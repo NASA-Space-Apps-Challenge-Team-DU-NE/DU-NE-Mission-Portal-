@@ -1,79 +1,277 @@
+<div align="center">
+
 # LUNA-NAV · Lunar Base Planner
 
-NASA Space Apps Challenge 2026 **"Lunar Landing Site Navigator"** — 날짜와 착륙지를 고르면 달 남극의 햇빛·지구 교신·지형 위험을 실제 NASA 데이터로 계산해 보여 주는 정적 웹앱.
+**A static web app for comparing lunar south pole landing sites and dates, analyzing sunlight and Earth visibility, planning base power, and simulating surface operations, all in one place**
 
-- 팀 규칙·명세: [`CLAUDE.md`](CLAUDE.md) · 구조: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · 작업 보드: [`TASKS.md`](TASKS.md)
-- 점수는 후보 간 상대 비교용 지표이며 확률이 아니다.
-- 화면은 팀 UI 예시(`lunar-base-planner-ui.html`)의 01→11 단계 구조를 따른다. 바뀐 점: [`docs/handoff/2026-11-14-ui-redesign.md`](docs/handoff/2026-11-14-ui-redesign.md)
+*NASA Space Apps Challenge 2026: "Lunar Landing Site Navigator" · Team DU:NE*
 
-## 구성
+[![Demo Video](https://img.shields.io/badge/▶_Demo_Video-Google_Drive-EA4335?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1bMrFynrqyqA3BojAFyTJWUA2UwmcWBc5/view)
+[![NASA Space Apps 2026](https://img.shields.io/badge/NASA_Space_Apps-2026-0B3D91?style=for-the-badge&logo=nasa&logoColor=white)](https://www.spaceappschallenge.org/2026/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-black?style=for-the-badge)](./LICENSE)
+
+[![React 18.3](https://img.shields.io/badge/React-18.3-111827?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev/)
+[![TypeScript 5.6](https://img.shields.io/badge/TypeScript-5.6-111827?style=for-the-badge&logo=typescript&logoColor=3178C6)](https://www.typescriptlang.org/)
+[![Three.js 0.160](https://img.shields.io/badge/Three.js-0.160-black?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org/)
+[![Vite 6](https://img.shields.io/badge/Vite-6-111827?style=for-the-badge&logo=vite&logoColor=FFD62E)](https://vite.dev/)
+[![Python 3.11](https://img.shields.io/badge/Python-3.11_Pipeline-111827?style=for-the-badge&logo=python&logoColor=FFD43B)](./pipeline)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers_Static-111827?style=for-the-badge&logo=cloudflare&logoColor=F38020)](./wrangler.jsonc)
+
+</div>
+
+---
+
+## Demo Video
+
+[![▶ Watch the demo (Google Drive)](https://img.shields.io/badge/▶_Watch_the_Demo-Google_Drive-EA4335?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1bMrFynrqyqA3BojAFyTJWUA2UwmcWBc5/view)
+
+> Demo scenario: **"Launch slipped by two weeks. Is the original landing site still viable?"**
+> Pick a site and date → push the date back and watch the Earth link drop → get alternative sites and dates with their differences → settle it with the comparison board and the surface operations simulation.
+
+---
+
+## Table of Contents
+
+1. [Overview](#1-overview)
+2. [Features](#2-features)
+3. [Architecture](#3-architecture)
+4. [Repository Structure](#4-repository-structure)
+5. [How It Calculates](#5-how-it-calculates)
+6. [Getting Started](#6-getting-started)
+7. [Data Sources](#7-data-sources)
+8. [Team](#8-team)
+9. [License](#9-license)
+
+---
+
+## 1. Overview
+
+Near the lunar south pole (roughly south of 75°S), the Sun circles only a few degrees above the horizon, so an error of less than 1° can flip a site between "sunlit" and "dark". Earth also sits low in the sky, and when nearby terrain blocks it, direct-to-Earth (DTE) communication is lost.
+
+Existing tools such as QuickMap, Moon Trek and JPL Horizons are accurate, but it is hard for non-specialists to **quickly compare many site × date combinations**. LUNA-NAV lets you pick a site and a date and immediately shows:
+
+- How long the Sun and Earth stay above the **real terrain horizon** (sunlit fraction, communication fraction, longest continuous darkness)
+- Whether **power and communications hold up for the whole mission** under those conditions (battery, link and data volume simulation)
+- When the schedule slips, alternatives split into **"same site, different date"** and **"different site, same date"**, with their differences from the original plan
+
+Every map layer and catalog value is computed from NASA and other public observational data with verified sources; nothing is filled in with synthetic values. Where data is missing the app shows "No data", and coordinates outside the terrain data are computed with a spherical horizon (0°) and flagged "Terrain not included".
+
+> **Scores are relative indicators for comparing candidates, not probabilities.** Geologic hazard and dust checks are **warnings** and do not guarantee safety.
+
+---
+
+## 2. Features
+
+The portal follows a **9-step flow** (Design → Simulation → Review). On the right, a **3D Moon and site view** (horizon panorama, sky dome, alerts, data sources) always points at the same site and time, whatever step you are on.
+
+| Step | Screen | What it does |
+| :---: | :--- | :--- |
+| **01** | Mission Setup | Choose a mission profile (long-term base, landing reconnaissance, water prospecting, custom) and lander specs (power source, power, comms, mass, thrust). These values drive the map colors and candidate ranking |
+| **02** | Site & Date | Pick a site from the overall score map, the ranking table or the catalog (32 sites), or enter coordinates directly; choose a combination from the site × start date score table; see landing windows |
+| **03** | Base Layout | Place landing pad, power, water mining and habitat modules; see distances between them, landing dust and fault scarp proximity warnings, and recommended solar panel spots |
+| **04** | Mission Analysis | Time-lapse of battery, link and cumulative downlink from landing to end of mission; whether surface operations requirements are met; the stop point and its cause (shadow, Earth blocked, overconsumption); ground station windows (3 DSN sites + Yeoju) |
+| **05** | Orbit Analysis | Compute and validate the NRHO transfer, finite burns and landing trajectory from the plan inputs in a browser Worker |
+| **06** | Schedule Slip | Re-evaluate the original plan after a delay, suggest the top 3 alternatives, and show the change in score, sunlight, comms, shadow, distance and date versus the original, with a one-line reason |
+| **07** | Compare | Compare 2–4 site + date combinations side by side on the same metrics; A/B scenario comparison |
+| **08** | Past Missions | Replay the sky at past landings (16 missions); reference cases with similar conditions, shown with their outcome (success, partial success, failure) and cause; "Match this mission" |
+| **09** | Validation | Compare our results against NASA measured illumination maps (PGDA 69, LROC WAC) and JPL Horizons |
+
+### Map Layers
+
+| Layer | Source data |
+| :--- | :--- |
+| Overall score | Relative score combining the layers below with the mission conditions (color on/off) |
+| Sunlight / Earth visibility / Permanent shadow | NASA PGDA 69 average illumination, Earth visibility and permanently shadowed regions |
+| Landing safety (slope) | LOLA polar DEMs, SLDEM2015 slope |
+| Water ice potential | Lunar Prospector neutron hydrogen + permanent shadow ("where ice may exist", not confirmed deposits) |
+| Iron / Titanium | Lunar Prospector GRS, Kaguya SP + LOLA FeO, LROC WAC TiO₂ |
+| Geologic hazard | LROC fault scarps, global rockfall catalog (Bickel et al., 2020) |
+
+The app also supports export (ranking CSV, copy report text), EN/KR switching, and a fullscreen presentation mode.
+
+---
+
+## 3. Architecture
+
+A **serverless static web app**: heavy terrain computation is done ahead of time in a Python pipeline, and the browser handles everything that depends on the date, plus rendering. The same formulas exist in both Python (`luna/sky.py`) and TypeScript (`core/sky.ts`), and cross tests (`tests/fixtures/cross/`) check that they agree.
+
+```mermaid
+flowchart TD
+    subgraph RAW["1. Raw data (team Drive, read-only)"]
+        DEM["LOLA DEMs (south pole, north pole, global)"]
+        ILL["PGDA 69 illumination, Earth visibility, permanent shadow"]
+        RES["Resource and geology data (LP, Kaguya, LROC)"]
+        SPICE["NAIF SPICE kernels · JPL Horizons"]
+        CAT["32 sites · 16 past missions · ground stations · landers"]
+    end
+
+    subgraph PIPE["2. pipeline/ (Python 3.11 precomputation)"]
+        S["00 inventory → 10 ephemeris → 20 terrain → 30 masks → 40 grid<br/>→ 50 layers → 60 textures → 70 catalogs → 80 validation → 90 manifest"]
+    end
+
+    subgraph DATA["3. web/public/data/ (static outputs)"]
+        OUT["Horizon masks · grids · map layers · textures · catalogs · provenance"]
+    end
+
+    subgraph WEB["4. web/ (React + Vite + TypeScript)"]
+        AD["adapters (loading, schema checks)"]
+        ST["state (Zustand)"]
+        CORE["core (pure functions: ephemeris, horizon, scoring, energy balance)"]
+        WK["workers (grid, search, simulation, Orbit)"]
+        VIEW["components / pages (three.js 3D Moon, Canvas 2D, 9 steps)"]
+    end
+
+    RAW --> PIPE --> DATA
+    DATA --> AD --> ST
+    ST <--> CORE
+    CORE <--> WK
+    ST --> VIEW
+    DATA -->|"build-site.mjs"| SITE["dist/ → Cloudflare<br/>/ homepage · /mission-portal/ portal"]
+    WEB --> SITE
 ```
-pipeline/   Python 3.11 사전 계산 (Drive "DU_NE Data" → web/public/data)
-web/        React + Vite + TypeScript + three.js 포탈
-orbit/      검증된 Orbit 소스·정적 NASA 자료·회귀 검사
-scripts/    통합 빌드와 로컬 확인
-docs/       결정·검증·출처·좌표계 확인표
-tests/      Python↔TS 교차 테스트 입력
+
+Data sources sit behind adapters, so data can be swapped without touching UI code.
+
+| Adapter | Input → Output |
+| :--- | :--- |
+| `SiteCatalog` | → list of landing sites |
+| `EphemerisProvider` | time, location → Sun and Earth azimuth/elevation |
+| `TerrainProvider` | site → horizon mask |
+| `MapLayerProvider` | layer name, region → grid values |
+
+---
+
+## 4. Repository Structure
+
+```text
+DU-NE-Mission-Portal-/
+├── pipeline/              # Python 3.11 precomputation (Drive "DU_NE Data" → web/public/data)
+│   ├── luna/              #   stages s00–s90: ephemeris, horizons, grids, layers
+│   └── tests/
+├── web/                   # React + Vite + TypeScript + three.js mission portal
+│   ├── src/core/          #   pure calculations (ephemeris, horizon, sky, gridScore, energy, alternatives, similarity, stations …)
+│   ├── src/workers/       #   grid, search and simulation Web Workers
+│   ├── src/pages/         #   the 9 steps (Cond, Site, Base, Sim, Orbit, Delay, Compare, Missions, Valid)
+│   ├── src/components/    #   3D Moon and Earth, south pole map, local 3D terrain, panorama and sky dome
+│   ├── src/orbit/         #   Orbit (NRHO) integration
+│   ├── public/data/       #   pipeline outputs (static data)
+│   └── e2e/               #   Playwright integration tests
+├── orbit/                 # validated Orbit source, static NASA data, regression tests
+├── homepage/              # team homepage (static HTML, EN/KR)
+├── scripts/               # site build (build-site.mjs) and Orbit preparation/checks
+├── tests/fixtures/        # Python ↔ TypeScript cross-test inputs
+├── docs/                  # architecture, decisions, validation, sources, coordinate frames
+├── CLAUDE.md              # team rules and specification
+├── TASKS.md               # task board
+└── wrangler.jsonc         # Cloudflare Workers static deployment config
 ```
 
-## 홈페이지 + 포탈 사이트 (배포)
+---
 
-배포 사이트는 `/`에 팀 홈페이지(`homepage/`, 정적 HTML), `/mission-portal/`에 이 포탈을 둡니다. 홈페이지의 "착륙 계획 세우기"가 `/mission-portal/`로 이동합니다.
+## 5. How It Calculates
 
-```sh
-npm run build          # 포탈(web/dist) + 사이트(dist/: 홈페이지 + /mission-portal/)
-npm run preview:site   # http://127.0.0.1:5176  (홈페이지 → 착륙 계획 세우기 → 포탈)
-```
+| Item | Method |
+| :--- | :--- |
+| **Conventions** | Angles in degrees; azimuth from north 0°, increasing east. Latitude positive north, longitude positive east (−180 to 180). Times in UTC (ISO 8601). Moon-fixed frame: Mean Earth/Polar Axis, reference radius 1737.4 km |
+| **Ephemeris** | Sun and Earth direction vectors are transformed into the site's local East-North-Up (ENU) frame to get azimuth and elevation. Reference values from SPICE (DE440, lunar orientation kernels), cross-checked against JPL Horizons |
+| **Horizon mask** | For each azimuth step, trace a ray outward and take the maximum elevation angle. Lunar curvature corrected; high-resolution DEM for near range, low-resolution for far range |
+| **Sunlight** | The Sun is treated as a disk (angular radius about 0.27°); the visible fraction above the mask is 0–1 |
+| **Communication** | Earth center elevation > horizon elevation at that azimuth + communication margin (user adjustable) |
+| **Ground station windows** | Intervals when the Moon is above each station's minimum operating elevation ∩ intervals when Earth is visible from the site |
+| **Energy balance** | Integrate (power index × panel output − consumption) over time for the battery curve, and accumulate downlink during link intervals. Record the first time the lower limit is hit and the cause |
+| **Score** | 0–100, weighted sum of power, communication and delay robustness. Weights are adjustable in the UI. If any required condition fails, the plan is marked "Requirement not met" regardless of score |
+| **Reference cases** | Distance over normalized features (absolute latitude, Sun and Earth elevation at landing, time since local sunrise, mission duration) plus a penalty for differing power, comms and approach tags |
 
-`dist/`는 `scripts/build-site.mjs`가 만들고 Cloudflare(`wrangler.jsonc`)가 이 폴더를 올립니다. 홈페이지 문구를 고치면 `homepage/`에서 고치고, 검색 색인은 `homepage/tools/build_search_index.py`로 다시 만듭니다.
+Parameters without a firm basis are marked `PROVISIONAL` and can be changed in the UI. See [`docs/params-without-basis.md`](docs/params-without-basis.md) for the list and [`docs/validation.md`](docs/validation.md) for validation results.
 
-## 포탈 + Orbit 실행
+---
 
-프로젝트 **루트**에서 실행합니다. Node.js 22 이상을 권장합니다.
+## 6. Getting Started
+
+**Prerequisites:** Node.js 22 or later (Python 3.11 only if you rebuild the data)
+
+### Portal + Orbit dev server
+
+Run from the **repository root**. On Windows you can also double-click `start-dev.bat`.
 
 ```sh
 npm install
-npm run dev          # http://127.0.0.1:5175
+npm run dev            # http://127.0.0.1:5175
 ```
 
-05 궤도 분석은 NRHO Mode B를 브라우저 Worker에서 계산합니다. 01 착륙선 정보에서 질량·추진·궤도 조건, 02에서 계획 착륙지·UTC를 바꾸면 같은 입력이 05로 전달됩니다. 기본 임무는 Connecting Ridge, 2026-11-16 UTC, GRAIL 30차, LLO 총질량 1500 kg / 건조 650 kg / 최대 추력 12000 N의 검증 예제입니다. 저장된 성공 경로를 재생하지 않고 실행할 때 다시 계산합니다.
-
-포탈 EN/KR 선택에 Orbit 언어도 따라 바뀌며 계산과 결과는 유지됩니다. 상단 보고서와 순위 CSV에는 Orbit 입력·계산 상태·검증 결과를 포함합니다. 순위 점수는 기존 표면 평가 기준을 유지하고, 미계산 후보에는 `NOT_CALCULATED`를 표시합니다. 카탈로그 복원·재연결 등 후속 수정은 [검토 수정 기록](docs/ORBIT_REVIEW_FIXES.md)을 확인하세요.
+### Tests and build
 
 ```sh
-npm test             # 포탈 타입·규칙·170개 검사 + Orbit 76개 회귀 검사
-npm run build        # 정적 배포물: web/dist
-npm run preview      # 빌드 결과 확인, 포트 5175
-npm --prefix web run e2e -- e2e/orbit-integration.spec.ts e2e/orbit-review-fixes.spec.ts e2e/smoke.spec.ts
+npm test               # portal type, rule and unit checks + Orbit regression tests
+npm run build          # portal (web/dist) + site (dist/: homepage + /mission-portal/)
+npm run preview:site   # http://127.0.0.1:5176  (homepage → Plan a landing → portal)
+npm run test:e2e       # Playwright integration tests (Chrome: PLAYWRIGHT_CHANNEL=chrome)
 ```
 
-Chrome으로 브라우저 검사를 하려면 `PLAYWRIGHT_CHANNEL=chrome` 환경 변수를 설정합니다. 통합 검사는 실제 계산을 포함합니다. `web`만 개발하려면 먼저 루트 `npm run prepare:orbit` 후 기존 `web` 명령을 사용할 수 있습니다. Orbit 소스를 수정한 경우 `npm run prepare:orbit`로 임베드 빌드를 갱신합니다.
+### Rebuilding the data (requires the team Drive data)
 
-`web/public/orbit`는 자동 생성·Git 제외 디렉터리입니다. Orbit 원본은 `orbit/`에 포함되어 다른 로컬 저장소 경로를 참조하지 않습니다. 런타임 Python/Node API/DB는 필요 없습니다. `web/dist`를 하위 경로에 배포할 때는 포탈의 Vite base를 그 경로로 지정하고 다시 빌드합니다. 자세한 구조·범위·검증은 [Orbit 통합 기록](docs/ORBIT_INTEGRATION.md)을 확인하세요.
-
-## 데이터 만들기 (Drive 데이터가 있는 PC)
-```
-cp .env.example .env.local      # LUNA_DATA_DIR=<DU_NE Data 경로>
+```sh
+cp .env.example .env.local      # LUNA_DATA_DIR=<path to DU_NE Data>
 cd pipeline
 python -m venv .venv && .venv\Scripts\activate   # macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt && pip install -e .
-python -m luna s00              # 필요한 파일·품질 확인
-python -m luna all --workers 4  # 전체 (끊겨도 이어서 계산)
+python -m luna s00              # check required files and quality
+python -m luna all --workers 4  # full run (resumes if interrupted)
 pytest
 ```
-결과는 `web/public/data/` 에 생긴다. 확인용 그림은 `build/preview/`. 결과를 커밋하는 PR 은 `data/` 브랜치로.
 
-## 배포
-Cloudflare Workers 설정(`wrangler.jsonc`)은 `web/dist` 정적 파일을 제공한다. Orbit 통합본의 빌드 명령은 **저장소 루트에서 `npm ci && npm run build`**다. 기존 `cd web && npm ci && npm run build` 설정은 변경해야 한다. GitHub 업로드와 서비스 배포는 별개이며, 이번 작업에서는 Cloudflare 계정 설정을 변경하지 않았다. [반영·배포 안내](docs/ORBIT_GITHUB_HANDOFF.md).
+Outputs are written to `web/public/data/`.
 
-## 데이터 출처
-[`docs/sources.md`](docs/sources.md)
+### Deployment
 
-## 라이선스
-이 저장소의 코드와 문서는 [MIT License](LICENSE)를 따른다.
+Cloudflare Workers (`wrangler.jsonc`) serves the `dist/` folder produced by `npm run build` as static files: `/` is the team homepage and `/mission-portal/` is the portal. No runtime server or database is needed. See [`docs/ORBIT_INTEGRATION.md`](docs/ORBIT_INTEGRATION.md) and [`docs/ORBIT_GITHUB_HANDOFF.md`](docs/ORBIT_GITHUB_HANDOFF.md) for details.
 
-아래는 MIT License의 대상이 아니며 각 원 출처의 조건을 따른다. 출처와 링크는 [`docs/data-sources.md`](docs/data-sources.md)에 있다.
+---
 
-- `web/public/data/` 등의 데이터: NASA 자료(공공 영역), USGS 자료(공공 영역), CC BY 4.0 연구 자료(Wueller 외 2026, Lemelin 외 2022, Bickel 외 2020, Gawronska·Boazman 2025, 극지 평원 지도)는 출처 표시가 필요하다. JAXA Kaguya MI 자료는 ISAS 데이터 정책을 따른다.
-- `homepage/` 이미지: 달 기지 그림(NASA, SpaceX·Blue Origin 제공 NASA 배포), 대학 로고는 각 소유자의 것이다.
-- 글꼴: Pretendard, JetBrains Mono (SIL Open Font License 1.1).
+## 7. Data Sources
+
+Full list with links: [`docs/data-sources.md`](docs/data-sources.md) · auto-generated table: [`docs/sources.md`](docs/sources.md)
+
+| Area | Main datasets | Provider |
+| :--- | :--- | :--- |
+| Terrain | LOLA polar and global DEMs (240 m to 10 m), SLDEM2015 slope, Artemis III candidate site navigation grids | NASA GSFC / PDS Geosciences / PGDA |
+| Illumination, Earth visibility, permanent shadow | PGDA 69 average illumination, Earth visibility and PSRs; LROC WAC south pole illumination; LROC NAC PSRs | NASA PGDA / ASU LROC |
+| Resources | Lunar Prospector neutron and GRS, Kaguya SP + LOLA FeO, Kaguya MI, LROC WAC TiO₂ | NASA PDS / JAXA / ASU LROC |
+| Geologic hazards | LROC fault scarps, global rockfall catalog, Shackleton area boulders, polar plains map | ASU LROC / open research datasets |
+| Ephemeris | NAIF SPICE kernels (DE440 etc.), JPL Horizons | NASA JPL |
+| Catalogs | Artemis III candidate regions (USGS, NASA), NSSDC landing site and artifact lists, LROC anthropogenic object locations, agency announcements | NASA / USGS / agencies |
+| Ground stations | DSN antenna coordinates and receive horizon masks (810-005), Yeoju deep space antenna | NASA JPL DSN / KARI |
+| Background imagery | LROC WAC south pole mosaic, NASA SVS CGI Moon Kit | ASU LROC / NASA SVS |
+
+---
+
+## 8. Team
+
+**Team DU:NE**: six undergraduate students from four universities in and around Seoul
+
+| Name | Affiliation |
+| :--- | :--- |
+| **Sanghyun Song** (Team Owner) | Software Convergence, Kyung Hee University |
+| **Minjun Kwon** | Electronic Engineering, Sogang University |
+| **Minjae Kim** | Physics and Mechanical Engineering, Gachon University |
+| **Seoyeon Kim** | Nanomaterials Engineering, Chung-Ang University |
+| **Sungjun Park** | Software Convergence, Kyung Hee University |
+| **Changhyun Ha** | Mechanical Engineering, Kyung Hee University |
+
+---
+
+## 9. License
+
+The code and documentation in this repository are released under the [MIT License](LICENSE).
+
+The following are not covered by the MIT License and remain under the terms of their original sources. Sources and links are listed in [`docs/data-sources.md`](docs/data-sources.md).
+
+- Data such as `web/public/data/`: NASA data (public domain) and USGS data (public domain). CC BY 4.0 research datasets (Wueller et al. 2026, Lemelin et al. 2022, Bickel et al. 2020, Gawronska & Boazman 2025, polar plains map) require attribution. JAXA Kaguya MI data follows the ISAS data policy.
+- Images in `homepage/`: lunar base illustrations (NASA; SpaceX and Blue Origin images distributed by NASA) and university logos belong to their respective owners.
+- Fonts: Pretendard, JetBrains Mono (SIL Open Font License 1.1).
+
+<div align="center">
+
+*Not affiliated with or endorsed by NASA.*
+
+</div>
