@@ -1,5 +1,5 @@
 // 앱 틀: 검은 띠(로고·화면 이동) | 지도 모드(달이 가운데 전체) ↔ 계획 모드(단계 | 단계 화면 | 오른쪽 달 + 현장 뷰)
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HOUR_MS } from '../core/constants';
 import { reportText, toCsv } from '../core/export';
 import { Toast, toast, utc, pct, LayerPopover } from '../components/kit';
@@ -22,6 +22,37 @@ function download(name: string, text: string, type: string) {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+/** 처음부터 다시: 누르면 확인을 한 번 더 묻고, 확인하면 주소의 설정을 지우고 새로 연다.
+ *  (화면 언어와 칸 너비·접기는 그대로 둔다) */
+function StartOver() {
+  const [ask, setAsk] = useState(false);
+  const yes = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    if (!ask) return;
+    yes.current?.focus();
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setAsk(false); } };
+    window.addEventListener('keydown', esc, true);
+    return () => window.removeEventListener('keydown', esc, true);
+  }, [ask]);
+  return (
+    <>
+      <button type="button" className="btn sm so-btn" onClick={() => setAsk(true)}>처음부터 다시</button>
+      {ask ? (
+        <div className="confirm-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) setAsk(false); }}>
+          <div className="confirm" role="alertdialog" aria-modal="true" aria-labelledby="so-h" aria-describedby="so-p">
+            <div className="confirm-h" id="so-h">처음부터 다시 시작할까요?</div>
+            <p id="so-p">정한 조건, 착륙지, 착륙 날짜, 기지 배치, 비교 목록, 추가한 지상국이 모두 지워지고 처음 화면으로 돌아갑니다. 되돌릴 수 없습니다.</p>
+            <div className="confirm-b">
+              <button type="button" className="btn" onClick={() => setAsk(false)}>취소</button>
+              <button type="button" className="btn danger" ref={yes} onClick={() => { window.location.href = window.location.pathname; }}>처음부터 다시</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
 }
 
 /** 맨 위 검은 띠: 팀 로고(홈페이지와 같은 크기·위치) · 화면 이동 · 데이터 상태 · 내보내기 */
@@ -75,9 +106,9 @@ export function Masthead() {
       <div className="macts">
         {gridError ? <button className="btn" title={gridError} onClick={retryGrid}>{t('grid.retry')}</button> : null}
         <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? (gridApprox ? '데이터 일부 근사' : '데이터 준비됨') : status === 'loading' || status === 'idle' ? '불러오는 중' : status === 'degraded' ? `일부 자료 없음 (${reasons.length})` : status === 'failed' ? '불러오기 실패' : '자료 없음'}</span>
-        {unverified ? <span className="badge warn" title="verified:false 항목이 있음">일부 수치 미검증</span> : null}
+        <StartOver />
         <button className="btn sm" onClick={report}>보고서 복사</button>
-        <button className="btn sm" onClick={csv} disabled={!res}>순위 CSV</button>
+        <button className="btn sm mast-csv" onClick={csv} disabled={!res}>순위 CSV</button>
         <button className="ibtn" aria-label="도움말" onClick={() => ui.set({ help: true })}>?</button>
       </div>
       <div className="lang" aria-label="Language">
@@ -156,7 +187,10 @@ export function Sidebar() {
   };
   let g = '';
   return (
-    <nav className="side" aria-label="단계">
+    <nav className={`side${ui.sideCollapsed ? ' collapsed' : ''}`} aria-label="단계">
+      <button type="button" className="sidetog" aria-expanded={!ui.sideCollapsed} title={ui.sideCollapsed ? '단계 설명 펴기' : '단계 설명 접기'} onClick={() => ui.set({ sideCollapsed: !ui.sideCollapsed })}>
+        {ui.sideCollapsed ? '»' : '« 접기'}
+      </button>
       <div className="scroll">
         {STEPS.map((st) => {
           const head = st.g !== g ? <div className="sgrp" key={`g${st.g}`}>{st.g}</div> : null;
@@ -164,7 +198,7 @@ export function Sidebar() {
           const s = summary(st.id);
           return [
             head,
-            <button key={st.id} className={`step ${app.visited.includes(st.id) && st.id !== app.page ? 'done' : ''}`} aria-current={st.id === app.page} onClick={() => app.setPage(st.id)}>
+            <button key={st.id} className={`step ${app.visited.includes(st.id) && st.id !== app.page ? 'done' : ''}`} aria-current={st.id === app.page} title={ui.sideCollapsed ? `${st.n} ${st.t}` : undefined} onClick={() => app.setPage(st.id)}>
               <span className="n">{st.n}</span><span className="t">{st.t}</span><span className={`dot ${dot(st.id)}`} /><span className="s" title={s}>{s}</span>
             </button>,
           ];
@@ -179,6 +213,50 @@ export function Sidebar() {
         <span>점수</span><b>{ev ? `${Math.round(ev.score.total)}${ev.score.meets_requirements ? '' : ' · 요건 미달'}` : '—'}</b>
       </div>
     </nav>
+  );
+}
+
+/** 계획 모드 세 칸 사이 경계: 끌어서 너비 조절, 두 번 누르면 기본값 */
+export function Resizers() {
+  const mode = useUi((u) => u.mode);
+  const ui = useUi();
+  if (mode !== 'plan') return null;
+  const start = (which: 'side' | 'rail') => (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const app = (e.currentTarget.parentElement as HTMLElement);
+    const box = app.getBoundingClientRect();
+    const side = app.querySelector('.side') as HTMLElement | null;
+    const rail = app.querySelector('.rail') as HTMLElement | null;
+    app.classList.add('resizing');
+    const MID_MIN = 420;
+    const move = (ev: PointerEvent) => {
+      const st = useUi.getState();
+      if (which === 'side') {
+        const x = ev.clientX - box.left;
+        const railW = rail?.getBoundingClientRect().width ?? 360;
+        if (x < 120) { if (!st.sideCollapsed) st.set({ sideCollapsed: true }); return; }
+        const w = Math.round(Math.max(170, Math.min(420, x, box.width - railW - MID_MIN)));
+        st.set({ sideCollapsed: false, sideW: w });
+      } else {
+        const sideW = side?.getBoundingClientRect().width ?? 236;
+        const w = Math.round(Math.max(300, Math.min(box.right - ev.clientX, box.width - sideW - MID_MIN, box.width * 0.6)));
+        st.set({ railW: w });
+      }
+    };
+    const up = () => {
+      app.classList.remove('resizing');
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.dispatchEvent(new Event('resize')); // 캔버스·3D 크기 다시 맞춤
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <>
+      <div className="rsz rsz-side" role="separator" aria-orientation="vertical" aria-label="단계 목록 너비" title="끌어서 너비 조절 · 두 번 누르면 기본값" onPointerDown={start('side')} onDoubleClick={() => ui.set({ sideW: 0, sideCollapsed: false })} />
+      <div className="rsz rsz-rail" role="separator" aria-orientation="vertical" aria-label="달 영역 너비" title="끌어서 너비 조절 · 두 번 누르면 기본값" onPointerDown={start('rail')} onDoubleClick={() => ui.set({ railW: 0 })} />
+    </>
   );
 }
 

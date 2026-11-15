@@ -1,6 +1,6 @@
 // 앱 틀: 검은 띠 | 지도 모드(달 전체) ↔ 계획 모드(왼쪽 단계 01→09 | 가운데 단계 화면 | 오른쪽 3D 달 + 현장 뷰)
 import { lazy, Suspense, useEffect } from 'react';
-import { Masthead, Overlays, PageFrame, Sidebar } from './layout/Shell';
+import { Masthead, Overlays, PageFrame, Resizers, Sidebar } from './layout/Shell';
 import { Rail } from './layout/Rail';
 import { useData } from './state/data';
 import { useGridRunner } from './state/gridRun';
@@ -34,7 +34,7 @@ function useShortcuts() {
       else if (e.key === 'ArrowLeft') s.setT(s.t - step);
       else if (e.key === 'c' || e.key === 'C') s.setMap({ colorOn: !s.colorOn });
       else if (e.key === 'f' || e.key === 'F') s.setFullscreen(!s.fullscreen);
-      else if (e.key === 'Escape') { if (useUi.getState().help) useUi.getState().set({ help: false }); else if (s.fullscreen) s.setFullscreen(false); else useUi.getState().set({ mode: 'explore' }); }
+      else if (e.key === 'Escape') { if (useUi.getState().gsFull) useUi.getState().set({ gsFull: false }); else if (useUi.getState().help) useUi.getState().set({ help: false }); else if (s.fullscreen) s.setFullscreen(false); else useUi.getState().set({ mode: 'explore' }); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
@@ -64,13 +64,20 @@ export default function App() {
   const P = PAGES[page];
   const mode = useUi((u) => u.mode);
   const lang = useLang((l) => l.lang); // 언어를 바꾸면 본문을 다시 그린다 (캔버스 글자 포함)
+  const sideCollapsed = useUi((u) => u.sideCollapsed);
+  const sideW = useUi((u) => u.sideW);
+  const railW = useUi((u) => u.railW);
+  const layoutVars = {
+    ...(sideCollapsed ? { '--side-w': '64px' } : sideW ? { '--side-w': `${sideW}px` } : {}),
+    ...(railW ? { '--rail-w': `${railW}px` } : {}),
+  } as React.CSSProperties;
   useShortcuts();
   useDefaults();
   useGridRunner();
   return (
     <>
       <Masthead />
-      <div className={`app mode-${mode}`} key={lang}>
+      <div className={`app mode-${mode}${sideCollapsed ? ' side-collapsed' : ''}`} key={lang} style={layoutVars}>
         <Sidebar />
         <PageFrame>
           <Suspense fallback={<div className="muted">불러오는 중…</div>}>
@@ -78,6 +85,7 @@ export default function App() {
           </Suspense>
         </PageFrame>
         <Rail />
+        <Resizers />
       </div>
       <Overlays />
     </>
