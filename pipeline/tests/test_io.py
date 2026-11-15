@@ -102,3 +102,30 @@ def test_read_csv_encodings(tmp_path):
     p.write_bytes("lat,lon,값\n-80,350,1\n".encode("cp949"))
     df = read_csv(p)
     assert list(df.columns)[2] == "값"
+
+
+def test_extract_member_same_size_update(tmp_path):
+    """검토 F07: 같은 길이로 내용만 바뀐 zip 도 다시 꺼낸다."""
+    import os
+    z = tmp_path / "x.zip"
+    with zipfile.ZipFile(z, "w") as f:
+        f.writestr("dir/ldem.img", b"OLD")
+    assert extract_member(z, ".img", tmp_path / "out").read_bytes() == b"OLD"
+    with zipfile.ZipFile(z, "w") as f:
+        f.writestr("dir/ldem.img", b"NEW")
+    os.utime(z, ns=(z.stat().st_atime_ns, z.stat().st_mtime_ns + 10_000_000))
+    assert extract_member(z, ".img", tmp_path / "out").read_bytes() == b"NEW"
+
+
+def test_join_parts_same_size_update(tmp_path):
+    import os
+    p = tmp_path / "a.zip.part001"
+    p.write_bytes(b"OLD")
+    out = tmp_path / "build" / "a.joined"
+    assert join_parts([p], out).read_bytes() == b"OLD"
+    p.write_bytes(b"NEW")
+    os.utime(p, ns=(p.stat().st_atime_ns, p.stat().st_mtime_ns + 10_000_000))
+    assert join_parts([p], out).read_bytes() == b"NEW"
+    # force 는 지문이 같아도 다시 만든다
+    out.write_bytes(b"XXX")
+    assert join_parts([p], out, force=True).read_bytes() == b"NEW"
