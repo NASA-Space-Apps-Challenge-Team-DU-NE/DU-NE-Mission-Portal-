@@ -68,3 +68,12 @@ Cloudflare Workers 설정(`wrangler.jsonc`)은 `web/dist` 정적 파일을 제�
 
 ## 데이터 출처
 [`docs/sources.md`](docs/sources.md)
+
+## 라이선스
+이 저장소의 코드와 문서는 [MIT License](LICENSE)를 따른다.
+
+아래는 MIT License의 대상이 아니며 각 원 출처의 조건을 따른다. 출처와 링크는 [`docs/data-sources.md`](docs/data-sources.md)에 있다.
+
+- `web/public/data/` 등의 데이터: NASA 자료(공공 영역), USGS 자료(공공 영역), CC BY 4.0 연구 자료(Wueller 외 2026, Lemelin 외 2022, Bickel 외 2020, Gawronska·Boazman 2025, 극지 평원 지도)는 출처 표시가 필요하다. JAXA Kaguya MI 자료는 ISAS 데이터 정책을 따른다.
+- `homepage/` 이미지: 달 기지 그림(NASA, SpaceX·Blue Origin 제공 NASA 배포), 대학 로고는 각 소유자의 것이다.
+- 글꼴: Pretendard, JetBrains Mono (SIL Open Font License 1.1).
