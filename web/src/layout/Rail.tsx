@@ -4,7 +4,7 @@ import { HOUR_MS, DAY_MS } from '../core/constants';
 import { skyState } from '../core/sky';
 import { ArtemisBadge, LayerPickButton, NoData, Kpi, TerrBadge, deg, dur, hrs, pct, utc, Empty } from '../components/kit';
 import { MoonGlobe } from '../components/MoonGlobe';
-import { pickNear, SouthMap } from '../components/SouthMap';
+import { pickNear, REGION_LABEL, RegionSeg, regionSub, SouthMap } from '../components/SouthMap';
 import { Dome, Pano } from '../components/viz';
 import { useData } from '../state/data';
 import { siteKey, timelineFor, useEval, useSim } from '../state/derived';
@@ -98,7 +98,8 @@ function MoonSection() {
   const explore = useUi((u) => u.mode) === 'explore';
   const dim = useUi((u) => u.dim);
   const setUi = useUi((u) => u.set);
-  const dimSeg = <div className="seg dimseg" aria-label="3D 또는 2D">{(['3d', '2d'] as const).map((d) => <button key={d} aria-pressed={dim === d} onClick={() => setUi({ dim: d })}>{d.toUpperCase()}</button>)}</div>;
+  const region = useData((d) => d.mapRegion);
+  const dimSeg = <><div className="seg dimseg" aria-label="3D 또는 2D">{(['3d', '2d'] as const).map((d) => <button key={d} aria-pressed={dim === d} onClick={() => setUi({ dim: d })}>{d.toUpperCase()}</button>)}</div><RegionSeg /></>;
   useEffect(() => {
     document.body.classList.toggle('fs', app.fullscreen);
     document.body.classList.toggle('present', app.presentation);
@@ -107,8 +108,8 @@ function MoonSection() {
     <section className="moon" id="moon">
       <div className="mhd">
         {explore ? (
-          <div className="ttl intro-h"><span className="k">SOUTH POLE · 75°S 이남</span><h1>달 남극 착륙 계획</h1><span>달에서 착륙지를 누르거나, 조건을 정하고 후보 순위를 받아 보세요.</span></div>
-        ) : <div className="ttl"><b>{dim === '3d' ? '3D 달' : '2D 남극 지도'}</b><span>{dim === '3d' ? sub ?? '드래그 회전 · 휠 확대 · 클릭으로 지점 선택' : '75°S 이남 · 위쪽이 경도 0° · 클릭으로 지점 선택'}</span></div>}
+          <div className="ttl intro-h"><span className="k">{region === 'south' ? 'SOUTH POLE · 75°S 이남' : region === 'north' ? 'NORTH POLE · 75°N 이북' : 'GLOBAL · 75°S–75°N'}</span><h1>달 남극 착륙 계획</h1><span>달에서 착륙지를 누르거나, 조건을 정하고 후보 순위를 받아 보세요.</span></div>
+        ) : <div className="ttl"><b>{dim === '3d' ? '3D 달' : `2D ${REGION_LABEL[region]} 지도`}</b><span>{dim === '3d' ? sub ?? `드래그 회전 · 휠 확대 · 클릭으로 지점 선택 · 세 지역 함께 칠함 · 순위 기준 ${REGION_LABEL[region]}` : `${regionSub(region)} · 클릭으로 지점 선택`}</span></div>}
         <LayerPickButton where="rail" />
         <button className="btn sm" title="지도 색 켜기·끄기 (C)" onClick={() => app.setMap({ colorOn: !app.colorOn })}>{app.colorOn ? '색 끄기' : '색 켜기'}</button>
         <button className="ibtn" aria-label="전체화면" title="전체화면 (F)" onClick={() => app.setFullscreen(!app.fullscreen)}>⤢</button>

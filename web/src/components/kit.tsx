@@ -1,7 +1,8 @@
 // UI 예시(lunar-base-planner-ui.html)의 화면 조각을 React 로 옮긴 것. 클래스 이름은 예시와 같다.
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import type { Outcome, TerrainKind } from '../core/types';
-import { LAYER_UI, LGROUPS, type LayerUi } from '../state/layerUi';
+import { LAYER_UI, LGROUPS, layerUiFor, type LayerUi } from '../state/layerUi';
+import { useData } from '../state/data';
 import { useApp } from '../state/store';
 import { vintageLabel, vintageTitle, type ArtemisVintage } from '../state/artemis';
 
@@ -73,6 +74,9 @@ export const OutBadge = ({ o }: { o: Outcome }) => <span className={`badge ${o =
 const TERR: Record<TerrainKind, [string, string]> = { site: ['지형 반영', 'ok'], grid: ['격자 근사', 'approx'], flat: ['지형 미반영', 'warn'] };
 export const TerrBadge = ({ k }: { k: TerrainKind }) => <span className={`badge ${TERR[k][1]}`}>{TERR[k][0]}</span>;
 export const terrLabel = (k: TerrainKind) => TERR[k][0];
+const GRID_REGION: Record<string, string> = { south: '남극', north: '북극', global: '전역' };
+/** 격자 지평선 출처 (예: "전역 15 km 격자"). 지역을 모르면 빈 문자열 */
+export const gridLabel = (region?: string, km?: number) => (region && km ? `${GRID_REGION[region] ?? region} ${km} km 격자` : '');
 
 export function Progress({ p }: { p: number | null }) {
   if (p == null) return null;
@@ -123,6 +127,9 @@ export function LayerPopover() {
   const cur = LAYER_UI[app.mapLayer] ?? LAYER_UI.composite;
   const g = group ?? cur.g;
   const items = Object.values(LAYER_UI).filter((l) => l.g === g);
+  // 지금 지도 지역의 해상도·출처 (북극·전역은 s50_regions 자료)
+  const region = useData.getState().mapRegion, km = useData.getState().grid?.manifest.cell_km;
+  const forRegion = (l: LayerUi) => { const r = layerUiFor(l.id, region); return km ? { ...r, res: r.res.replace(/5 km/g, `${km} km`) } : r; };
   return (
     <div className="pop" ref={ref} style={pos} onClick={(e) => e.stopPropagation()}>
       <div className="phd">
@@ -136,7 +143,7 @@ export function LayerPopover() {
         ))}
       </div>
       <div className="items">
-        {items.map((l: LayerUi) => (
+        {items.map(forRegion).map((l: LayerUi) => (
           <button key={l.id} className="lopt" aria-pressed={app.mapLayer === l.id} onClick={() => { app.setMap({ mapLayer: l.id }); setAnchor(null); }}>
             <b>{l.name}{l.tag ? <> <span className="badge">{l.tag}</span></> : null}</b>
             <span className={`badge ${l.kind === '실제' ? 'ok' : ''}`}>{l.kind}</span>

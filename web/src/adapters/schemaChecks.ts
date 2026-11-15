@@ -114,6 +114,22 @@ export const artemisCheck: Check = (v) => rows(v, (r) => text(r.id) && text(r.na
 export const sourcesCheck: Check = (v) => rows(v, (r) => text(r.key) && text(r.name) && kind(r.kind) && nullable(r.quality, quality) && nullable(r.url, text) && nullable(r.drive_paths, texts) && ['resolution', 'description'].every((k) => nullable(r[k], (x) => typeof x === 'string')) ? null : '출처 항목 형식이 다르다', 'key');
 export const qualityCheck: Check = (v) => object(v) && Object.values(v).every((r) => object(r) && kind(r.kind) && quality(r.quality) && nullable(r.caution, (x) => typeof x === 'string')) ? null : '품질 목록 형식이 다르다';
 
+const horizonSpec = (h: unknown) => object(h) && relativeFile(h.file) && integer(h.n_az, 2) && num(h.az_step_deg, Number.MIN_VALUE) && Math.abs((h.n_az as number) * (h.az_step_deg as number) - 360) < 1e-8 && num(h.scale, Number.MIN_VALUE);
+/** 북극 5 km AEQD 지평선 격자 (grid_north) */
+export const polarTerrainCheck: Check = (v) => {
+  if (!object(v) || !text(v.projection) || !relativeFile(v.cells) || !integer(v.nx, 1) || !integer(v.ny, 1) || !integer(v.n_cells, 1) || !finite(v.x0_km) || !finite(v.y0_km) || !num(v.cell_km, Number.MIN_VALUE) || !num(v.lat_limit_deg, 0, 90) || !num(v.observer_height_m, 0)) return '북극 격자 크기·원점·좌표 형식이 다르다';
+  if (!Number.isSafeInteger((v.nx as number) * (v.ny as number)) || (v.n_cells as number) > (v.nx as number) * (v.ny as number)) return '북극 격자 칸 개수가 범위를 벗어난다';
+  return horizonSpec(v.horizon) ? null : '북극 격자 지평선 간격·배율 형식이 다르다';
+};
+/** 75°S–75°N 위도 띠 지평선 격자 (grid_global, luna.grid_bands.v1) */
+export const bandTerrainCheck: Check = (v) => {
+  if (!object(v) || !text(v.projection) || !relativeFile(v.cells) || !num(v.cell_km, Number.MIN_VALUE) || !num(v.lat_max_deg, Number.MIN_VALUE, 90) || !num(v.dlat_deg, Number.MIN_VALUE, 180) || !integer(v.n_rows, 1) || !integer(v.n_cells_total, 1) || !integer(v.n_cells, 1) || !num(v.observer_height_m, 0)) return '띠 격자 크기·좌표 형식이 다르다';
+  const nl = v.n_lon;
+  if (!Array.isArray(nl) || nl.length !== v.n_rows || !nl.every((x) => integer(x, 1))) return '띠 격자 n_lon 이 띠 개수와 맞지 않는다';
+  if (nl.reduce((a: number, b: number) => a + b, 0) !== v.n_cells_total || (v.n_cells as number) > (v.n_cells_total as number)) return '띠 격자 칸 개수가 맞지 않는다';
+  if (Math.abs((v.n_rows as number) * (v.dlat_deg as number) - 2 * (v.lat_max_deg as number)) > 1e-3) return '띠 높이와 위도 범위가 맞지 않는다';
+  return horizonSpec(v.horizon) ? null : '띠 격자 지평선 간격·배율 형식이 다르다';
+};
 export const texturesCheck: Check = (v) => object(v) && Object.values(v).every((r) => object(r) && relativeFile(r.file) && text(r.projection) && ['size', 'width', 'height', 'radius_km'].every((k) => nullable(r[k], (x) => num(x, Number.MIN_VALUE)))) ? null : '텍스처 메타 형식이 다르다';
 export const localCheck: Check = (v) => {
   if (!object(v) || !num(v.half_km, Number.MIN_VALUE) || !integer(v.size_px, 1) || !num(v.m_per_px, Number.MIN_VALUE) || !text(v.frame) || !object(v.light) || !finite(v.light.az_deg) || !num(v.light.alt_deg, -90, 90) || !object(v.sites)) return '국지 지형 메타 형식이 다르다';

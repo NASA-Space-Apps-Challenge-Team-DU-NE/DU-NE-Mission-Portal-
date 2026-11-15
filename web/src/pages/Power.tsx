@@ -4,14 +4,15 @@ import { loadMastMasks } from '../adapters/data';
 import { Card, Help, Kpi, NoData, Progress, hrs, km, pct } from '../components/kit';
 import { LineChart } from '../components/viz';
 import { DEFAULTS, FEATURES, POWER_KINDS } from '../config';
-import { nearestCell } from '../core/gridScore';
+import { nearestCell, panelCandidates } from '../core/gridScore';
+import { REGION_LABEL } from '../components/SouthMap';
 import type { MastRow } from '../core/light';
 import type { PanelPick } from '../core/power';
 import { useData } from '../state/data';
 import { calculationSource } from '../state/calculationSource';
 import { usePower } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
-import { useResolvedSite } from '../state/hooks';
+import { useResolvedSite, useSiteLayers } from '../state/hooks';
 import { ephPayload } from '../state/scenario';
 import { useApp } from '../state/store';
 import { useUi } from '../state/ui';
@@ -28,16 +29,20 @@ export default function Power() {
   const ready = useGridRun((g) => g.ready);
   const gres = useGridRun((g) => g.result);
   const P = usePower(ui.demand_kw, ui.eff);
+  // 빛 릴레이는 지금 지도 지역의 점수 계산(동적 배열)을 쓴다. 패널 추천은 지도 지역과 무관하게 지점을 덮는 지역 격자로 계산한다
   const cell = grid && rs ? nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km) : -1;
+  const sl = useSiteLayers(rs);
+  const setMapRegion = useData((d) => d.setMapRegion);
 
   const [radius, setRadius] = useState(20);
   const [picks, setPicks] = useState<PanelPick[] | null>(null);
   const [prog, setProg] = useState<number | null>(null);
   const runPanels = () => {
-    if (cell < 0) return;
+    if (!sl.rd || sl.cell < 0) return;
+    const cands = panelCandidates(sl.rd.geo, sl.rd.layers, sl.cell, radius, app.filters.max_slope_deg ?? null);
     setProg(0);
-    gridWorker()
-      .request<PanelPick[]>('panels', { center_cell: cell, radius_km: radius, demand_kw: ui.demand_kw, eff: ui.eff, loss: DEFAULTS.panel_loss, margin: DEFAULTS.power_margin, max_slope_deg: app.filters.max_slope_deg ?? null, start: app.landing, duration_h: 30 * 24, margin_deg: app.margin_deg }, { onProgress: setProg })
+    simWorker()
+      .request<PanelPick[]>('panels', { eph: ephPayload(), cands, observer_height_m: sl.rd.geo.manifest.observer_height_m, demand_kw: ui.demand_kw, eff: ui.eff, loss: DEFAULTS.panel_loss, margin: DEFAULTS.power_margin, start: app.landing, duration_h: 30 * 24, margin_deg: app.margin_deg }, { onProgress: setProg })
       .then((r) => { setPicks(r.slice(0, 5)); setProg(null); })
       .catch((e) => { if (!isCancelled(e)) { setProg(null); console.warn("worker", e); } });
   };
@@ -116,8 +121,8 @@ export default function Power() {
         <Help>착륙지 주변에서 같은 전력을 더 작은 패널·배터리로 얻을 수 있는 자리 5곳을 찾습니다.</Help>
         <div className="row">
           <label className="small muted">탐색 반경 (km) <input className="field num" type="number" min={5} max={100} value={radius} onChange={(e) => setRadius(Number(e.target.value))} /></label>
-          <button className="btn pri" disabled={cell < 0 || !ready} onClick={runPanels}>찾기</button>
-          {cell < 0 ? <span className="tiny muted">남극 격자 밖 지점은 추천할 수 없습니다</span> : null}
+          <button className="btn pri" disabled={!sl.rd || sl.cell < 0} onClick={runPanels}>찾기</button>
+          {sl.loading ? <span className="tiny muted">이 지역 격자를 불러오는 중</span> : !sl.rd || sl.cell < 0 ? <span className="tiny muted">지역 격자(남극·북극 5 km, 전역 15 km) 밖 지점은 추천할 수 없습니다</span> : sl.region ? <span className="tiny muted">{`${REGION_LABEL[sl.region]} ${sl.rd.geo.manifest.cell_km} km 격자 기준`}</span> : null}
         </div>
         <Progress p={prog} />
         {picks ? (
@@ -125,7 +130,7 @@ export default function Power() {
             <thead><tr><th>#</th><th>위치</th><th>거리</th><th>필요 패널</th><th>필요 배터리</th><th /></tr></thead>
             <tbody>{picks.map((p, i) => (
               <tr key={p.cell}><td>{i + 1}</td><td className="mono small">{p.lat_deg.toFixed(3)}, {p.lon_deg.toFixed(2)}</td><td className="mono">{km(p.distance_km)}</td><td className="mono">{Math.round(p.panel_area_m2)} m²</td><td className="mono">{Math.max(0, Math.round(p.battery_kwh)).toLocaleString()} kWh</td>
-                <td><button className="btn sm" onClick={() => app.setSite({ kind: 'cell', cell: p.cell })}>여기로 착륙지 바꾸기</button></td></tr>
+                <td><button className="btn sm" onClick={() => app.setSite(sl.region === 'south' ? { kind: 'cell', cell: p.cell } : { kind: 'custom', lat: +p.lat_deg.toFixed(4), lon: +p.lon_deg.toFixed(4) })}>여기로 착륙지 바꾸기</button></td></tr>
             ))}</tbody>
           </table></div>
         ) : null}
@@ -155,7 +160,9 @@ export default function Power() {
                 ))}</tbody>
               </table>
             </>
-          ) : <NoData what="빛 릴레이" why={cell < 0 ? '남극 격자 밖 지점입니다' : '30 km 안에 격자 칸이 없거나 계산 중입니다'} />}
+          ) : cell < 0 && sl.region && sl.region !== grid?.region ? (
+            <><NoData what="빛 릴레이" why="빛 릴레이는 지금 고른 지도 지역의 점수 계산을 씁니다. 지점이 있는 지역의 지도로 바꾸세요" /><div className="row"><button className="btn sm" onClick={() => void setMapRegion(sl.region!)}>{`${REGION_LABEL[sl.region]} 지도로 바꾸기`}</button></div></>
+          ) : <NoData what="빛 릴레이" why={cell < 0 ? '지역 격자 밖 지점입니다' : '30 km 안에 격자 칸이 없거나 계산 중입니다'} />}
         </Card>
       </div>
     </>

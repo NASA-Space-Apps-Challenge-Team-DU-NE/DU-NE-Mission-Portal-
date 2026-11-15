@@ -1,10 +1,12 @@
 // 데이터 어댑터 (ARCHITECTURE 6.3). web/public/data 산출물만 읽는다. 실패하면 던지지 않고 'missing' 을 돌려준다.
 import { DATA_BASE } from '../config';
-import { artemisCheck, catalogCheck, ellipseCheck, ephemerisCheck, ephemerisRowsCheck, extraChecks, gridCheck, layerCheck, layersCheck, localCheck, manifestCheck, maskCheck, mastCheck, object, quality, qualityCheck, sourcesCheck, texturesCheck, validationRowsCheck, type Check, type ExtraValidationName } from './schemaChecks';
+import { artemisCheck, bandTerrainCheck, catalogCheck, ellipseCheck, ephemerisCheck, ephemerisRowsCheck, extraChecks, gridCheck, layerCheck, layersCheck, localCheck, manifestCheck, maskCheck, mastCheck, object, polarTerrainCheck, quality, qualityCheck, sourcesCheck, texturesCheck, validationRowsCheck, type Check, type ExtraValidationName } from './schemaChecks';
 import type {
   Envelope, EphemerisMeta, GridManifest, HorizonMask, LayerMeta, Lander, MastMasks, Mission, PowerRef, QualityEntry,
   Site, SourceEntry, StaticLayerName, Station, ValidationResult,
 } from '../core/types';
+import { bandTerrainGrid, polarTerrainGrid, type BandTerrainManifest, type PolarTerrainManifest, type TerrainGrid, type TerrainRegion } from '../core/terrainGrids';
+import type { GridRegion } from '../core/gridScore';
 
 export type Loaded<T> = { status: 'ok'; value: T } | { status: 'missing'; reason: string };
 export const ok = <T>(value: T): Loaded<T> => ({ status: 'ok', value });
@@ -141,7 +143,9 @@ export async function loadEphemeris(jsonPath: string): Promise<Loaded<EphemerisL
 }
 
 export interface GridLoaded {
-  env: Envelope<GridManifest>;
+  /** 지도·점수 격자 지역 (남극 grid/, 북극 grid_north/, 전역 grid_global/) */
+  region: GridRegion;
+  env: Envelope<GridManifest | PolarTerrainManifest | BandTerrainManifest>;
   cells: Uint32Array;
   horizon: Int16Array;
   layersEnv: Envelope<LayerMeta[]> | null;
@@ -164,14 +168,48 @@ export async function loadGrid(): Promise<Loaded<GridLoaded>> {
   if (cells.some((cell) => cell >= m.nx * m.ny) || new Set(cells).size !== cells.length) return missing('grid: 셀 인덱스가 범위를 벗어나거나 중복된다');
   if (horizon.some((h) => Math.abs(h * m.horizon.scale) > 90)) return missing('grid: 지평선 고도각이 범위를 벗어난다');
   const le = checkEnvelope(await getJson<Envelope<LayerMeta[]>>('grid/layers.json'), 'luna.layers', 'grid/layers.json', layersCheck);
-  return ok({ env: env.value, cells, horizon, layersEnv: le.status === 'ok' ? le.value : null, ...(le.status === 'missing' ? { layersReason: le.reason } : {}) });
+  return ok({ region: 'south', env: env.value, cells, horizon, layersEnv: le.status === 'ok' ? le.value : null, ...(le.status === 'missing' ? { layersReason: le.reason } : {}) });
 }
 
-export async function loadLayer(meta: LayerMeta, n_cells: number): Promise<Loaded<Float32Array>> {
+export const gridDir = (r: GridRegion) => (r === 'south' ? 'grid' : r === 'north' ? 'grid_north' : 'grid_global');
+
+/** 지평선 전용 격자 (북극 grid_north, 전역 grid_global). 칸·길이·고도각 범위를 검사한다 */
+export async function loadTerrainGrid(region: TerrainRegion): Promise<Loaded<{ grid: TerrainGrid; env: Envelope<unknown>; raw: GridLoaded }>> {
+  const dir = region === 'north' ? 'grid_north' : 'grid_global';
+  const path = `${dir}/manifest.json`;
+  const env = region === 'north'
+    ? checkEnvelope(await getJson<Envelope<PolarTerrainManifest>>(path), 'luna.grid', path, polarTerrainCheck)
+    : checkEnvelope(await getJson<Envelope<BandTerrainManifest>>(path), 'luna.grid_bands', path, bandTerrainCheck);
+  if (env.status !== 'ok') return env;
+  const m = env.value.data;
+  const [c, h] = await Promise.all([getBin(`${dir}/${m.cells}`), getBin(`${dir}/${m.horizon.file}`)]);
+  if (c.status !== 'ok') return c;
+  if (h.status !== 'ok') return h;
+  const ct = typed(c.value, Uint32Array, `${dir}/${m.cells}`);
+  if (ct.status !== 'ok') return ct;
+  const ht = typed(h.value, Int16Array, `${dir}/${m.horizon.file}`);
+  if (ht.status !== 'ok') return ht;
+  const cells = ct.value, horizon = ht.value;
+  const size = 'nx' in m ? m.nx * m.ny : m.n_cells_total;
+  if (cells.length !== m.n_cells || horizon.length !== m.n_cells * m.horizon.n_az) return missing(`${dir}: 길이가 manifest 와 다르다`);
+  if (cells.some((cell) => cell >= size) || new Set(cells).size !== cells.length) return missing(`${dir}: 셀 인덱스가 범위를 벗어나거나 중복된다`);
+  if (horizon.some((v) => Math.abs(v * m.horizon.scale) > 90)) return missing(`${dir}: 지평선 고도각이 범위를 벗어난다`);
+  const grid = 'nx' in m ? polarTerrainGrid(m, cells, horizon) : bandTerrainGrid(m, cells, horizon);
+  // 정적 지도 레이어 목록 (s50_regions). 실패해도 지평선은 쓴다
+  const lp = `${dir}/layers.json`;
+  const le = checkEnvelope(await getJson<Envelope<LayerMeta[]>>(lp), 'luna.layers', lp, layersCheck);
+  const raw: GridLoaded = {
+    region, env: env.value as GridLoaded['env'], cells, horizon,
+    layersEnv: le.status === 'ok' ? le.value : null, ...(le.status === 'missing' ? { layersReason: le.reason } : {}),
+  };
+  return ok({ grid, env: env.value as Envelope<unknown>, raw });
+}
+
+export async function loadLayer(meta: LayerMeta, n_cells: number, dir = 'grid'): Promise<Loaded<Float32Array>> {
   if (!object(meta) || layerCheck(meta) || !Number.isSafeInteger(n_cells) || n_cells < 1) return missing('레이어 메타 또는 칸 개수가 유효하지 않다');
   // 레이어별 품질: 사용 금지 품질(VALIDATION_FAILED·NO_DATA)은 수치 계산에 넣지 않는다
   if (BLOCKED.includes(meta.quality)) return missing(`${meta.file}: 품질 ${meta.quality}`);
-  const b = await getBin(`grid/${meta.file}`);
+  const b = await getBin(`${dir}/${meta.file}`);
   if (b.status !== 'ok') return b;
   const t = typed(b.value, Float32Array, meta.file);
   if (t.status !== 'ok') return t;
@@ -182,12 +220,12 @@ export async function loadLayer(meta: LayerMeta, n_cells: number): Promise<Loade
 }
 
 /** 레이어 묶음. 실패한 레이어의 사유는 reasons 로 돌려준다 */
-export async function loadLayers(metas: LayerMeta[], n_cells: number): Promise<{ layers: Partial<Record<StaticLayerName, Float32Array>>; reasons: Partial<Record<StaticLayerName, string>> }> {
+export async function loadLayers(metas: LayerMeta[], n_cells: number, dir = 'grid'): Promise<{ layers: Partial<Record<StaticLayerName, Float32Array>>; reasons: Partial<Record<StaticLayerName, string>> }> {
   const out: Partial<Record<StaticLayerName, Float32Array>> = {};
   const reasons: Partial<Record<StaticLayerName, string>> = {};
   await Promise.all(
     metas.map(async (m) => {
-      const r = await loadLayer(m, n_cells);
+      const r = await loadLayer(m, n_cells, dir);
       if (r.status === 'ok') out[m.name] = r.value;
       else reasons[m.name] = r.reason;
     }),
@@ -204,7 +242,7 @@ export interface TextureInfo {
   projection: string;
   source?: string;
 }
-export type TextureSet = { hillshade?: TextureInfo; wac?: TextureInfo; globe_2k?: TextureInfo; globe_8k?: TextureInfo };
+export type TextureSet = { hillshade?: TextureInfo; wac?: TextureInfo; globe_2k?: TextureInfo; globe_8k?: TextureInfo; relief_south?: TextureInfo; relief_north?: TextureInfo; relief_global?: TextureInfo };
 export async function loadTextures() {
   return checkEnvelope(await getJson<Envelope<TextureSet>>('textures/textures.json'), 'luna.textures', 'textures/textures.json', texturesCheck);
 }

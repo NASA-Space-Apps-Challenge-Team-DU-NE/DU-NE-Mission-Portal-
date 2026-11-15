@@ -54,11 +54,11 @@ export function useGridRunner() {
   const powerKind = useApp((s) => s.powerSource.kind);
 
   useEffect(() => {
-    if (!raw) return;
+    if (!raw) { useGridRun.setState({ ready: false, result: null, sources: null, running: false, progress: null }); return; }
     let alive = true;
     useGridRun.setState({ ready: false, result: null, sources: null, running: false, progress: null, error: null });
     gridWorker()
-      .request('init', { manifest: raw.env.data, cells: raw.cells, horizon: raw.horizon, layers, eph: { meta: ephMeta, rows: ephRows } }, { latestOnly: false })
+      .request('init', { region: raw.region, manifest: raw.env.data, cells: raw.cells, horizon: raw.horizon, layers, eph: { meta: ephMeta, rows: ephRows } }, { latestOnly: false })
       .then(() => { if (alive) useGridRun.setState({ ready: true }); })
       .catch((e) => { if (alive && !isCancelled(e)) useGridRun.setState({ error: (e as Error).message }); });
     return () => { alive = false; };

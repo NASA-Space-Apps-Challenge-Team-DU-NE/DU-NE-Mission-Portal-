@@ -1,17 +1,19 @@
-// 남극 지도 카드 (UI 예시 mapCard): 02 착륙지·날짜 고르기 공용
+// 지도 카드 (UI 예시 mapCard): 02 착륙지 고르기·04 기지 배치 공용. 남극·북극·전역 지역 전환
 import type { ReactNode } from 'react';
 import { useData } from '../state/data';
 import { useGridRun } from '../state/gridRun';
-import { LAYER_UI } from '../state/layerUi';
+import { layerUiFor } from '../state/layerUi';
 import { layerView } from '../state/layers';
 import { useApp } from '../state/store';
 import { Card, Help, LayerPickButton, pct, Seg } from './kit';
-import { pickNear, SouthMap } from './SouthMap';
+import { pickNear, REGION_LABEL, RegionSeg, regionSub, SouthMap } from './SouthMap';
 
 export function MapCard(p: { where: 'site' | 'base'; tag?: ReactNode; onPick?(lat: number, lon: number): void }) {
   const app = useApp();
-  const l = LAYER_UI[app.mapLayer] ?? LAYER_UI.composite;
   const grid = useData((d) => d.grid);
+  const region = useData((d) => d.mapRegion);
+  const regionLoading = useData((d) => d.regionLoading);
+  const l = layerUiFor(app.mapLayer, region);
   const approx = useData((d) => d.gridApprox);
   const layers = useData((d) => d.layers);
   const metas = useData((d) => d.layerMetas);
@@ -27,10 +29,10 @@ export function MapCard(p: { where: 'site' | 'base'; tag?: ReactNode; onPick?(la
   const sourceText = dynamic ? `${source?.label ?? '자료 없음'} · ${approx ? '구면 지평선' : '지형 지평선'}` : l.src;
   const isBase = p.where === 'base';
   return (
-    <Card title={isBase ? '기지 놓기' : '남극 지도'} sub={isBase ? '' : '75°S 이남 · 위쪽이 경도 0°'} tag={p.tag}>
+    <Card title={isBase ? '기지 놓기' : `${REGION_LABEL[region]} 지도`} sub={isBase ? '' : regionSub(region)} tag={p.tag}>
       {isBase ? null : (
         <div className="row" style={{ justifyContent: 'space-between' }}>
-          <LayerPickButton where="map" />
+          <span className="row" style={{ gap: 8 }}><RegionSeg /><LayerPickButton where="map" /></span>
           <div className="maplegend"><div className="ramp" /><div className="ramp-t"><span>{l.lo}</span><span>{l.hi}</span></div></div>
         </div>
       )}
@@ -59,7 +61,8 @@ export function MapCard(p: { where: 'site' | 'base'; tag?: ReactNode; onPick?(la
             {lv?.quality && lv.quality !== 'VALIDATED' ? <span className="badge warn">품질 {lv.quality}</span> : null}
             {l.warn ? <span className="badge warn">{l.warn}</span> : null}{l.tag ? <span className="badge">{l.tag}</span> : null}
           </div>
-          <Help>지도를 클릭하면 그 좌표가 착륙지로 선택됩니다. 배경: LROC WAC 남극 모자이크.</Help>
+          {regionLoading ? <Help>{REGION_LABEL[regionLoading]} 레이어 불러오는 중…</Help> : !grid ? <Help>{REGION_LABEL[region]} 격자 자료 없음 — 지도 색·순위를 계산할 수 없습니다.</Help> : null}
+          <Help>지도를 클릭하면 그 좌표가 착륙지로 선택됩니다. 배경: {region === 'south' ? 'LROC WAC 남극 모자이크' : 'NASA SVS CGI Moon Kit 회색 지도 (LROC WAC + 극지 LOLA)'}.{region === 'global' ? ' 일조·지구 가시 장기 평균·영구음영은 |위도| 55.2° 이상만 자료가 있습니다 (그 밖은 자료 없음).' : ''}</Help>
         </>
       )}
     </Card>

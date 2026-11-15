@@ -41,13 +41,21 @@ def from_pds_label(label: dict) -> CrsInfo:
         "MINIMUM_LATITUDE", "MAXIMUM_LATITUDE", "LINE_FIRST_PIXEL", "SAMPLE_FIRST_PIXEL",
     ]
     params = {k: mp.get(k) for k in keys if k in mp}
+    pos = str(mp.get("POSITIVE_LONGITUDE_DIRECTION", "EAST")).upper()
+    conv = "east+" if "EAST" in pos else "west+"
+    if "SIMPLE CYLINDRICAL" in ptype or "EQUIRECTANGULAR" in ptype:
+        for k in ("A_AXIS_RADIUS", "CENTER_LONGITUDE", "CENTER_LATITUDE", "MAP_RESOLUTION", "LINE_PROJECTION_OFFSET", "SAMPLE_PROJECTION_OFFSET"):
+            if k not in mp:
+                raise CrsUnknown(f"라벨에 {k} 가 없다")
+        if conv != "east+":
+            raise CrsUnknown("동경 양수가 아닌 원통 투영은 지원하지 않는다")
+        return CrsInfo("simple_cylindrical", f"PDS {ptype}", params, conv)
     if "POLAR STEREOGRAPHIC" not in ptype:
         raise CrsUnknown(f"예상하지 못한 투영: {ptype}")
     for k in ("A_AXIS_RADIUS", "CENTER_LONGITUDE", "MAP_SCALE", "LINE_PROJECTION_OFFSET", "SAMPLE_PROJECTION_OFFSET"):
         if k not in mp:
             raise CrsUnknown(f"라벨에 {k} 가 없다")
-    pos = str(mp.get("POSITIVE_LONGITUDE_DIRECTION", "EAST")).upper()
-    return CrsInfo("polar_stereographic", f"PDS {ptype}", params, "east+" if "EAST" in pos else "west+")
+    return CrsInfo("polar_stereographic", f"PDS {ptype}", params, conv)
 
 
 def from_geotiff(path: Path) -> CrsInfo:

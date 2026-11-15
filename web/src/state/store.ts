@@ -138,7 +138,7 @@ export const useApp = create<AppState>((set, get) => ({
   overlayScenarioId: null,
 
   setPage: (page) => set({ page, visited: get().visited.includes(page) ? get().visited : [...get().visited, page] }),
-  setSite: (siteRef) => set({ siteRef }),
+  setSite: (siteRef) => set({ siteRef: siteRef?.kind === 'cell' && cellResolver ? cellResolver(siteRef.cell) : siteRef }),
   setT: (t) => set({ t }),
   // 착륙 시각이 바뀌면 보는 시각도 착륙 시각으로 옮긴다 (위쪽 시간 막대를 없앴으므로 현장 뷰가 새 착륙 조건을 바로 보이게)
   setLanding: (landing) => set({ landing, t: landing }),
@@ -190,6 +190,10 @@ export const useApp = create<AppState>((set, get) => ({
 
 /** 임무 기간 상한 (h). computeDynamic 의 평가 상한과 같다 */
 export const MAX_DURATION_H = 60 * 24;
+
+/** 'cell' 칸 번호는 남극 격자 기준. 지도 지역이 북극·전역일 때 순위표·지도에서 고른 칸은 좌표로 바꾼다 (data.ts 가 등록) */
+let cellResolver: ((cell: number) => SiteRef) | null = null;
+export function setCellResolver(f: (cell: number) => SiteRef) { cellResolver = f; }
 
 // ───────── URL 동기화 (?site=&t=&d=&p=) ─────────
 export function siteRefToParam(r: SiteRef | null): string | null {

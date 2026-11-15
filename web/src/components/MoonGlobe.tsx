@@ -1,6 +1,6 @@
 // 3D 달 (UI 예시 initGlobe·loop·placeOverlay 를 옮김). three.js 객체는 ref 로만 소유한다.
 // 표면: 파이프라인 s60 이 만든 전역 회색 텍스처(NASA SVS CGI Moon Kit) + 75°S 이남 LROC WAC 남극 모자이크.
-// 지도 색: 실제 5 km 남극 격자(75°S 이남)만 칠한다. 그 밖은 자료가 없으므로 칠하지 않는다 (합성 값 금지).
+// 지도 색: 실제 격자 세 지역(남극 5 km 75°S 이남, 북극 5 km 75°N 이북, 전역 15 km 75°S–75°N)을 함께 칠한다. 자료 없는 칸은 칠하지 않는다 (합성 값 금지).
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { textureUrl } from '../adapters/data';
@@ -12,7 +12,9 @@ import { useData } from '../state/data';
 import { useBases } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite, useSiteCtx } from '../state/hooks';
-import { useNormLayer } from '../state/layerNorm';
+import { useGlobeLayers } from '../state/globeRuns';
+import type { GridGeometry, GridRegion } from '../core/gridScore';
+import { REGION_LABEL } from './SouthMap';
 import { LAYER_UI } from '../state/layerUi';
 import { useApp } from '../state/store';
 import { playClock } from '../state/playClock';
@@ -41,7 +43,7 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&l
 interface G {
   renderer: THREE.WebGLRenderer; scene: THREE.Scene; cam: THREE.PerspectiveCamera; moon: THREE.Mesh;
   uni: Record<string, THREE.IUniform>; sunDisc: THREE.Sprite; sunGlow: THREE.Sprite; earth: THREE.Mesh; earthUni: Record<string, THREE.IUniform>;
-  ovTex: THREE.CanvasTexture | null; dist: number; target: { lat: number; lon: number; dist: number } | null; dirty: boolean;
+  ovTex: Partial<Record<GridRegion, THREE.CanvasTexture>>; dist: number; target: { lat: number; lon: number; dist: number } | null; dirty: boolean;
   /** 카메라 방향(보는 점 → 카메라, 단위 벡터)과 화면 위쪽. 위경도 대신 벡터라 극을 지나도 끊기지 않는다 (팀 4f05f1e) */
   pos: THREE.Vector3; up: THREE.Vector3;
   /** 화면에 그린 태양 위치 (달 중심 기준) — 표지 위치에 쓴다 */
@@ -71,11 +73,12 @@ const latOf = (p: THREE.Vector3) => Math.asin(clamp(p.y, -1, 1)) / D2R;
 const view = { g: null as G | null };
 /** 실제 크기·거리라 지구(약 221 달 반지름)까지 볼 수 있게 */
 const maxDist = () => 900;
-export function globeView(v: 'pole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' | 'north') {
+export function globeView(v: 'pole' | 'npole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' | 'north') {
   const g = view.g;
   if (!g) return;
   const eph = useData.getState().eph, t = useApp.getState().t;
   if (v === 'pole') g.target = { lat: -89.5, lon: lonOf(g.pos), dist: 2.0 };
+  else if (v === 'npole') g.target = { lat: 89.5, lon: lonOf(g.pos), dist: 2.0 };
   else if (v === 'north') g.target = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: g.dist };
   else if (v === 'sun') { const s = subLatLon(eph.bodyVectors(t).sun); g.target = { lat: s.lat, lon: s.lon, dist: 3.2 }; }
   else if (v === 'globe') g.target = { lat: -25, lon: 0, dist: 3.6 };
@@ -144,7 +147,6 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
   const [loading, setLoading] = useState<string | null>('달 표면 불러오는 중…');
   const app = useApp();
   const tex = useData((d) => d.textures);
-  const grid = useData((d) => d.grid);
   const gridApprox = useData((d) => d.gridApprox);
   const sites = useData((d) => d.sites.items);
   const regions = useData((d) => d.artemisRegions);
@@ -153,7 +155,6 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
   const res = useGridRun((g) => g.result);
   const rs = useResolvedSite();
   const ctx = useSiteCtx(rs);
-  const nl = useNormLayer();
   const bases = useBases();
   const live = useRef({ sites, regions, vint, res, rs, ctx, eph, t: app.t, bases });
   live.current = { sites, regions, vint, res, rs, ctx, eph, t: app.t, bases };
@@ -171,15 +172,16 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     const blank = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1, THREE.RGBAFormat); blank.needsUpdate = true;
     const blank0 = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat); blank0.needsUpdate = true;
     const uni: Record<string, THREE.IUniform> = {
-      map: { value: blank }, south: { value: blank }, overlay: { value: blank0 }, sunDir: { value: new THREE.Vector3(1, 0, 0) },
-      ovOn: { value: 1 }, ovOp: { value: 0.75 }, texel: { value: 1 / 2048 }, hasMap: { value: 0 }, hasSouth: { value: 0 }, ovScale: { value: 1 },
+      map: { value: blank }, south: { value: blank }, ovS: { value: blank0 }, ovN: { value: blank0 }, ovG: { value: blank0 }, sunDir: { value: new THREE.Vector3(1, 0, 0) },
+      ovOn: { value: 1 }, ovOp: { value: 0.75 }, texel: { value: 1 / 2048 }, hasMap: { value: 0 }, hasSouth: { value: 0 }, scS: { value: 1 }, scN: { value: 1 },
+      rlS: { value: blank }, rlN: { value: blank }, rlG: { value: blank }, hasRlS: { value: 0 }, hasRlN: { value: 0 }, hasRlG: { value: 0 }, exP: { value: 3.0 }, exG: { value: 5.0 },
     };
     const mat = new THREE.ShaderMaterial({
       uniforms: uni,
       vertexShader: 'varying vec3 vN; varying vec2 vUv; void main(){ vN=normalize(position); vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
       fragmentShader: `
         precision highp float; varying vec3 vN; varying vec2 vUv;
-        uniform sampler2D map, south, overlay; uniform vec3 sunDir; uniform float ovOn, ovOp, texel, hasMap, hasSouth, ovScale;
+        uniform sampler2D map, south, ovS, ovN, ovG, rlS, rlN, rlG; uniform vec3 sunDir; uniform float ovOn, ovOp, texel, hasMap, hasSouth, scS, scN, hasRlS, hasRlN, hasRlG, exP, exG;
         const float PI=3.14159265;
         float lum(vec2 uv){ return texture2D(map,uv).r; }
         float slum(vec2 uv){ return texture2D(south,uv).r; }
@@ -194,14 +196,24 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
             float s=slum(su)*1.3; float sx=slum(su+vec2(t2,0.0))-slum(su-vec2(t2,0.0)); float sy=slum(su+vec2(0.0,t2))-slum(su-vec2(0.0,t2));
             g=mix(g,s,cap); gx=mix(gx,sx*0.6,cap); gy=mix(gy,sy*0.6,cap); }
           vec3 nb=normalize(n-2.2*(gx*east+gy*north));
+          // DEM 지형 음영: LOLA 기울기 텍스처(R=∂z/∂동, G=∂z/∂북)로 법선을 기울여 실제 태양 방향으로 비춘다. 있으면 그림 밝기 기반 요철을 대신한다
+          const float B75R=75.0*PI/180.0; vec3 rt=vec3(0.0); float ex=0.0;
+          if(lat<=-B75R && hasRlS>0.5){ rt=texture2D(rlS,vec2(0.5+0.5*rho*sin(lon),0.5+0.5*rho*cos(lon))).rgb; ex=exP; }
+          else if(lat>=B75R && hasRlN>0.5){ float rn2=(PI*0.5-lat)/(15.0*PI/180.0); rt=texture2D(rlN,vec2(0.5+0.5*rn2*sin(lon),0.5-0.5*rn2*cos(lon))).rgb; ex=exP; }
+          else if(abs(lat)<B75R && hasRlG>0.5){ rt=texture2D(rlG,vec2((lon+PI)/(2.0*PI),(lat+PI*0.5)/PI)).rgb; ex=exG; }
+          if(ex>0.0){ vec2 gr=(rt.rg*255.0-128.0)/255.0; nb=normalize(n-ex*(gr.x*east+gr.y*north)); }
           float d=max(dot(nb,sunDir),0.0); float mu=max(dot(n,sunDir),0.0);
           float light=0.10+1.2*mix(d, d*2.0*mu/(mu+0.25+1e-3), 0.5);
           vec3 col=vec3(g)*light;
           if(ovOn>0.5){
             float la=lat*180.0/PI, lo=lon*180.0/PI;
             float gl=step(abs(mod(la+0.13,10.0)),0.26)+step(abs(mod(lo+0.13,10.0)),0.26);
-            if(lat<-1.30){ vec2 ou=vec2(0.5+0.5*rho*ovScale*sin(lon),0.5+0.5*rho*ovScale*cos(lon)); vec4 o=texture2D(overlay,ou);
-              col=mix(col,o.rgb*(0.62+0.45*clamp(d*1.4,0.0,1.0)),o.a*ovOp); }
+            // 세 지역을 함께: 75°S 이남 = 남극 AEQD, 75°N 이북 = 북극 AEQD (y=-ρcosλ), 그 사이 = 75°S–75°N 등장방형
+            vec4 o=vec4(0.0); const float B75=75.0*PI/180.0;
+            if(lat<=-B75){ o=texture2D(ovS,vec2(0.5+0.5*rho*scS*sin(lon),0.5+0.5*rho*scS*cos(lon))); }
+            else if(lat>=B75){ float rn=(PI*0.5-lat)/(15.0*PI/180.0); o=texture2D(ovN,vec2(0.5+0.5*rn*scN*sin(lon),0.5-0.5*rn*scN*cos(lon))); }
+            else { o=texture2D(ovG,vec2((lon+PI)/(2.0*PI),(lat+B75)/(2.0*B75))); }
+            col=mix(col,o.rgb*(0.62+0.45*clamp(d*1.4,0.0,1.0)),o.a*ovOp);
             col=mix(col,vec3(0.9,0.93,0.92),min(gl,1.0)*0.16);
           }
           gl_FragColor=vec4(col,1.0);
@@ -235,7 +247,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     scene.add(earth);
     new THREE.TextureLoader().load(EARTH_TEX_URL, (tx) => { earthUni.day.value = tx; earthUni.hasDay.value = 1; g.dirty = true; }, undefined, () => {});
     const pos0 = v3(-55, 0);
-    const g: G = { renderer, scene, cam, moon, uni, sunDisc, sunGlow, earth, earthUni, ovTex: null, dist: 3.4, pos: pos0, up: northAt(pos0)!, sunDraw: new THREE.Vector3(), target: null, dirty: true, dE: 221, dS: SUN_DRAW, look: new THREE.Vector3(), lookT: new THREE.Vector3(), k: 0.14, onArrive: null };
+    const g: G = { renderer, scene, cam, moon, uni, sunDisc, sunGlow, earth, earthUni, ovTex: {}, dist: 3.4, pos: pos0, up: northAt(pos0)!, sunDraw: new THREE.Vector3(), target: null, dirty: true, dE: 221, dS: SUN_DRAW, look: new THREE.Vector3(), lookT: new THREE.Vector3(), k: 0.14, onArrive: null };
     view.g = g;
     // 자전축 (북극–남극을 잇는 선): 화면이 기울어도 방향을 알 수 있게 항상 그린다 (팀 4f05f1e). 색은 차분한 흰색
     const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -1.32, 0), new THREE.Vector3(0, 1.32, 0)]);
@@ -264,7 +276,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       if (hitE && (!hit || hitE.distance < hit.distance)) return flyToEarth();
       if (!hit) return;
       const p = hit.point.clone().normalize(), lat = Math.asin(p.y) * R2D, lon = Math.atan2(-p.z, p.x) * R2D;
-      const gr = useData.getState().grid, st = useApp.getState();
+      const gr = useData.getState().southGrid, st = useApp.getState();
       if (lat < -75 && gr) {
         let best = -1, bd = 1e9;
         for (let i = 0; i < gr.cells.length; i += 1) { const d = greatCircleKm(lat, lon, gr.lat[i], gr.lon[i]); if (d < bd) { bd = d; best = i; } }
@@ -424,40 +436,76 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     const setMap = (tt: THREE.Texture, px: number) => { tt.anisotropy = 4; tt.wrapS = THREE.RepeatWrapping; g.uni.map.value = tt; g.uni.texel.value = 1 / px; g.uni.hasMap.value = 1; setLoading(null); onSub?.(null); g.dirty = true; };
     if (t2) loader.load(textureUrl(t2.file), (tt) => { setMap(tt, 2048); if (t8) loader.load(textureUrl(t8.file), (tt8) => setMap(tt8, 8192)); }, undefined, () => { setLoading(null); onSub?.('표면 텍스처 자료 없음 (남극 모자이크만 표시)'); });
     else { setLoading(null); onSub?.('표면 텍스처 자료 없음 (남극 모자이크만 표시)'); }
+    // DEM 지형 음영 (남극·북극 AEQD, 전역 등장방형)
+    const T = tex as Record<string, { file: string } | undefined>;
+    for (const [k, u, h, wrap] of [['relief_south', 'rlS', 'hasRlS', false], ['relief_north', 'rlN', 'hasRlN', false], ['relief_global', 'rlG', 'hasRlG', true]] as const) {
+      const f = T[k];
+      if (f) loader.load(textureUrl(f.file), (tt) => { tt.minFilter = THREE.LinearFilter; tt.generateMipmaps = false; if (wrap) tt.wrapS = THREE.RepeatWrapping; g.uni[u].value = tt; g.uni[h].value = 1; g.dirty = true; });
+    }
     const sw = tex.wac ?? tex.hillshade;
     if (sw) loader.load(textureUrl(sw.file), (tt) => { tt.minFilter = THREE.LinearFilter; tt.generateMipmaps = false; g.uni.south.value = tt; g.uni.hasSouth.value = 1; g.dirty = true; });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tex]);
 
-  // ── 지도 색 (남극 격자) ──
-  const ovCanvas = useMemo(() => {
-    if (!grid || !nl.v) return null;
-    const { nx, ny } = grid.manifest;
-    const c = document.createElement('canvas'); c.width = nx; c.height = ny;
-    const x = c.getContext('2d')!, im = x.createImageData(nx, ny);
-    for (let i = 0; i < grid.cells.length; i++) {
-      const v = nl.v[i];
-      if (!Number.isFinite(v)) continue;
-      let a = 1;
-      if (nl.pass && !nl.pass[i]) a = app.failMode === 'hide' ? 0 : app.failMode === 'dim' ? 0.32 : 1;
-      const [r, gg, b] = rampRGB(v);
-      im.data.set([r, gg, b, a * 255], grid.cells[i] * 4);
+  // ── 지도 색 (지금 고른 지역 격자) ──
+  // 3D 달은 세 지역을 함께 칠한다 (지도 지역 버튼은 순위·필터·2D 지도에만 쓰인다)
+  const globeLayers = useGlobeLayers();
+  const ovCanvases = useMemo(() => {
+    const out: Partial<Record<GridRegion, { c: HTMLCanvasElement; grid: GridGeometry }>> = {};
+    for (const { region, grid: gg, nl: L } of globeLayers) {
+      if (!L.v) continue;
+      const v = L.v, pass = L.pass;
+      const alpha = (i: number) => (pass && !pass[i] ? (app.failMode === 'hide' ? 0 : app.failMode === 'dim' ? 0.32 : 1) : 1);
+      let c: HTMLCanvasElement;
+      if (region === 'global') {
+        // 위도 띠 → 0.25° 등장방형 (75°S–75°N)
+        const W = 1440, H = 600; c = document.createElement('canvas'); c.width = W; c.height = H;
+        const x = c.getContext('2d')!, im = x.createImageData(W, H);
+        for (let r = 0; r < H; r++) {
+          const la = 75 - ((r + 0.5) / H) * 150;
+          for (let q = 0; q < W; q++) {
+            const i = gg.locate(la, ((q + 0.5) / W) * 360 - 180);
+            if (i < 0 || !Number.isFinite(v[i])) continue;
+            const [rr, g2, b] = rampRGB(v[i]);
+            im.data.set([rr, g2, b, alpha(i) * 255], (r * W + q) * 4);
+          }
+        }
+        x.putImageData(im, 0, 0);
+      } else {
+        const { nx, ny } = gg.manifest;
+        c = document.createElement('canvas'); c.width = nx; c.height = ny;
+        const x = c.getContext('2d')!, im = x.createImageData(nx, ny);
+        for (let i = 0; i < gg.cells.length; i++) {
+          if (!Number.isFinite(v[i])) continue;
+          const [r, g2, b] = rampRGB(v[i]);
+          im.data.set([r, g2, b, alpha(i) * 255], gg.cells[i] * 4);
+        }
+        x.putImageData(im, 0, 0);
+      }
+      out[region] = { c, grid: gg };
     }
-    x.putImageData(im, 0, 0);
-    return c;
-  }, [grid, nl, app.failMode]);
+    return out;
+  }, [globeLayers, app.failMode]);
   useEffect(() => {
     const g = view.g;
     if (!g) return;
-    g.ovTex?.dispose();
-    if (ovCanvas && grid) {
-      const t = new THREE.CanvasTexture(ovCanvas);
-      t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
-      g.ovTex = t; g.uni.overlay.value = t;
-      g.uni.ovScale.value = RAD15 / ((grid.manifest.nx * grid.manifest.cell_km) / 2);
-    } else { g.ovTex = null; g.uni.overlay.value = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat); (g.uni.overlay.value as THREE.DataTexture).needsUpdate = true; }
+    const U = { south: 'ovS', north: 'ovN', global: 'ovG' } as const;
+    for (const r of ['south', 'north', 'global'] as const) {
+      g.ovTex[r]?.dispose();
+      delete g.ovTex[r];
+      const oc = ovCanvases[r];
+      if (oc) {
+        const t = new THREE.CanvasTexture(oc.c);
+        t.minFilter = THREE.LinearFilter; t.generateMipmaps = false;
+        g.ovTex[r] = t; g.uni[U[r]].value = t;
+        if (r !== 'global') g.uni[r === 'south' ? 'scS' : 'scN'].value = RAD15 / ((oc.grid.manifest.nx * oc.grid.manifest.cell_km) / 2);
+      } else {
+        const e = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat); e.needsUpdate = true;
+        g.uni[U[r]].value = e;
+      }
+    }
     g.dirty = true;
-  }, [ovCanvas, grid]);
+  }, [ovCanvases]);
   useEffect(() => { const g = view.g; if (!g) return; g.uni.ovOn.value = app.colorOn ? 1 : 0; g.uni.ovOp.value = app.opacity; g.dirty = true; }, [app.colorOn, app.opacity]);
   useEffect(() => { if (view.g) view.g.dirty = true; }, [app.t, res, sites, regions, rs, bases, eph]);
 
@@ -514,6 +562,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       <div className="vtools">
         {tools}
         <button onClick={() => globeView('pole')}>남극</button>
+        <button onClick={() => globeView('npole')}>북극</button>
         <button onClick={() => globeView('sun')}>태양 쪽</button>
         <button onClick={() => globeView('globe')}>전체</button>
         <button title="화면 위쪽을 북쪽으로 되돌립니다" onClick={() => globeView('north')}>북 ↑</button>
@@ -527,7 +576,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
             <div style={{ fontWeight: 600, marginBottom: 3 }}>{l.name}{app.mapLayer === 'composite' && app.failMode !== 'show' ? <span className="muted" style={{ fontWeight: 400 }}> · 미달 {app.failMode === 'dim' ? '흐리게' : '숨김'}</span> : null}</div>
             <div className="ramp" style={{ width: 150 }} />
             <div className="ramp-t" style={{ width: 150 }}><span>{l.lo}</span><span>{l.hi}</span></div>
-            <div className="muted" style={{ marginTop: 3 }}>{grid ? `75°S 이남 ${grid.manifest.cell_km} km 격자${gridApprox ? ' · 근사, 지형 미반영' : ''}` : '격자 자료 없음'}</div>
+            <div className="muted" style={{ marginTop: 3 }}>{globeLayers.length ? `${globeLayers.map((x) => `${REGION_LABEL[x.region]} ${x.grid.manifest.cell_km} km`).join(' · ')} 격자${gridApprox ? ' · 남극 근사, 지형 미반영' : ''}` : '격자 자료 없음'}</div>
+            {globeLayers.some((x) => x.pending && !x.nl.v) ? <div className="muted tiny">{globeLayers.filter((x) => x.pending && !x.nl.v).map((x) => REGION_LABEL[x.region]).join(' · ')} 계산 중…</div> : null}
           </>
         ) : <span className="muted">지도 색 꺼짐 (C)</span>}
       </div>

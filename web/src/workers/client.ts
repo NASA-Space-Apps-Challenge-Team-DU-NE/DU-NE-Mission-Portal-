@@ -124,6 +124,13 @@ let search: WorkerClient | null = null;
 let sim: WorkerClient | null = null;
 // 죽은 Worker 는 다음 호출 때 새로 만든다 (재시도 경로)
 export const gridWorker = () => (grid ??= new InitializedWorkerClient(() => new Worker(new URL('./grid.worker.ts', import.meta.url), { type: 'module' })));
+/** 3D 달 전체 칠하기용: 지도 지역이 아닌 지역마다 따로 쓰는 격자 Worker (지도 지역 실행과 섞이지 않게) */
+const extraGrid = new Map<string, InitializedWorkerClient>();
+export const gridWorkerFor = (key: string) => {
+  let w = extraGrid.get(key);
+  if (!w) { w = new InitializedWorkerClient(() => new Worker(new URL('./grid.worker.ts', import.meta.url), { type: 'module' })); extraGrid.set(key, w); }
+  return w;
+};
 export const searchWorker = () => (search = search && !search.dead ? search : new WorkerClient(() => new Worker(new URL('./search.worker.ts', import.meta.url), { type: 'module' })));
 export const simWorker = () => (sim = sim && !sim.dead ? sim : new WorkerClient(() => new Worker(new URL('./sim.worker.ts', import.meta.url), { type: 'module' })));
 export const isCancelled = (e: unknown) => (e as Error)?.message === 'cancelled';

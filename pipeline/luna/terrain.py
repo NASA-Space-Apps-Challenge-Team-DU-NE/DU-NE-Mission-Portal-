@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from luna.horizon import Sampler
-from luna.io.pds import PolarPdsSampler, read_pds_image
+from luna.io.pds import PolarPdsSampler, read_pds_image, sampler_for
 
 # PROVISIONAL: 각 DEM 을 쓰는 최대 거리 (km)
 NEAR_30M_KM = 15.0
@@ -18,6 +18,7 @@ class Terrain:
         self.meta = json.loads(meta_path.read_text(encoding="utf-8"))
         self._240 = None
         self._80 = None
+        self._grid: list | None = None
 
     @property
     def dem240(self) -> PolarPdsSampler:
@@ -49,6 +50,12 @@ class Terrain:
         return out
 
     def grid_samplers(self, max_range_km: float) -> list[Sampler]:
+        # 북극·전역 메타는 쓸 DEM 목록(grid_dems)을 직접 적는다: 가까운 것부터, 마지막 DEM 은 최대 탐색 거리까지
+        if self.meta.get("grid_dems"):
+            if self._grid is None:
+                self._grid = [(d, sampler_for(read_pds_image(Path(d["label"]), Path(d["image"])))) for d in self.meta["grid_dems"]]
+            n = len(self._grid)
+            return [Sampler(d["name"], s, max_range_km if i == n - 1 else float(d["max_km"]), float(d["min_step_km"])) for i, (d, s) in enumerate(self._grid)]
         out: list[Sampler] = []
         if self.dem80 is not None:
             out.append(Sampler("dem80", self.dem80, 40.0, 0.08))

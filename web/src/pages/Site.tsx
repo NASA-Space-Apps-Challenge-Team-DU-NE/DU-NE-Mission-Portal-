@@ -1,8 +1,9 @@
 // 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침) · 착륙지 부분: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
 import { useEffect, useMemo, useState } from 'react';
-import { ArtemisBadge, Card, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, hrs, pct, toast, Empty } from '../components/kit';
+import { ArtemisBadge, Card, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, gridLabel, hrs, pct, toast, Empty } from '../components/kit';
 import { useArtemisVintage } from '../state/artemis';
 import { MapCard } from '../components/MapCard';
+import { REGION_LABEL } from '../components/SouthMap';
 import { DAY_MS } from '../core/constants';
 import { nearestCell } from '../core/gridScore';
 import { flatMask } from '../core/horizon';
@@ -11,7 +12,7 @@ import type { Criterion, SiteCategory } from '../core/types';
 import { useData } from '../state/data';
 import { evalFor, siteKey, useEval } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
-import { useResolvedSite, useSiteCtx } from '../state/hooks';
+import { gridMaskAt, useResolvedSite, useSiteCtx, useSiteLayers } from '../state/hooks';
 import { makeScenario } from '../state/scenario';
 import { useApp } from '../state/store';
 import { CAT, CRIT, CRIT_COL, useUi } from '../state/ui';
@@ -24,16 +25,20 @@ function RankTab() {
   const masks = useData((d) => d.masks);
   const ensureMask = useData((d) => d.ensureMask);
   const eph = useData((d) => d.eph);
+  const terrainGrids = useData((d) => d.terrainGrids);
+  const southGrid = useData((d) => d.grid);
   const [, bump] = useState(0);
   useEffect(() => { if (app.rankMode === 'catalog') sites.forEach((s) => s.mask && !masks[s.mask] && ensureMask(s.mask).then(() => bump((x) => x + 1))); }, [app.rankMode, sites, masks, ensureMask]);
   const cat = useMemo(() => {
     if (app.rankMode !== 'catalog') return [];
     return sites.map((s) => {
       const env = s.mask ? masks[s.mask] : undefined, m = env && env !== 'missing' ? env.data : null;
-      const ctx = siteContext({ ...s, elevation_m: m?.ground_elev_m ?? s.elevation_m }, m ?? flatMask(s.id, s.lat_deg, s.lon_deg, 2), eph, app.margin_deg);
-      return { s, terrain: (m ? 'site' : 'flat') as 'site' | 'flat', e: evalFor(ctx, `cat|${s.id}|${m ? 1 : 0}|r${useData.getState().ephRev}`, app.landing, app.duration_h, 6) };
+      const gm = m ? null : gridMaskAt(s.lat_deg, s.lon_deg);
+      const ctx = siteContext({ ...s, elevation_m: m?.ground_elev_m ?? s.elevation_m }, m ?? gm?.mask ?? flatMask(s.id, s.lat_deg, s.lon_deg, 2), eph, app.margin_deg);
+      const terrain: 'site' | 'grid' | 'flat' = m ? 'site' : gm ? 'grid' : 'flat';
+      return { s, terrain, e: evalFor(ctx, `cat|${s.id}|${terrain}${gm ? gm.region : ''}|r${useData.getState().ephRev}`, app.landing, app.duration_h, 6) };
     }).sort((a, b) => b.e.score.total - a.e.score.total);
-  }, [app.rankMode, sites, masks, eph, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.powerSource]);
+  }, [app.rankMode, sites, masks, eph, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.powerSource, terrainGrids, southGrid]);
   const ref = app.siteRef;
   const vint = useArtemisVintage();
   return (
@@ -141,10 +146,14 @@ export default function Site() {
   const res = useGridRun((g) => g.result);
   const setExplain = useGridRun((g) => g.setExplain);
   // 점수 근거: 선택 지점의 격자 칸
-  const cell = grid && rs ? (app.siteRef?.kind === 'cell' ? app.siteRef.cell : nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km * 2)) : -1;
+  const cell = grid && rs ? (app.siteRef?.kind === 'cell' && grid.region === 'south' ? app.siteRef.cell : nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km * 2)) : -1;
   useEffect(() => { setExplain(cell >= 0 ? cell : null); }, [cell, setExplain]);
   const prev = useMemo(() => (ctx ? [3, 7, 14].map((d) => ({ d, e: evalFor(ctx, siteKey(rs, app.margin_deg), app.landing + d * DAY_MS, app.duration_h, 6) })) : []), [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.powerSource]);
   const ex = res?.explain && cell >= 0 ? res.explain : null;
+  // 지점이 지금 지도 지역 밖이면 점수 근거(지도 지역의 종합 점수)는 없다 → 그 지역 지도로 바꾸는 안내
+  const siteRegion = useSiteLayers(rs).region;
+  const setMapRegion = useData((d) => d.setMapRegion);
+  const otherRegion = !!rs && cell < 0 && !!grid && !!siteRegion && siteRegion !== grid.region ? siteRegion : null;
   const comp = cell >= 0 && res ? res.composite[cell] : null;
   const R = app.req;
   const vint = useArtemisVintage();
@@ -161,7 +170,7 @@ export default function Site() {
         </section>
       </div>
       {rs && ev ? (
-        <Card title={rs.site.name} sub={`${rs.site.lat_deg.toFixed(3)}°, ${rs.site.lon_deg.toFixed(3)}° · ${CAT[rs.site.category] ?? ''}`} tag={<><TerrBadge k={rs.terrain} /><ArtemisBadge v={sv} /><button className="btn sm" onClick={() => { app.addScenario(makeScenario(rs.site, app.landing, app.duration_h, 'user')); toast('비교에 추가했습니다 (07 후보 비교)'); }}>비교에 추가</button></>}>
+        <Card title={rs.site.name} sub={`${rs.site.lat_deg.toFixed(3)}°, ${rs.site.lon_deg.toFixed(3)}° · ${CAT[rs.site.category] ?? ''}`} tag={<><TerrBadge k={rs.terrain} />{rs.terrain === 'grid' && rs.gridRegion ? <span className="tiny muted">{gridLabel(rs.gridRegion, rs.gridKm)}</span> : null}<ArtemisBadge v={sv} /><button className="btn sm" onClick={() => { app.addScenario(makeScenario(rs.site, app.landing, app.duration_h, 'user')); toast('비교에 추가했습니다 (07 후보 비교)'); }}>비교에 추가</button></>}>
           <div className="kpis">
             <Kpi l="시나리오 점수" v={Math.round(ev.score.total)} s="상대 비교용 · 확률 아님" />
             <Kpi l="요구 조건" v={ev.score.meets_requirements ? '충족' : '요건 미달'} s={ev.score.meets_requirements ? '' : '필수 요구 조건 미달'} tone={ev.score.meets_requirements ? 'good' : 'bad'} />
@@ -187,6 +196,11 @@ export default function Site() {
             {ex.weakest ? <>가장 크게 깎인 기준: <b style={{ color: 'var(--warn)' }}>{CRIT[ex.weakest]}</b></> : null}
             {ex.contributions.some((c) => c.missing) ? <> · <span className="muted">빠진 기준(가중치 0 또는 자료 없음): {ex.contributions.filter((c) => c.missing).map((c) => CRIT[c.criterion as Criterion]).join(', ')}</span></> : null}
           </div>
+        </Card>
+      ) : otherRegion ? (
+        <Card title="점수 근거">
+          <Help><span>점수 근거는 지금 고른 지도 지역의 종합 점수에서 나옵니다.</span> <span>{`이 지점은 ${REGION_LABEL[otherRegion]} 격자에 있습니다.`}</span> <span>단층애 경고와 패널 추천은 지도와 무관하게 지점이 있는 지역 격자로 계산합니다.</span></Help>
+          <div className="row"><button className="btn sm" onClick={() => void setMapRegion(otherRegion)}>{`${REGION_LABEL[otherRegion]} 지도로 바꾸기`}</button></div>
         </Card>
       ) : null}
       <h2 className="sechead"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>

@@ -116,6 +116,26 @@ class GridManifest:
 
 
 @dataclass
+class BandGridManifest:
+    """중·저위도 위도 띠 격자 (luna.grid_bands.v1). 칸 번호: 남쪽 띠부터, 띠 r 의 경도 칸 c → sum(n_lon[:r]) + c.
+
+    띠 r 의 위도 범위 [−lat_max + r·dlat, −lat_max + (r+1)·dlat], 경도 칸 c 범위 [−180 + c·360/n_lon[r], …).
+    """
+
+    projection: str
+    cell_km: float
+    lat_max_deg: float
+    dlat_deg: float
+    n_rows: int
+    n_lon: list[int]
+    n_cells_total: int
+    n_cells: int
+    cells: str
+    horizon: dict[str, Any]
+    observer_height_m: float
+
+
+@dataclass
 class LayerMeta:
     name: str
     file: str
