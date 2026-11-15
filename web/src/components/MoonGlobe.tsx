@@ -33,8 +33,8 @@ const EARTH_TEX_URL = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples
 /** 태양·지구 배치.
  *  compact (기본): 거리만 줄이고 크기는 달 중심에서 본 실제 각크기 그대로 (지구 약 1.9°, 태양 약 0.53°).
  *  real: 실제 거리·크기 (달 반지름 = 1). 태양은 카메라 범위 밖이라 실제 각크기를 지키며 2000 에 둔다. */
-const COMPACT = { earth: 26, sun: 60 };
-const SUN_FAR = 2000;
+/** 태양은 실제 거리(약 8.6만 달 반지름)라 카메라 먼 평면 밖이다. 카메라에서 같은 방향·같은 각크기로 이 거리에 대신 그린다 */
+const SUN_DRAW = 4500;
 const subLatLon = (v: number[]) => { const n = Math.hypot(v[0], v[1], v[2]); return { lat: Math.asin(v[2] / n) * R2D, lon: Math.atan2(v[1], v[0]) * R2D }; };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string);
 
@@ -44,8 +44,8 @@ interface G {
   ovTex: THREE.CanvasTexture | null; dist: number; target: { lat: number; lon: number; dist: number } | null; dirty: boolean;
   /** 카메라 방향(보는 점 → 카메라, 단위 벡터)과 화면 위쪽. 위경도 대신 벡터라 극을 지나도 끊기지 않는다 (팀 4f05f1e) */
   pos: THREE.Vector3; up: THREE.Vector3;
-  /** 평면 지구 그림 (지구 보기 '평면'일 때) */
-  earthSpr: THREE.Sprite; earthCanvas: HTMLCanvasElement; earthTex: THREE.CanvasTexture; ph: number | null;
+  /** 화면에 그린 태양 위치 (달 중심 기준) — 표지 위치에 쓴다 */
+  sunDraw: THREE.Vector3;
   /** 지금 그린 지구·태양 거리 (달 반지름 단위) — 겹침 표지 위치에 쓴다 */
   dE: number; dS: number;
   /** 카메라가 바라보는 점 (기본 달 중심). '지구까지' 보기에서는 달–지구 중간 */
@@ -68,20 +68,9 @@ function orthoUp(g: { pos: THREE.Vector3; up: THREE.Vector3 }) {
 }
 const lonOf = (p: THREE.Vector3) => Math.atan2(-p.z, p.x) / D2R;
 const latOf = (p: THREE.Vector3) => Math.asin(clamp(p.y, -1, 1)) / D2R;
-/** 평면 지구 그림: 태양 쪽만 밝은 위상 원반 (팀 4f05f1e 방식) */
-function drawEarthSprite(c: HTMLCanvasElement, phase: number) {
-  const x = c.getContext('2d')!;
-  x.clearRect(0, 0, 128, 128);
-  const gr = x.createRadialGradient(50, 50, 6, 64, 64, 46); gr.addColorStop(0, '#bfe3f0'); gr.addColorStop(0.6, '#3f8fb5'); gr.addColorStop(1, '#173a52');
-  x.fillStyle = gr; x.beginPath(); x.arc(64, 64, 44, 0, 7); x.fill();
-  x.fillStyle = 'rgba(2,6,8,.78)'; x.beginPath();
-  const k = 1 - 2 * phase;
-  x.ellipse(64, 64, 44 * Math.abs(k), 44, 0, 0, 7);
-  if (k > 0) { x.fill(); x.beginPath(); x.rect(20, 20, 44, 88); x.fill(); }
-  else { x.save(); x.beginPath(); x.rect(20, 20, 44, 88); x.clip(); x.beginPath(); x.arc(64, 64, 44, 0, 7); x.fill(); x.restore(); x.globalCompositeOperation = 'destination-out'; x.beginPath(); x.ellipse(64, 64, 44 * Math.abs(k), 44, 0, 0, 7); x.fill(); x.globalCompositeOperation = 'source-over'; }
-}
-const view = { g: null as G | null, real: false, flat: false };
-const maxDist = () => (view.real ? 900 : 80);
+const view = { g: null as G | null };
+/** 실제 크기·거리라 지구(약 221 달 반지름)까지 볼 수 있게 */
+const maxDist = () => 900;
 export function globeView(v: 'pole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' | 'north') {
   const g = view.g;
   if (!g) return;
@@ -90,8 +79,8 @@ export function globeView(v: 'pole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' |
   else if (v === 'north') g.target = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: g.dist };
   else if (v === 'sun') { const s = subLatLon(eph.bodyVectors(t).sun); g.target = { lat: s.lat, lon: s.lon, dist: 3.2 }; }
   else if (v === 'globe') g.target = { lat: -25, lon: 0, dist: 3.6 };
-  else if (v === 'in') g.dist = clamp(g.dist * 0.8, 1.08, maxDist());
-  else if (v === 'out') g.dist = clamp(g.dist * 1.25, 1.08, maxDist());
+  else if (v === 'in') { g.dist = clamp(g.dist * 0.8, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
+  else if (v === 'out') { g.dist = clamp(g.dist * 1.25, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
   else if (v === 'earth') {
     // 달과 지구가 한 화면에 들어오게: 지구 방향에 수직인 쪽에서 바라본다
     const e = meToThree(eph.bodyVectors(t).earth), up = Math.abs(e.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
@@ -103,15 +92,6 @@ export function globeView(v: 'pole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' |
   g.dirty = true;
 }
 
-/** 실제 거리 보기 켜기·끄기. 끌 때 카메라가 멀리 있으면 달 가까이로 돌아온다 */
-export function globeReal(on: boolean) {
-  view.real = on;
-  const g = view.g;
-  if (!g) return;
-  if (!on && g.dist > 8) { g.target = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: 3.4 }; g.lookT.set(0, 0, 0); }
-  g.dirty = true;
-}
-
 /** 지구를 누르면: 카메라가 천천히 지구로 날아가 화면 가운데에 지구가 오면
  *  05 임무 시뮬레이션의 지상국 통신 창을 전체화면으로 연다 (한국이 보이게). 달 화면은 원래 보기로 돌려 놓는다. */
 export function flyToEarth() {
@@ -119,7 +99,7 @@ export function flyToEarth() {
   if (!g || g.onArrive) return;
   const before = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: g.dist, look: g.look.clone() };
   const pos = new THREE.Vector3().setFromMatrixPosition(g.earth.matrix);
-  const rE = view.flat ? g.earthSpr.scale.x / 2 : new THREE.Vector3().setFromMatrixScale(g.earth.matrix).x;
+  const rE = new THREE.Vector3().setFromMatrixScale(g.earth.matrix).x;
   const dir = pos.clone().negate().normalize(); // 지구에서 달 쪽: 달에서 보이는 지구 면을 바라본다
   g.lookT.copy(pos);
   g.target = { lat: Math.asin(clamp(dir.y, -1, 1)) * R2D, lon: Math.atan2(-dir.z, dir.x) * R2D, dist: rE * 3.2 };
@@ -184,7 +164,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     let renderer: THREE.WebGLRenderer;
     try { renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true }); } catch { setLoading('이 브라우저에서 WebGL 을 쓸 수 없습니다'); return; }
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, 0.01, 6000);
+    const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, 0.01, 8000);
     // 배경 하늘: 실제 방향의 은하수와 별 (starfield.ts)
     const sky = createSky();
     scene.add(sky.group);
@@ -254,11 +234,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     earth.matrixAutoUpdate = false;
     scene.add(earth);
     new THREE.TextureLoader().load(EARTH_TEX_URL, (tx) => { earthUni.day.value = tx; earthUni.hasDay.value = 1; g.dirty = true; }, undefined, () => {});
-    const earthCanvas = document.createElement('canvas'); earthCanvas.width = earthCanvas.height = 128;
-    const earthTex = new THREE.CanvasTexture(earthCanvas);
-    const earthSpr = new THREE.Sprite(new THREE.SpriteMaterial({ map: earthTex, depthWrite: false })); earthSpr.visible = false; scene.add(earthSpr);
     const pos0 = v3(-55, 0);
-    const g: G = { renderer, scene, cam, moon, uni, sunDisc, sunGlow, earth, earthUni, ovTex: null, dist: 3.4, pos: pos0, up: northAt(pos0)!, earthSpr, earthCanvas, earthTex, ph: null, target: null, dirty: true, dE: COMPACT.earth, dS: COMPACT.sun, look: new THREE.Vector3(), lookT: new THREE.Vector3(), k: 0.14, onArrive: null };
+    const g: G = { renderer, scene, cam, moon, uni, sunDisc, sunGlow, earth, earthUni, ovTex: null, dist: 3.4, pos: pos0, up: northAt(pos0)!, sunDraw: new THREE.Vector3(), target: null, dirty: true, dE: 221, dS: SUN_DRAW, look: new THREE.Vector3(), lookT: new THREE.Vector3(), k: 0.14, onArrive: null };
     view.g = g;
     // 자전축 (북극–남극을 잇는 선): 화면이 기울어도 방향을 알 수 있게 항상 그린다 (팀 4f05f1e). 색은 차분한 흰색
     const axisGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -1.32, 0), new THREE.Vector3(0, 1.32, 0)]);
@@ -267,15 +244,14 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
 
     let drag: { x: number; y: number } | null = null, moved = 0;
     const down = (e: PointerEvent) => { drag = { x: e.clientX, y: e.clientY }; moved = 0; c.setPointerCapture(e.pointerId); g.target = null; };
-    // 화면 기준 회전 (트랙볼, 팀 4f05f1e): 가로로 끌면 화면 세로축, 세로로 끌면 화면 가로축을 중심으로 돈다. 극 위에서도 매끄럽다
+    // 끌기: 가로 = 경도, 세로 = 위도 방향으로 돈다 (화면 위쪽은 늘 북쪽). 극에서 멈춘다
     const move = (e: PointerEvent) => {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       moved += Math.abs(dx) + Math.abs(dy); drag = { x: e.clientX, y: e.clientY };
-      const k = Math.min(0.3, 0.25 * (g.dist - 1)) * D2R;
-      const right = new THREE.Vector3().crossVectors(g.pos, g.up).negate().normalize();
-      const q = new THREE.Quaternion().setFromAxisAngle(g.up, -dx * k).multiply(new THREE.Quaternion().setFromAxisAngle(right, -dy * k));
-      g.pos.applyQuaternion(q).normalize(); g.up.applyQuaternion(q); orthoUp(g);
+      const k = Math.min(0.3, 0.25 * (g.dist - 1));
+      const lat = clamp(latOf(g.pos) + dy * k, -89.9, 89.9), lon = lonOf(g.pos) - dx * k;
+      g.pos.copy(v3(lat, lon)); g.up.copy(northAt(g.pos) ?? g.up); orthoUp(g);
       g.dirty = true;
     };
     const up = () => { drag = null; };
@@ -283,7 +259,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       if (moved >= 5) return;
       const r = c.getBoundingClientRect(), m = new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       const rc = new THREE.Raycaster(); rc.setFromCamera(m, cam);
-      const hitE = rc.intersectObject(view.flat ? earthSpr : earth)[0];
+      const hitE = rc.intersectObject(earth)[0];
       const hit = rc.intersectObject(moon)[0];
       if (hitE && (!hit || hitE.distance < hit.distance)) return flyToEarth();
       if (!hit) return;
@@ -296,7 +272,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       }
       st.setSite({ kind: 'custom', lat: +lat.toFixed(3), lon: +lon.toFixed(3) });
     };
-    const wheel = (e: WheelEvent) => { e.preventDefault(); g.dist = clamp(g.dist * (e.deltaY > 0 ? 1.12 : 0.89), 1.08, maxDist()); g.target = null; g.dirty = true; };
+    // 확대·축소는 늘 달 중심을 기준으로 한다: 아무리 멀리 나가도 다시 확대하면 달로 돌아온다
+    const wheel = (e: WheelEvent) => { e.preventDefault(); g.dist = clamp(g.dist * (e.deltaY > 0 ? 1.12 : 0.89), 1.08, maxDist()); g.lookT.set(0, 0, 0); g.target = null; g.dirty = true; };
     const dbl = () => { const st = useApp.getState(); st.setFullscreen(!st.fullscreen); };
     c.addEventListener('pointerdown', down); c.addEventListener('pointermove', move); c.addEventListener('pointerup', up);
     c.addEventListener('click', click); c.addEventListener('wheel', wheel, { passive: false }); c.addEventListener('dblclick', dbl);
@@ -342,11 +319,16 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       (uni.sunDir.value as THREE.Vector3).copy(sd);
       sky.update((v) => meRaw(j2000ToMoonFixed(T0, v as [number, number, number])), cam.position, renderer.getPixelRatio());
       const kmE = Math.hypot(...b.earth), kmS = Math.hypot(...b.sun);
-      const dE = view.real ? kmE / R_MOON_KM : COMPACT.earth, rE = view.real ? R_EARTH_KM / R_MOON_KM : COMPACT.earth * (R_EARTH_KM / kmE);
-      const dS = view.real ? SUN_FAR : COMPACT.sun, rS = dS * (R_SUN_KM / kmS);
-      g.dE = dE; g.dS = dS;
-      sunDisc.position.copy(sd).multiplyScalar(dS); sunDisc.scale.set(2 * rS, 2 * rS, 1);
-      sunGlow.position.copy(sd).multiplyScalar(dS * 1.0001); sunGlow.scale.set(2 * rS * 9, 2 * rS * 9, 1);
+      // 모두 실제 크기·거리 (달 반지름 = 1): 지구 반지름 약 3.7, 태양 반지름 약 400
+      const dE = kmE / R_MOON_KM, rE = R_EARTH_KM / R_MOON_KM;
+      { // 태양: 실제 위치를 카메라에서 본 방향에, 같은 각크기로 SUN_DRAW 거리에 그린다
+        const toSun = sd.clone().multiplyScalar(kmS / R_MOON_KM).sub(cam.position), dTrue = toSun.length();
+        g.sunDraw.copy(cam.position).addScaledVector(toSun.normalize(), SUN_DRAW);
+        const rS = SUN_DRAW * (R_SUN_KM / R_MOON_KM) / dTrue;
+        sunDisc.position.copy(g.sunDraw); sunDisc.scale.set(2 * rS, 2 * rS, 1);
+        sunGlow.position.copy(g.sunDraw); sunGlow.scale.set(2 * rS * 9, 2 * rS * 9, 1);
+      }
+      g.dE = dE; g.dS = SUN_DRAW;
       // 지구 자전: 극 = J2000 z축, 본초자오선 = 그리니치 평균 항성시(GMST) 방향을 달 고정 좌표로 옮김
       { const jd = T0 / 86400000 + 2440587.5, gm = (280.46061837 + 360.98564736629 * (jd - 2451545)) * D2R;
         const P = meRaw(j2000ToMoonFixed(T0, [0, 0, 1])).normalize(), M = meRaw(j2000ToMoonFixed(T0, [Math.cos(gm), Math.sin(gm), 0]));
@@ -354,19 +336,12 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         const E = new THREE.Vector3().crossVectors(P, M);
         earth.matrix.makeBasis(M.multiplyScalar(rE), P.multiplyScalar(rE), E.multiplyScalar(-rE)).setPosition(ed.clone().multiplyScalar(dE));
         earth.matrixWorldNeedsUpdate = true;
-        // 지구 보기: 3D(실제 자전·명암) 또는 평면 위상 그림
-        earth.visible = !view.flat; earthSpr.visible = view.flat;
-        if (view.flat) {
-          earthSpr.position.copy(ed).multiplyScalar(dE); const sc = Math.max(2 * rE * (128 / 88), 3.4 * (dE / 26)); earthSpr.scale.set(sc, sc, 1);
-          const ph = (1 - sd.dot(ed)) / 2;
-          if (g.ph == null || Math.abs(g.ph - ph) > 0.01) { g.ph = ph; drawEarthSprite(earthCanvas, ph); earthTex.needsUpdate = true; }
-        }
         const sunFromEarth = meRaw(b.sun).sub(meRaw(b.earth)).normalize();
         (earthUni.sunE.value as THREE.Vector3).copy(sunFromEarth); }
       renderer.render(scene, cam);
-      placeOverlay(sd, ed);
+      placeOverlay(ed);
     };
-    const placeOverlay = (sd: THREE.Vector3, ed: THREE.Vector3) => {
+    const placeOverlay = (ed: THREE.Vector3) => {
       const o = ovl.current;
       if (!o) return;
       const W = vw.clientWidth, H = vw.clientHeight, camDir = cam.position.clone().normalize();
@@ -421,7 +396,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         const sy = Math.abs(Math.sin(a)) > 1e-6 ? (Math.sin(a) > 0 ? B - cy : cy - T) / Math.abs(Math.sin(a)) : 1e9, tt = Math.min(sx, sy);
         emit(cls, cx + Math.cos(a) * tt - 40, cy + Math.sin(a) * tt - 10, `<span class="ar" style="transform:rotate(${(a * R2D + 90).toFixed(0)}deg)"></span>${name} <em>${el}</em>`);
       };
-      if (!far) body(sd, g.dS, 'sun', '☀ 태양', now ? `고도 ${now.sun.el_deg.toFixed(1)}°` : '');
+      if (!far) body(g.sunDraw.clone().normalize(), g.sunDraw.length(), 'sun', '☀ 태양', now ? `고도 ${now.sun.el_deg.toFixed(1)}°` : '');
       // 자전축 끝 표시 (N·S)
       if (!far) for (const [y, lb] of [[1.36, 'N'], [-1.36, 'S']] as Array<[number, string]>) {
         const p = proj(new THREE.Vector3(0, y, 0));
@@ -436,7 +411,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       cancelAnimationFrame(raf); window.clearTimeout(tm); ro.disconnect();
       c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up);
       c.removeEventListener('click', click); c.removeEventListener('wheel', wheel); c.removeEventListener('dblclick', dbl);
-      axisGeo.dispose(); earthTex.dispose(); sky.dispose(); renderer.dispose(); view.g = null; vw.closest(".moon")?.classList.remove("far");
+      axisGeo.dispose(); sky.dispose(); renderer.dispose(); view.g = null; vw.closest(".moon")?.classList.remove("far");
     };
   }, []);
 
@@ -521,8 +496,6 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
   }, [siteId]);
 
   const l = LAYER_UI[app.mapLayer] ?? LAYER_UI.composite;
-  const [real, setReal] = useState(view.real);
-  const [flat, setFlat] = useState(view.flat);
   return (
     <div className="view" ref={viewEl}>
       <canvas id="gl" ref={cvs} />
@@ -545,8 +518,6 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         <button onClick={() => globeView('globe')}>전체</button>
         <button title="화면 위쪽을 북쪽으로 되돌립니다" onClick={() => globeView('north')}>북 ↑</button>
         <button onClick={() => globeView('earth')}>지구까지</button>
-        <button aria-pressed={flat} title="지구를 3D(실제 자전·명암) 또는 평면 위상 그림으로" onClick={() => { view.flat = !flat; setFlat(!flat); if (view.g) view.g.dirty = true; }}>{flat ? '지구 평면' : '지구 3D'}</button>
-        <button aria-pressed={real} title="실제 거리·크기로 보기 (달 반지름 = 1)" onClick={() => { globeReal(!real); setReal(!real); }}>실제 거리</button>
         <button aria-label="확대" onClick={() => globeView('in')}>+</button>
         <button aria-label="축소" onClick={() => globeView('out')}>−</button>
       </div>
@@ -560,7 +531,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
           </>
         ) : <span className="muted">지도 색 꺼짐 (C)</span>}
       </div>
-      <div className="scale-note">{real ? '실제 거리·크기 · 지구 약 221 달 반지름 · 태양은 실제 각크기로 표시' : '태양·지구 크기는 달에서 보이는 실제 각크기 · 거리만 줄임'}</div>
+      <div className="scale-note">실제 크기·거리 · 지구 약 221 달 반지름 · 태양은 약 8.6만 달 반지름</div>
       {children}
       {loading ? <div className="loading">{loading}</div> : null}
     </div>

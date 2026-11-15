@@ -1263,4 +1263,5 @@ export const EN: Record<string, string> = {
  "후보 / 달성 여부": "Candidate / met?",
  "입력값 초기화": "Reset inputs",
  "지구 중심이 그 방향 지형선 + 통신 여유각(": "Counts as in contact when Earth's centre is above the terrain line in that direction plus the comms margin (",
+ "실제 크기·거리 · 지구 약 221 달 반지름 · 태양은 약 8.6만 달 반지름": "True sizes and distances · Earth about 221 Moon radii away · Sun about 86,000",
 };
