@@ -100,7 +100,7 @@ function MoonSection() {
   const dim = useUi((u) => u.dim);
   const setUi = useUi((u) => u.set);
   const region = useData((d) => d.mapRegion);
-  const dimSeg = <><div className="seg dimseg" aria-label="3D 또는 2D">{(['3d', '2d'] as const).map((d) => <button key={d} aria-pressed={dim === d} onClick={() => setUi({ dim: d })}>{d.toUpperCase()}</button>)}</div><RegionSeg /></>;
+  const dimSeg = <><div className="seg dimseg" aria-label="3D 또는 2D">{(['3d', '2d'] as const).map((d) => <button key={d} aria-pressed={dim === d} onClick={() => setUi({ dim: d })}>{d.toUpperCase()}</button>)}</div>{dim === '2d' ? <RegionSeg /> : null}</>;
   useEffect(() => {
     document.body.classList.toggle('fs', app.fullscreen);
     document.body.classList.toggle('present', app.presentation);
