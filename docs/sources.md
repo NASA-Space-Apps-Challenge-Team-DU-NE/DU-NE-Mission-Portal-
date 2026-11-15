@@ -1,5 +1,7 @@
 # 데이터 출처 (제출용, CLAUDE.md 15절)
 
+자료별 원 출처 링크 전체는 [data-sources.md](data-sources.md)에 정리했다.
+
 ## NASA 데이터
 - JPL Horizons — https://ssd.jpl.nasa.gov/horizons/
 - LOLA DEM (PDS Geosciences) — https://pds-geosciences.wustl.edu/missions/lro/lola.htm
