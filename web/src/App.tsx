@@ -34,7 +34,7 @@ function useShortcuts() {
       else if (e.key === 'ArrowLeft') s.setT(s.t - step);
       else if (e.key === 'c' || e.key === 'C') s.setMap({ colorOn: !s.colorOn });
       else if (e.key === 'f' || e.key === 'F') s.setFullscreen(!s.fullscreen);
-      else if (e.key === 'Escape') { if (useUi.getState().help) useUi.getState().set({ help: false }); else if (s.fullscreen) s.setFullscreen(false); else useUi.getState().set({ mode: 'explore' }); }
+      else if (e.key === 'Escape') { if (useUi.getState().gsFull) useUi.getState().set({ gsFull: false }); else if (useUi.getState().help) useUi.getState().set({ help: false }); else if (s.fullscreen) s.setFullscreen(false); else useUi.getState().set({ mode: 'explore' }); }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

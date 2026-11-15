@@ -1115,4 +1115,7 @@ export const EN: Record<string, string> = {
  "달 영역 너비": "Moon panel width",
  "끌어서 너비 조절 · 두 번 누르면 기본값": "Drag to resize · double-click to reset",
  "대한민국": "S. Korea",
+ "지구로 가서 지상국 통신 창 보기": "Fly to Earth and open the ground station windows",
+ "지상국 통신 창 · 지구": "Ground station windows · Earth",
+ "전체화면 끄기 (Esc)": "Exit full screen (Esc)",
 };

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { moonEcef } from '../core/stations';
 import type { Station } from '../core/types';
 import { useApp } from '../state/store';
+import { useUi } from '../state/ui';
 import { toast } from './kit';
 
 const D2R = Math.PI / 180, R2D = 180 / Math.PI, DAY = 86_400_000;
@@ -140,12 +141,25 @@ export function EarthGlobe({ stations }: { stations: Array<Station & { custom?: 
     };
   }, []);
 
+  const full = useUi((u) => u.gsFull);
+  const wrap = useRef<HTMLDivElement>(null);
+  // 전체화면으로 열릴 때 (3D 달에서 지구를 눌러 왔을 때): 한국 쪽으로 돌리고, 뒤 페이지는 이 카드 위치로 미리 내려 둔다
+  useEffect(() => {
+    if (!full) return;
+    earthView('korea');
+    wrap.current?.closest('.card')?.scrollIntoView({ block: 'start' });
+  }, [full]);
+  const setFull = (on: boolean) => {
+    useUi.getState().set({ gsFull: on });
+    if (!on) requestAnimationFrame(() => wrap.current?.closest('.card')?.scrollIntoView({ block: 'start' }));
+  };
   return (
-    <div className="egwrap">
+    <div className={`egwrap${full ? ' full' : ''}`} ref={wrap}>
       <canvas ref={cvs} />
       <div className="ovl" ref={ovl} />
       <div className="hint">드래그 회전 · 휠 확대 · <b>클릭 = 지상국 추가</b></div>
-      <div className="vtools"><button onClick={() => earthView('korea')}>대한민국</button><button onClick={() => earthView('moon')}>달 쪽</button><button onClick={() => earthView('all')}>전체</button></div>
+      {full ? <div className="egtitle">지상국 통신 창 · 지구</div> : null}
+      <div className="vtools"><button onClick={() => earthView('korea')}>대한민국</button><button onClick={() => earthView('moon')}>달 쪽</button><button onClick={() => earthView('all')}>전체</button><button className="egfs" aria-pressed={full} title={full ? '전체화면 끄기 (Esc)' : '전체화면'} onClick={() => setFull(!full)}>{full ? '⤡' : '⤢'}</button></div>
       <div className="vleg"><span style={{ color: 'var(--earth)' }}>■</span> 카탈로그 지상국 · <span style={{ color: 'var(--amber)' }}>■</span> 가정 지상국 · <span style={{ color: '#F2E6B0' }}>☾</span> 달 바로 아래</div>
     </div>
   );

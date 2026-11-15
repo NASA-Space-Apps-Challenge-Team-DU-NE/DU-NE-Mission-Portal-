@@ -21,6 +21,8 @@ export interface UiState {
   dim: '3d' | '2d';
   /** 계획 모드 왼쪽 단계 목록을 번호만 남기고 접기 */
   sideCollapsed: boolean;
+  /** 05 지상국 통신 창의 지구본을 전체화면으로 (3D 달에서 지구를 눌러 왔을 때) */
+  gsFull: boolean;
   /** 계획 모드 왼쪽 단계 목록·오른쪽 달 영역 너비 (px). 0 이면 기본값 */
   sideW: number;
   railW: number;
@@ -38,6 +40,7 @@ export const useUi = create<UiState>((set) => ({
   periodFrom: '',
   periodTo: '',
   dim: '3d',
+  gsFull: false,
   ...loadLayout(),
   mode: new URLSearchParams(window.location.search).get('p') ? 'plan' : 'explore',
   set: (p) => {
