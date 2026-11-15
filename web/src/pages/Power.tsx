@@ -1,9 +1,9 @@
-// 05 임무 시뮬레이션 아래 · 전력 계획: 전력 계산(P1-30), 패널 설치 추천(P1-31), 마스트 높이 비교(P3-01), 빛 릴레이(P3-02)
+// 04 임무 분석 › 전력 탭: 전력 계산(P1-30), 패널 설치 추천(P1-31), 마스트 높이 비교(P3-01), 빛 릴레이(P3-02)
 import { useEffect, useState } from 'react';
 import { loadMastMasks } from '../adapters/data';
 import { Card, Help, Kpi, NoData, Progress, hrs, km, pct } from '../components/kit';
 import { LineChart } from '../components/viz';
-import { DEFAULTS, FEATURES } from '../config';
+import { DEFAULTS, FEATURES, POWER_KINDS } from '../config';
 import { nearestCell } from '../core/gridScore';
 import type { MastRow } from '../core/light';
 import type { PanelPick } from '../core/power';
@@ -70,6 +70,23 @@ export default function Power() {
   }, [cell, ready, gres]);
 
   if (!rs || !P) return <NoData what="전력 계획" why="02에서 착륙지를 먼저 고르세요" />;
+  const kind = POWER_KINDS[app.powerSource.kind];
+  if (!kind.needsSun) {
+    const out = app.powerSource.output_w;
+    const n = out > 0 ? Math.ceil((ui.demand_kw * 1000 * (1 + DEFAULTS.power_margin)) / out) : NaN;
+    return (
+      <Card title="전력 계산" tag={<span className="badge prov">출력 임시값</span>}>
+        <div className="nodata">지금 발전 방식(<b>{kind.name}</b>)은 햇빛이 필요 없어 패널 면적·일조 기반 계산(패널 설치 추천·마스트 높이·빛 릴레이)을 하지 않습니다.</div>
+        <div className="kpis">
+          <Kpi l="정격 출력 (1대)" v={`${out} W`} />
+          <Kpi l="기지 필요 전력" v={`${ui.demand_kw} kW`} s={`여유 +${DEFAULTS.power_margin * 100}%`} />
+          <Kpi l="필요 대수" v={Number.isFinite(n) ? `${n}대` : '—'} />
+          {kind.usesFuel ? <Kpi l="연료로 버티는 시간" v={ui.demand_kw > 0 ? hrs(app.powerSource.fuel_wh / (ui.demand_kw * 1000)) : '—'} s="기지 필요 전력 기준, 1대분 연료" /> : null}
+        </div>
+        <div className="row"><button className="btn sm ghost" onClick={() => { useUi.getState().set({ condTab: 'lander' }); app.setPage('cond'); }}>01 임무 설정 › 착륙선 정보에서 바꾸기</button></div>
+      </Card>
+    );
+  }
   const { plan, samples } = P;
   const source = calculationSource(samples.map((s) => s.source), tableSource);
   const terrain = rs.terrain === 'flat' ? '지형 미반영' : rs.terrain === 'grid' ? '격자 지평선' : '지점 지평선';
@@ -78,7 +95,7 @@ export default function Power() {
       <Card title="전력 계산" tag={<span className={`badge ${source.approx ? 'approx' : ''}`}>출처: {source.label} · {terrain}</span>}>
         <div className="row">
           <span className="small">필요 전력 <b className="mono">{ui.demand_kw} kW</b> · 패널 효율 <b className="mono">{ui.eff}</b></span>
-          <button className="btn sm ghost" onClick={() => app.setPage('cond')}>01 조건 정하기 › 상세 조건에서 바꾸기</button>
+          <button className="btn sm ghost" onClick={() => { useUi.getState().set({ condTab: 'lander' }); app.setPage('cond'); }}>01 임무 설정 › 착륙선 정보에서 바꾸기</button>
           <div className="note" style={{ flex: 1, minWidth: 220 }}>태양을 따라 도는 수직 패널 기준. 시스템 손실 {DEFAULTS.panel_loss * 100}%, 설계 여유 {DEFAULTS.power_margin * 100}% (임시값). 배터리는 최장 그늘 동안 부하를 버티는 용량.</div>
         </div>
         {!plan.feasible ? <div className="nodata">이 기간에는 햇빛이 없어 계산할 수 없습니다</div> : (

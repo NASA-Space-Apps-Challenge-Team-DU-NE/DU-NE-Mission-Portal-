@@ -283,6 +283,8 @@ export interface ScenarioWeights {
   power: number;
   comm: number;
   robustness: number;
+  /** 발전이 햇빛과 무관(연료전지·RTG·핵분열)하면 true: 전력 항목을 점수·요구 조건에서 뺀다 */
+  exclude_power?: boolean;
 }
 
 export type ScenarioOrigin = 'user' | 'alternative' | 'template' | 'mission' | 'search';

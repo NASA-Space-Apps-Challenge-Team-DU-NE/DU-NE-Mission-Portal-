@@ -25,7 +25,7 @@ function Col({ sc, best, onScore }: { sc: Scenario; best: boolean; onScore(id: s
   const margin = Number.isFinite(sc.comm_margin_deg) ? sc.comm_margin_deg : app.margin_deg;
   const ctx = useMemo(() => (ctx0 ? { ...ctx0, margin_deg: margin } : null), [ctx0, margin]);
   const landing = Date.parse(sc.landing_utc);
-  const e = useMemo(() => (ctx ? evalFor(ctx, siteKey(rs, margin), landing, sc.duration_h, 3) : null), [ctx, rs, margin, landing, sc.duration_h, app.req, app.scenarioWeights]);
+  const e = useMemo(() => (ctx ? evalFor(ctx, siteKey(rs, margin), landing, sc.duration_h, 3) : null), [ctx, rs, margin, landing, sc.duration_h, app.req, app.scenarioWeights, app.powerSource]);
   const band = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, margin), landing, 720, 6) : null), [ctx, rs, margin, landing]);
   useEffect(() => { if (e) onScore(sc.id, e.score.total); }, [e, sc.id, onScore]);
   return (

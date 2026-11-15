@@ -1,11 +1,11 @@
 // 격자 Worker 실행과 결과 공유 (지도·3D·순위·필터가 같은 결과를 본다)
 import { useEffect } from 'react';
 import { create } from 'zustand';
-import { DEFAULTS } from '../config';
+import { DEFAULT_POWER_SOURCE, DEFAULTS } from '../config';
 import { isCancelled, gridWorker } from '../workers/client';
 import type { GridScoreReq, GridScoreRes } from '../workers/grid.worker';
 import { useData } from './data';
-import { useApp } from './store';
+import { useApp, effMapWeights, effFilters } from './store';
 import { gridSources } from './calculationSource';
 
 interface GridRunState {
@@ -51,6 +51,7 @@ export function useGridRunner() {
   const margin = useApp((s) => s.margin_deg);
   const weights = useApp((s) => s.mapWeights);
   const filters = useApp((s) => s.filters);
+  const powerKind = useApp((s) => s.powerSource.kind);
 
   useEffect(() => {
     if (!raw) return;
@@ -69,7 +70,7 @@ export function useGridRunner() {
     let alive = true;
     const timer = setTimeout(() => {
       const req: GridScoreReq = {
-        start: landing, duration_h: duration, step_h: DEFAULTS.grid_step_h, now: nowHour * 3_600_000, margin_deg: margin, weights, filters,
+        start: landing, duration_h: duration, step_h: DEFAULTS.grid_step_h, now: nowHour * 3_600_000, margin_deg: margin, weights: effMapWeights({ powerSource: { ...DEFAULT_POWER_SOURCE, kind: powerKind }, mapWeights: weights }), filters: effFilters({ powerSource: { ...DEFAULT_POWER_SOURCE, kind: powerKind }, filters }),
         artemis: sites.filter((s) => s.category === 'artemis'), artemis_radius_km: 0, artemis_regions: regions.map((r) => ({ rings: r.rings })), explain_cell: explainCell,
       };
       useGridRun.setState({ running: true, progress: 0 });
@@ -81,5 +82,5 @@ export function useGridRunner() {
         });
     }, 150);
     return () => { alive = false; clearTimeout(timer); };
-  }, [ready, landing, duration, nowHour, margin, weights, filters, sites, regions, explainCell, ephMeta]);
+  }, [ready, landing, duration, nowHour, margin, weights, filters, powerKind, sites, regions, explainCell, ephMeta]);
 }

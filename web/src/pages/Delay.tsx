@@ -12,7 +12,7 @@ import type { Site } from '../core/types';
 import { useData } from '../state/data';
 import { useResolvedSite, useSiteCtx } from '../state/hooks';
 import { ephPayload, makeScenario, siteMaskOf, useCandidates } from '../state/scenario';
-import { useApp } from '../state/store';
+import { scoreWeights, useApp } from '../state/store';
 import { isCancelled, searchWorker } from '../workers/client';
 
 interface AltRes { re: Reevaluation; preview: Array<{ days: number; ev: ScenarioEval }>; same: ScenarioEval[]; other: Array<{ site: Site; ev: ScenarioEval }> }
@@ -36,12 +36,12 @@ export default function Delay() {
     const tm = setTimeout(() => {
       setProg(0);
       searchWorker()
-        .request<AltRes | null>('alternatives', { eph: ephPayload(), origin: siteMaskOf(rs), candidates: cands, original: app.landing, shifted, sc: { req: app.req, weights: app.scenarioWeights, delay_days: app.delay_days, duration_h: app.duration_h, step_h: 2 }, margin_deg: app.margin_deg, span_days: DEFAULTS.alt_span_days, radius_km: DEFAULTS.alt_radius_km }, { onProgress: setProg })
+        .request<AltRes | null>('alternatives', { eph: ephPayload(), origin: siteMaskOf(rs), candidates: cands, original: app.landing, shifted, sc: { req: app.req, weights: scoreWeights(app), delay_days: app.delay_days, duration_h: app.duration_h, step_h: 2 }, margin_deg: app.margin_deg, span_days: DEFAULTS.alt_span_days, radius_km: DEFAULTS.alt_radius_km }, { onProgress: setProg })
         .then((r) => { if (r) setRes(r); setProg(null); })
         .catch((e) => { if (!isCancelled(e)) { setProg(null); console.warn("worker", e); } });
     }, 300);
     return () => clearTimeout(tm);
-  }, [rs, cands, app.landing, shifted, app.req, app.scenarioWeights, app.delay_days, app.duration_h, app.margin_deg]);
+  }, [rs, cands, app.landing, shifted, app.req, app.scenarioWeights, app.powerSource, app.delay_days, app.duration_h, app.margin_deg]);
 
   const baseTrack = useMemo(() => (ctx ? sampleTimeline(ctx, shifted, shifted + app.duration_h * 3_600_000, 3) : null), [ctx, shifted, app.duration_h]);
   const ov = app.overlay;

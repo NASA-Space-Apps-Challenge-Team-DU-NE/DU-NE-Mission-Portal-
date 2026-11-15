@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card, Help, NoData, Seg, km, Empty } from '../components/kit';
 import { LocalMap, useLocalTerrain } from '../components/LocalMap';
+import { LocalTerrain3D } from '../components/LocalTerrain3D';
 import { DEFAULTS } from '../config';
 import { distanceTable, type BaseKind } from '../core/hazards';
 import { useBases, useFaultCheck, useSiteWarnings } from '../state/derived';
@@ -28,9 +29,13 @@ export default function Base() {
   const local = useLocalTerrain(rs?.site.id);
   const lt = local && rs ? local.meta.sites[rs.site.id] : undefined;
   const off = ui.baseOff;
+  const [mode, setMode] = useState<'2d' | '3d'>('2d');
+  const [exag, setExag] = useState(1);
+  const has3d = !!(local && lt?.elev_file && rs && Math.abs(lt.lat_deg - rs.site.lat_deg) < 1e-6 && Math.abs(lt.lon_deg - rs.site.lon_deg) < 1e-6);
   const lockRef = useRef<HTMLDivElement>(null);
   // 꺼졌을 때 회색 영역 안으로 키보드 초점도 못 들어가게 (React 18 은 inert 속성 타입이 없어 직접 단다)
   useEffect(() => { lockRef.current?.toggleAttribute('inert', off); }, [off]);
+  const place = (lat: number, lon: number) => app.addBase({ id: `b${Date.now().toString(36)}`, kind, name: `${KN[kind]} ${app.bases.filter((b) => b.kind === kind).length + 1}`, lat_deg: lat, lon_deg: lon });
   const view = ui.baseViewM;
   const setView = (m: number) => ui.set({ baseViewM: Math.max(VIEW_MIN, Math.min(VIEW_MAX, Math.round(m / VIEW_STEP) * VIEW_STEP)) });
   return (
@@ -49,8 +54,16 @@ export default function Base() {
         <Card title="기지 놓기" sub={rs ? `${rs.site.name} 중심 · 한 변 ${view.toLocaleString()} m` : ''} tag={<><Seg value={kind} opts={(Object.keys(KN) as BaseKind[]).map((k) => [k, KN[k]] as [BaseKind, string])} onChange={setKind} /></>}>
           {!rs ? <NoData what="착륙지" why="02에서 착륙지를 먼저 고르세요" /> : (
             <>
-              <LocalMap lat={rs.site.lat_deg} lon={rs.site.lon_deg} name={rs.site.name} siteId={rs.site.id} sizeM={view} bases={bases} disabled={off}
-                onPick={(lat, lon) => app.addBase({ id: `b${Date.now().toString(36)}`, kind, name: `${KN[kind]} ${app.bases.filter((b) => b.kind === kind).length + 1}`, lat_deg: lat, lon_deg: lon })} />
+              <div className="row" style={{ gap: 8 }}>
+                <Seg value={has3d ? mode : '2d'} opts={[['2d', '평면 지도'], ['3d', '3D 지형']]} onChange={(v) => has3d && setMode(v)} />
+                {has3d && mode === '3d' ? <label className="small muted" style={{ display: 'flex', gap: 6, alignItems: 'center' }}>높이 과장 <input type="range" min={1} max={5} step={0.5} value={exag} onChange={(e) => setExag(Number(e.target.value))} /><output className="mono">{exag}×</output></label> : null}
+                {!has3d ? <span className="tiny muted">3D 지형은 실제 고도 자료가 있는 카탈로그 착륙지에서만 됩니다</span> : null}
+              </div>
+              {has3d && mode === '3d' && local && lt ? (
+                <LocalTerrain3D lat={rs.site.lat_deg} lon={rs.site.lon_deg} sizeM={view} bases={bases} meta={local.meta} info={lt} img={local.img} exag={exag} disabled={off} onPick={place} />
+              ) : (
+                <LocalMap lat={rs.site.lat_deg} lon={rs.site.lon_deg} name={rs.site.name} siteId={rs.site.id} sizeM={view} bases={bases} disabled={off} onPick={place} />
+              )}
               <div className="row zoomrow">
                 <span className="small muted">지도 크기 (한 변)</span>
                 <button className="ibtn" aria-label="100 m 줄이기" disabled={view <= VIEW_MIN} onClick={() => setView(useUi.getState().baseViewM - VIEW_STEP)}>−</button>
@@ -64,7 +77,7 @@ export default function Base() {
               </div>
               <div className="row tiny muted" style={{ gap: 6 }}>
                 {lt && local ? <>
-                  <span className="badge ok">실제 지형</span><span>배경: LOLA 30 m 지형 음영기복 · 약 {Math.round(local.meta.m_per_px)} m/화소 · 조명 방향 북서 {local.meta.light.alt_deg}°(보기용, 실제 햇빛 아님)</span>
+                  <span className="badge ok">실제 지형</span><span>배경: LOLA 30 m 지형 음영기복 · 약 {Math.round(local.meta.m_per_px)} m/화소 · 조명 방향 북서 {local.meta.light.alt_deg}°(보기용, 실제 햇빛 아님). 원본 해상도가 30 m라 한 변 1 km 안쪽은 흐릿합니다 (더 선명하려면 5 m 국지 지형 자료가 필요). 3D 지형은 같은 30 m 고도로 만든 실제 기복입니다{mode === '3d' && exag > 1 ? ` (높이 ${exag}배 과장)` : ''}.</span>
                   <span className="mono">고도 {Math.round(lt.elev_min_m).toLocaleString()} ~ {Math.round(lt.elev_max_m).toLocaleString()} m (중심 {Math.round(lt.elev_center_m).toLocaleString()} m)</span>
                 </> : <>
                   <span className="badge approx">저해상도</span><span>배경: LROC WAC 남극 모자이크 확대 (약 440 m/화소, 1 km 안에서는 흐릿함). 상세 지형 그림은 카탈로그 착륙지에만 있습니다.</span>

@@ -1,14 +1,14 @@
 // 앱 상태 (Zustand, ARCHITECTURE 6.4). 계산 결과는 넣지 않는다 — 파생값은 hooks 의 셀렉터·useMemo.
 import { create } from 'zustand';
-import { DEFAULT_LANDING_UTC, DEFAULT_FILTERS, DEFAULT_MAP_WEIGHTS, DEFAULT_REQUIREMENTS, DEFAULT_SCENARIO_WEIGHTS, DEFAULTS, PROFILES, type ProfileId } from '../config';
+import { DEFAULT_LANDER_EXTRA, DEFAULT_POWER_SOURCE, POWER_KINDS, type LanderExtra, type PowerSource, DEFAULT_LANDING_UTC, DEFAULT_FILTERS, DEFAULT_MAP_WEIGHTS, DEFAULT_REQUIREMENTS, DEFAULT_SCENARIO_WEIGHTS, DEFAULTS, PROFILES, type ProfileId } from '../config';
 import type { BaseElement } from '../core/hazards';
 import type { Criterion, HardFilters, Lander, LayerName, Requirements, Scenario, ScenarioWeights, Station, TimeMs } from '../core/types';
 
 /** 단계 (UI 예시의 왼쪽 사이드바 순서 = 설정 순서) */
-export type PageId = 'cond' | 'site' | 'base' | 'date' | 'sim' | 'delay' | 'compare' | 'missions' | 'valid';
-export const PAGES: PageId[] = ['cond', 'site', 'base', 'date', 'sim', 'delay', 'compare', 'missions', 'valid'];
-/** 옛 주소 호환: 전력 계획·통신은 임무 시뮬레이션 아래로 합쳤다 */
-const PAGE_ALIAS: Record<string, PageId> = { power: 'sim', comm: 'sim' };
+export type PageId = 'cond' | 'site' | 'base' | 'sim' | 'orbit' | 'delay' | 'compare' | 'missions' | 'valid';
+export const PAGES: PageId[] = ['cond', 'site', 'base', 'sim', 'orbit', 'delay', 'compare', 'missions', 'valid'];
+/** 옛 주소 호환: 전력 계획·통신은 임무 분석 안 탭으로, 착륙 날짜는 착륙지·날짜 고르기로 합쳤다 */
+const PAGE_ALIAS: Record<string, PageId> = { power: 'sim', comm: 'sim', date: 'site' };
 export type ProfileSel = ProfileId | 'custom';
 
 export type SiteRef = { kind: 'catalog'; id: string } | { kind: 'custom'; lat: number; lon: number } | { kind: 'cell'; cell: number };
@@ -52,6 +52,10 @@ export interface AppState {
   bases: BaseElement[];
   landerId: string | null;
   landerEdits: Partial<Lander>;
+  /** 발전 방식 (기본 태양전지) */
+  powerSource: PowerSource;
+  /** 착륙선 질량·추진 (궤도 분석용 입력) */
+  landerExtra: LanderExtra;
   rightTab: RightTab;
   fullscreen: boolean;
   presentation: boolean;
@@ -85,6 +89,10 @@ export interface AppState {
   removeBase(id: string): void;
   setLander(id: string | null): void;
   editLander(p: Partial<Lander>): void;
+  setPowerSource(p: Partial<PowerSource>): void;
+  setLanderExtra(p: Partial<LanderExtra>): void;
+  /** 입력값(조건·착륙선·날짜)을 기본값으로 되돌린다. 페이지·비교 목록·기지는 그대로 */
+  resetInputs(): void;
   setRightTab(t: RightTab): void;
   setFullscreen(v: boolean): void;
   setPresentation(v: boolean): void;
@@ -122,6 +130,8 @@ export const useApp = create<AppState>((set, get) => ({
   bases: [],
   landerId: 'small_solar',
   landerEdits: {},
+  powerSource: DEFAULT_POWER_SOURCE,
+  landerExtra: DEFAULT_LANDER_EXTRA,
   rightTab: 'sky',
   fullscreen: false,
   presentation: false,
@@ -130,7 +140,8 @@ export const useApp = create<AppState>((set, get) => ({
   setPage: (page) => set({ page, visited: get().visited.includes(page) ? get().visited : [...get().visited, page] }),
   setSite: (siteRef) => set({ siteRef }),
   setT: (t) => set({ t }),
-  setLanding: (landing) => set({ landing }),
+  // 착륙 시각이 바뀌면 보는 시각도 착륙 시각으로 옮긴다 (위쪽 시간 막대를 없앴으므로 현장 뷰가 새 착륙 조건을 바로 보이게)
+  setLanding: (landing) => set({ landing, t: landing }),
   // 지도·순위와 같은 상한(60일)을 URL·프리셋에도 강제한다
   setDuration: (duration_h) => { if (Number.isFinite(duration_h)) set({ duration_h: Math.max(1, Math.min(MAX_DURATION_H, duration_h)) }); },
   togglePlay: () => set({ playing: !get().playing }),
@@ -161,6 +172,16 @@ export const useApp = create<AppState>((set, get) => ({
   removeBase: (id) => set({ bases: get().bases.filter((b) => b.id !== id) }),
   setLander: (landerId) => set({ landerId, landerEdits: {} }),
   editLander: (p) => set({ landerEdits: { ...get().landerEdits, ...p } }),
+  setPowerSource: (p) => set({ powerSource: { ...get().powerSource, ...p } }),
+  setLanderExtra: (p) => set({ landerExtra: { ...get().landerExtra, ...p } }),
+  resetInputs: () => {
+    const landing = Date.parse(DEFAULT_LANDING_UTC);
+    set({
+      landing, t: landing, playing: false, duration_h: DEFAULTS.duration_h, margin_deg: DEFAULTS.comm_margin_deg, req: DEFAULT_REQUIREMENTS,
+      scenarioWeights: DEFAULT_SCENARIO_WEIGHTS, delay_days: DEFAULTS.delay_days, profile: 'custom', mapWeights: DEFAULT_MAP_WEIGHTS, customWeights: DEFAULT_MAP_WEIGHTS,
+      filters: DEFAULT_FILTERS, shift_days: 14, landerId: 'small_solar', landerEdits: {}, powerSource: DEFAULT_POWER_SOURCE, landerExtra: DEFAULT_LANDER_EXTRA,
+    });
+  },
   setRightTab: (rightTab) => set({ rightTab }),
   setFullscreen: (fullscreen) => set({ fullscreen, presentation: fullscreen ? get().presentation : false }),
   setPresentation: (presentation) => set({ presentation }),
@@ -221,4 +242,23 @@ export function syncUrl() {
       window.history.replaceState(null, '', `?${q.toString()}`);
     }, 300);
   });
+}
+
+// ───────── 발전 방식에 따른 실효 입력 ─────────
+/** 발전에 햇빛이 필요한가 (태양전지만 true) */
+export const needsSun = (s: Pick<AppState, 'powerSource'>) => POWER_KINDS[s.powerSource.kind].needsSun;
+/** 시나리오 점수 가중치: 햇빛이 필요 없는 발전이면 전력 항목을 뺀다 */
+export function scoreWeights(s: Pick<AppState, 'powerSource' | 'scenarioWeights'>): ScenarioWeights {
+  return needsSun(s) ? s.scenarioWeights : { ...s.scenarioWeights, exclude_power: true };
+}
+/** 지도 종합 점수 가중치: 햇빛이 필요 없는 발전이면 발전(일조) 가중치 0 */
+export function effMapWeights(s: Pick<AppState, 'powerSource' | 'mapWeights'>): Record<Criterion, number> {
+  return needsSun(s) ? s.mapWeights : { ...s.mapWeights, power: 0 };
+}
+/** 필수 조건: 햇빛이 필요 없는 발전이면 일조율·최장 그늘 조건을 뺀다 */
+export function effFilters(s: Pick<AppState, 'powerSource' | 'filters'>): HardFilters {
+  if (needsSun(s)) return s.filters;
+  const f = { ...s.filters };
+  delete f.min_illum_frac; delete f.max_dark_h;
+  return f;
 }

@@ -21,7 +21,7 @@ test('깨진 manifest가 정상 카탈로그와 격자의 로딩까지 오염시
   await loaded(page);
   await expect(page.locator('header.top')).toContainText('일부 자료 없음');
   await page.locator('nav.side .step').nth(1).click();
-  await expect(page.locator('main')).toContainText('착륙지 고르기');
+  await expect(page.locator('main')).toContainText('착륙지·날짜 고르기');
   await expect(page.locator('body')).not.toContainText("reading 'find'");
 });
 
@@ -33,7 +33,7 @@ test('검증 표의 null 행은 해당 카드에만 자료 없음으로 표시�
   await expect(card(page, '착륙지 좌표 대조')).toContainText('자료 없음');
   await expect(page.locator('nav.side .step')).toHaveCount(9);
   await page.locator('nav.side .step').nth(1).click();
-  await expect(page.locator('.phead h1')).toHaveText('착륙지 고르기');
+  await expect(page.locator('.phead h1')).toHaveText('착륙지·날짜 고르기');
   expect(errors).toEqual([]);
 });
 
@@ -48,7 +48,7 @@ test('좌표 구성 필드가 빠진 격자는 근사 대체 사실을 표시한
 });
 
 test('음수 부하는 실행을 차단하고 올바른 입력에서 1년 계산을 완료한다', async ({ page }) => {
-  await loaded(page); await page.locator('nav.side .step').nth(4).click();
+  await loaded(page); await page.locator('nav.side .step').nth(3).click();
   const c = card(page, '1년 기지 운용');
   const load = c.getByLabel('거주 부하 (kW)');
   await load.fill('-1');
@@ -63,7 +63,8 @@ test('음수 부하는 실행을 차단하고 올바른 입력에서 1년 계산
 test('범위 밖 전력 계산은 SPICE 표 대신 근사 천체력을 표시한다', async ({ page }) => {
   await page.goto('/?site=connecting_ridge&t=2040-01-01T00:00:00Z', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: '순위 CSV', exact: true })).toBeEnabled();
-  await page.locator('nav.side .step').nth(4).click();
+  await page.locator('nav.side .step').nth(3).click();
+  await page.getByRole('tab', { name: '전력', exact: true }).click();
   const c = card(page, '전력 계산');
   await expect(c.locator('.hd')).toContainText('근사 천체력');
   await expect(c.locator('.hd')).not.toContainText('SPICE 표');

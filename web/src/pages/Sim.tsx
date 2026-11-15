@@ -1,18 +1,17 @@
-// 05 임무 시뮬레이션: 착륙선 프리셋(P1-29), 타임랩스·멈춤(P1-33·34), 착륙선 시점(P3-03), 1년 기지 운용(P1-32)
-// 그 아래에 전력 계획(Power)과 통신(Comm)을 이어 붙인다 (옛 05·07 단계).
+// 04 임무 분석: 타임랩스·멈춤(P1-33·34), 착륙선 시점(P3-03), 1년 기지 운용(P1-32).
+// 전력 계획(Power)과 통신(Comm)은 같은 페이지의 탭. 착륙선 프리셋(P1-29)은 01 임무 설정 › 착륙선 정보로 옮겼다.
 import { useMemo, useState } from 'react';
 import { Card, Help, Kpi, NoData, Progress, hrs, pct, utc } from '../components/kit';
 import { LineChart, Pano } from '../components/viz';
-import { DEFAULTS } from '../config';
+import { DEFAULTS, POWER_KINDS } from '../config';
 import { HOUR_MS } from '../core/constants';
 import { baseInputError, type BaseSimResult } from '../core/energy';
 import { skyState } from '../core/sky';
-import type { Lander } from '../core/types';
-import { useData } from '../state/data';
 import { useLander, useSim } from '../state/derived';
 import { useResolvedSite, useSiteCtx } from '../state/hooks';
 import { ephPayload, siteMaskOf } from '../state/scenario';
 import { useApp } from '../state/store';
+import { useUi } from '../state/ui';
 import { isCancelled, simWorker } from '../workers/client';
 import { t } from '../strings';
 import Comm from './Comm';
@@ -26,7 +25,6 @@ function SimMain() {
   const app = useApp();
   const rs = useResolvedSite();
   const ctx = useSiteCtx(rs);
-  const landers = useData((d) => d.landers.items);
   const L = useLander();
   const R = useSim();
   const now = useMemo(() => (ctx ? skyState(ctx.frame, ctx.mask, ctx.eph, app.t, ctx.margin_deg) : null), [ctx, app.t]);
@@ -51,23 +49,10 @@ function SimMain() {
 
   if (!rs || !ctx || !R || !L) return <NoData what="착륙지" why="02에서 착륙지를 먼저 고르세요" />;
   const { sim, samples } = R;
-  const fld = (k: keyof Lander, l: string, st: number) => (
-    <label className="small muted" key={k}>{l}<br /><input className="field num" type="number" step={st} value={L[k] as number} onChange={(e) => app.editLander({ [k]: Number(e.target.value) } as Partial<Lander>)} /></label>
-  );
   const rel = Math.max(0, Math.min(app.duration_h, (app.t - app.landing) / HOUR_MS));
   return (
     <>
-      <Card title="착륙선 프리셋" tag={<span className="badge approx">근사값</span>}>
-        <div className="row">
-          <select className="field" value={L.id} style={{ minWidth: 300 }} onChange={(e) => app.setLander(e.target.value)}>
-            {landers.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
-          </select>
-          {Object.keys(app.landerEdits).length ? <button className="btn sm" onClick={() => app.setLander(L.id)}>원래 값으로</button> : null}
-        </div>
-        <div className="row">{fld('panel_area_m2', '패널 면적 (m²)', 0.1)}{fld('efficiency', '패널 효율', 0.01)}{fld('battery_wh', '배터리 (Wh)', 100)}{fld('load_active_w', '작업 중 소비 (W)', 10)}{fld('load_idle_w', '대기 소비 (W)', 10)}{fld('rate_kbps', '전송 속도 (kbps)', 50)}</div>
-        <Help>대표 유형의 근사값입니다. 숫자를 바꾸면 아래 타임랩스가 바로 다시 계산됩니다.</Help>
-      </Card>
-      <Card title="표면 운용 타임랩스" sub={`${app.duration_h} h · ${L.name.split(' (')[0]}`}>
+      <Card title="표면 운용 타임랩스" sub={`${app.duration_h} h · ${L.name.split(' (')[0]} · ${POWER_KINDS[app.powerSource.kind].name}`} tag={<button className="btn sm ghost" onClick={() => { useUi.getState().set({ condTab: 'lander' }); app.setPage('cond'); }}>착륙선 정보 바꾸기 (01)</button>}>
         <div className={`verdict ${sim.verdict}`}><b>{VN[sim.verdict]}</b><span className="small soft">기준: 운용 ≥ {app.req.min_ops_h} h, 전송 ≥ {app.req.data_mb.toLocaleString()} MB (임시값)</span></div>
         <div className="kpis">
           <Kpi l="운용 시간" v={hrs(sim.ops_h)} s={`기준 ≥ ${app.req.min_ops_h} h`} tone={sim.ops_h >= app.req.min_ops_h ? 'good' : 'bad'} />
@@ -89,7 +74,9 @@ function SimMain() {
         <Help>착륙선에서 본 지평선과 하늘. 위 막대로 시간을 움직이면 태양·지구 위치가 바뀝니다.</Help>
         <Pano h={200} mask={ctx.mask} layers={[{ track: samples.filter((_, i) => i % 2 === 0) }]} now={now} />
       </Card>
-      <Card title="1년 기지 운용" sub="최대 1년 정전·교신 끊김·가동률 예측">
+      {!POWER_KINDS[app.powerSource.kind].needsSun ? (
+        <Card title="1년 기지 운용" sub="최대 1년 정전·교신 끊김·가동률 예측"><div className="nodata">1년 기지 운용은 태양전지 패널·배터리 기준 계산입니다. 지금 발전 방식({POWER_KINDS[app.powerSource.kind].name})에서는 계산하지 않습니다.</div></Card>
+      ) : <Card title="1년 기지 운용" sub="최대 1년 정전·교신 끊김·가동률 예측">
         <div className="row">
           <label className="small muted">거주 부하 (kW)<br /><input className="field num" type="number" min={0} step="any" disabled={prog !== null} value={Number.isFinite(loads.habitat_kw) ? loads.habitat_kw : ''} onChange={(e) => setLoads({ ...loads, habitat_kw: e.currentTarget.valueAsNumber })} /></label>
           <label className="small muted">ISRU 부하 (kW)<br /><input className="field num" type="number" min={0} step="any" disabled={prog !== null} value={Number.isFinite(loads.isru_kw) ? loads.isru_kw : ''} onChange={(e) => setLoads({ ...loads, isru_kw: e.currentTarget.valueAsNumber })} /></label>
@@ -123,27 +110,21 @@ function SimMain() {
             </details>
           </>
         ) : null}
-      </Card>
+      </Card>}
     </>
   );
 }
 
-/** 한 페이지에서 시뮬레이션 → 전력 계획 → 통신 순서로 아래로 이어진다. 위쪽 바로가기로 건너뛸 수 있다. */
+/** 임무 분석 · 전력 · 통신을 탭으로 나눈다 (스크롤 이동 대신) */
 export default function Sim() {
-  const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const tab = useUi((u) => u.simTab);
+  const set = useUi((u) => u.set);
   return (
     <>
-      <nav className="jump" aria-label="이 페이지 안 바로가기">
-        <button onClick={() => go('sec-sim')}>임무 시뮬레이션</button>
-        <button onClick={() => go('sec-power')}>전력 계획 ↓</button>
-        <button onClick={() => go('sec-comm')}>통신 ↓</button>
-      </nav>
-      <div id="sec-sim" className="secanchor" />
-      <SimMain />
-      <h2 id="sec-power" className="sechead"><span>전력 계획</span><small>필요 전력을 채우는 패널 면적·배터리 용량, 근처 더 좋은 자리, 마스트 높이</small></h2>
-      <Power />
-      <h2 id="sec-comm" className="sechead"><span>통신</span><small>착륙지에서 지구가 보이는 시간과 지상국(DSN 3곳·여주)에서 실제로 교신 가능한 구간</small></h2>
-      <Comm />
+      <div className="tabs pagetabs" role="tablist">
+        {([['mission', '임무 분석'], ['power', '전력'], ['comm', '통신']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={tab === k} onClick={() => set({ simTab: k })}>{l}</button>)}
+      </div>
+      {tab === 'mission' ? <SimMain /> : tab === 'power' ? <Power /> : <Comm />}
     </>
   );
 }
