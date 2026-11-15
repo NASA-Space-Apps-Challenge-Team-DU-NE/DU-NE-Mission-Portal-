@@ -1,4 +1,4 @@
-// 05 임무 시뮬레이션 아래 · 통신: 지구 교신 판정(P1-35), 통신 여유각(P1-16, 값은 01에서), 지상국 통신 창(P1-36, 가정 지상국 포함)
+// 04 임무 분석 › 통신 탭: 지구 교신 판정(P1-35), 통신 여유각(P1-16, 값은 01에서), 지상국 통신 창(P1-36, 가정 지상국 포함)
 import { useMemo } from 'react';
 import { EarthGlobe } from '../components/EarthGlobe';
 import { Card, Help, Kpi, NoData, deg, dur, hrs, pct, utc, Empty } from '../components/kit';
@@ -51,7 +51,7 @@ export default function Comm() {
   return (
     <>
       <Card title="지구 교신" sub={`${rs.site.name} · ${utc(app.landing)} + 30일`}>
-        <div className="row"><Help>지구 중심이 그 방향 지형선 + 통신 여유각(<b>{app.margin_deg}°</b>)보다 높으면 "교신 가능"으로 칩니다.</Help><button className="btn sm ghost" onClick={() => app.setPage('cond')}>01 조건 정하기에서 여유각 바꾸기</button></div>
+        <div className="row"><Help>지구 중심이 그 방향 지형선 + 통신 여유각(<b>{app.margin_deg}°</b>)보다 높으면 "교신 가능"으로 칩니다.</Help><button className="btn sm ghost" onClick={() => app.setPage('cond')}>01 임무 설정에서 여유각 바꾸기</button></div>
         <div className="kpis">
           <Kpi l="지금 · 지구 고도" v={deg(now.earth.el_deg, 2)} s={`필요: 지형 + 여유각 ${deg(now.horizon_earth_deg + app.margin_deg, 2)}`} tone={now.earth_visible ? 'good' : 'bad'} />
           <Kpi l="다음 변화" v={now.earth_visible ? dur(nx?.next_earthset != null ? nx.next_earthset - app.t : null) : dur(nx?.next_earthrise != null ? nx.next_earthrise - app.t : null)} s={now.earth_visible ? '지구몰까지' : '지구돋이까지'} />

@@ -1,4 +1,4 @@
-// 남극 지도 카드 (UI 예시 mapCard): 02 착륙지 고르기·04 기지 배치 공용
+// 남극 지도 카드 (UI 예시 mapCard): 02 착륙지·날짜 고르기 공용
 import type { ReactNode } from 'react';
 import { useData } from '../state/data';
 import { useGridRun } from '../state/gridRun';

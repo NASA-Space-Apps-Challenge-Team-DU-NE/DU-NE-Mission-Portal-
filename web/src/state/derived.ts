@@ -1,6 +1,6 @@
 // 여러 화면이 같이 쓰는 파생값 (사이드바 요약·현장 뷰·페이지). 입력 키가 같으면 한 번만 계산한다.
 import { useMemo } from 'react';
-import { DEFAULTS } from '../config';
+import { DEFAULTS, POWER_KINDS } from '../config';
 import { DAY_MS, HOUR_MS } from '../core/constants';
 import { simulate, systemFromLander, type SimResult } from '../core/energy';
 import { nearestCell } from '../core/gridScore';
@@ -13,7 +13,7 @@ import { t } from '../strings';
 import { useData } from './data';
 import { useResolvedSite, useSiteCtx, type ResolvedSite } from './hooks';
 import { useUi } from './ui';
-import { useApp } from './store';
+import { scoreWeights, useApp } from './store';
 
 const cache = new Map<string, unknown>();
 export function cached<T>(key: string, fn: () => T): T {
@@ -45,16 +45,18 @@ export function useEval(): ScenarioEval | null {
   const app = useApp();
   return useMemo(() => {
     if (!ctx) return null;
-    const k = `ev|${siteKey(rs, app.margin_deg)}|${app.landing}|${app.duration_h}|${JSON.stringify(app.req)}|${JSON.stringify(app.scenarioWeights)}|${app.delay_days}`;
-    return cached(k, () => scoreScenario(ctx, app.landing, app.duration_h, app.req, app.scenarioWeights, app.delay_days, 1));
-  }, [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.delay_days]);
+    const w = scoreWeights(app);
+    const k = `ev|${siteKey(rs, app.margin_deg)}|${app.landing}|${app.duration_h}|${JSON.stringify(app.req)}|${JSON.stringify(w)}|${app.delay_days}`;
+    return cached(k, () => scoreScenario(ctx, app.landing, app.duration_h, app.req, w, app.delay_days, 1));
+  }, [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.delay_days, app.powerSource]);
 }
 
 export function evalFor(ctx: SiteContext, key: string, landing: number, duration_h: number, step_h = 3): ScenarioEval {
   const a = useApp.getState();
   // 여유각은 ctx 의 값을 쓴다 (저장한 시나리오는 자기 여유각으로 평가)
-  return cached(`evf|${key}|${landing}|${duration_h}|${step_h}|${ctx.margin_deg}|${JSON.stringify(a.req)}|${JSON.stringify(a.scenarioWeights)}|${a.delay_days}`, () =>
-    scoreScenario(ctx, landing, duration_h, a.req, a.scenarioWeights, a.delay_days, step_h),
+  const w = scoreWeights(a);
+  return cached(`evf|${key}|${landing}|${duration_h}|${step_h}|${ctx.margin_deg}|${JSON.stringify(a.req)}|${JSON.stringify(w)}|${a.delay_days}`, () =>
+    scoreScenario(ctx, landing, duration_h, a.req, w, a.delay_days, step_h),
   );
 }
 
@@ -81,11 +83,13 @@ export function useSim(): { sim: SimResult; samples: TimelineSample[] } | null {
     if (!ctx || !lander) return null;
     const k = siteKey(rs, app.margin_deg);
     const samples = timelineFor(ctx, k, app.landing, app.duration_h, 1);
-    const sim = cached(`sim|${k}|${app.landing}|${app.duration_h}|${JSON.stringify(lander)}|${app.req.min_ops_h}|${app.req.data_mb}`, () =>
-      simulate(samples, 1, systemFromLander(lander, DEFAULTS.panel_loss), app.req),
+    const ps = app.powerSource, kind = POWER_KINDS[ps.kind];
+    const sys = { ...systemFromLander(lander, DEFAULTS.panel_loss), ...(kind.needsSun ? {} : { source: 'constant' as const, const_w: ps.output_w, fuel_wh: kind.usesFuel ? ps.fuel_wh : null }) };
+    const sim = cached(`sim|${k}|${app.landing}|${app.duration_h}|${JSON.stringify(sys)}|${app.req.min_ops_h}|${app.req.data_mb}`, () =>
+      simulate(samples, 1, sys, app.req),
     );
     return { sim, samples };
-  }, [ctx, rs, lander, app.margin_deg, app.landing, app.duration_h, app.req]);
+  }, [ctx, rs, lander, app.margin_deg, app.landing, app.duration_h, app.req, app.powerSource]);
 }
 
 /** 전력 계획 (05 아래): 착륙 후 30일, 수직 태양 추적 패널 */

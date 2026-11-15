@@ -4,6 +4,8 @@
 - 틀: 착륙지 중심 방위 등거리(국지 평면). 위 = 북(위도가 커지는 쪽), 오른쪽 = 동. 웹 LocalMap 과 같은 규칙.
 - 한 변 2·half_km, size_px 화소. 30 m 타일을 쌍선형으로 표본, 비는 곳은 80 m DEM 으로 메운다.
 - 음영기복의 조명 방향은 보기 좋게 고른 값(북서 35°)이며 실제 햇빛이 아니다.
+- 고도 그림(<id>_elev.png): 같은 틀을 ELEV_PX 화소로 줄여 고도를 0.1 m 단위 정수(최저 고도 기준)로 R(상위)·G(하위) 바이트에 담는다.
+  웹 03 기지 배치의 3D 지형 보기용. 브라우저 캔버스가 16비트 PNG 를 8비트로 줄이므로 두 바이트로 나눴다.
 - 30 m 타일 좌표계: VRT SRS 가 남극 극평사(위도 −90, 중앙 경도 0, 구 1737.4 km)인지 확인한 뒤에만 쓴다.
 """
 
@@ -29,6 +31,8 @@ SCHEMA = "luna.local.v1"
 HALF_KM = 10.0  # 웹 기지 지도 최대 한 변 20 km 와 같게
 SIZE_PX = 1024  # 약 19.5 m/화소 (원본 30 m 를 쌍선형으로 표본)
 LIGHT_AZ, LIGHT_ALT = 315.0, 35.0
+ELEV_PX = 512  # 약 39 m/화소 (원본 30 m 와 비슷한 해상도)
+ELEV_STEP_M = 0.1
 
 
 def check_polar_srs(srs: str) -> str:
@@ -101,7 +105,7 @@ def run(ctx: Ctx) -> int:
         inputs.append(meta)
         dem80_meta = json.loads(meta.read_text(encoding="utf-8")).get("dem80", {})
         inputs += [Path(dem80_meta[k]) for k in ("label", "image") if dem80_meta.get(k)]
-    key = ctx.stamp_key(NAME, inputs, {"half": HALF_KM, "n": SIZE_PX, "light": [LIGHT_AZ, LIGHT_ALT], "ids": [s["id"] for s in south], "v": 2})
+    key = ctx.stamp_key(NAME, inputs, {"half": HALF_KM, "n": SIZE_PX, "light": [LIGHT_AZ, LIGHT_ALT], "ids": [s["id"] for s in south], "elev": [ELEV_PX, ELEV_STEP_M], "v": 3})
     if ctx.up_to_date(NAME, key):
         log.info(NAME, "변경 없음, 건너뜀")
         return 0
@@ -133,12 +137,23 @@ def run(ctx: Ctx) -> int:
         g = (40 + 215 * hs).astype(np.uint8)  # 완전 검정은 피한다
         g[~np.isfinite(z)] = 0
         Image.fromarray(g, "L").save(ctx.out_path(f"local/{s['id']}.jpg"), quality=86, optimize=True)
+        # 고도 그림: 2×2 평균으로 줄이고, 최저 고도 기준 0.1 m 정수 → R·G 두 바이트 (B 는 0)
+        k = max(1, SIZE_PX // ELEV_PX)
+        ep = SIZE_PX // k
+        ze = zf[: ep * k, : ep * k].reshape(ep, k, ep, k).mean(axis=(1, 3))
+        zmin = float(np.min(ze))
+        q = np.clip(np.round((ze - zmin) / ELEV_STEP_M), 0, 65535).astype(np.uint32)
+        rgb = np.zeros((ep, ep, 3), np.uint8)
+        rgb[..., 0] = (q >> 8).astype(np.uint8)
+        rgb[..., 1] = (q & 255).astype(np.uint8)
+        Image.fromarray(rgb, "RGB").save(ctx.out_path(f"local/{s['id']}_elev.png"), optimize=True)
         c = SIZE_PX // 2
         out[s["id"]] = {
             "file": f"{s['id']}.jpg", "lat_deg": s["lat_deg"], "lon_deg": s["lon_deg"],
             "elev_center_m": round(float(np.nanmean(z[c - 1:c + 1, c - 1:c + 1])), 1),
             "elev_min_m": round(float(np.nanmin(z)), 1), "elev_max_m": round(float(np.nanmax(z)), 1),
             "dem": dem, "missing_frac": round(float((~np.isfinite(z)).mean()), 4),
+            "elev_file": f"{s['id']}_elev.png", "elev_px": ep, "elev_offset_m": round(zmin, 2), "elev_step_m": ELEV_STEP_M,
         }
         log.info(NAME, f"{s['id']}: 중심 {out[s['id']]['elev_center_m']:.0f} m, 범위 {out[s['id']]['elev_min_m']:.0f}~{out[s['id']]['elev_max_m']:.0f} m ({dem})")
 
@@ -156,12 +171,14 @@ def run(ctx: Ctx) -> int:
     prov.append(ctx.prov(seed, "site_seed"))
     for record in out.values():
         ctx.track_output(ctx.out / "local" / record["file"])
+        if record.get("elev_file"):
+            ctx.track_output(ctx.out / "local" / record["elev_file"])
     write_envelope(ctx, "local/local.json", Envelope(SCHEMA, {
         "half_km": HALF_KM, "size_px": SIZE_PX, "m_per_px": round(px_km * 1000, 2),
         "frame": "착륙지 중심 방위 등거리, 위 = 북(위도 증가), 오른쪽 = 동",
         "light": {"az_deg": LIGHT_AZ, "alt_deg": LIGHT_ALT, "note": "보기 위한 조명 방향. 실제 햇빛 아님"},
         "radius_km": R_MOON_KM, "sites": out,
-    }, prov, notes=["03 기지 배치 지도 배경용 그림. 계산에는 쓰지 않는다", "원본 LOLA 30 m 를 쌍선형 표본 (약 19.5 m/화소)"]))
+    }, prov, notes=["03 기지 배치 지도 배경용 그림. 계산에는 쓰지 않는다", "원본 LOLA 30 m 를 쌍선형 표본 (약 19.5 m/화소)", "고도 그림은 2×2 평균 (약 39 m/화소), 0.1 m 단위 R·G 바이트, 3D 보기용"]))
     ctx.mark_done(NAME, key)
     log.info(NAME, f"착륙지 {len(out)}곳 국지 음영기복 저장")
     return 0

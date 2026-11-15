@@ -94,7 +94,7 @@ export function LocalMap(p: {
       if (useLocal && local) {
         // 파이프라인 그림: 한 변 2·half_km, 가운데 = 착륙지. 지금 보이는 한 변만큼 가운데에서 잘라 그린다
         const n = local.meta.size_px, src = Math.min(n, (p.sizeM / 1000 / (2 * local.meta.half_km)) * n);
-        x.imageSmoothingEnabled = true;
+        x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
         x.drawImage(local.img, n / 2 - src / 2, n / 2 - src / 2, src, src, 0, 0, W, W);
       } else if (wac && p.lat <= -75) {
         const N = 128, d = wacPixels(wac), im = x.createImageData(N, N);

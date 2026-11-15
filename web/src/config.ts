@@ -59,3 +59,19 @@ export const FEATURES = {
 
 /** 팀 홈페이지(학습 자료·출처). 배포 주소가 정해지면 바꾼다. 비어 있으면 링크를 숨긴다. */
 export const HOMEPAGE_URL = '';
+/** 발전 방식 (01 착륙선 정보). 기본은 태양전지. 햇빛이 필요 없는 방식은 점수·필수 조건에서 전력(일조) 항목을 뺀다.
+ *  정격 출력·연료량은 자료가 없어 화면에서 받는 파라미터 → 기본값은 모두 PROVISIONAL */
+export type PowerKind = 'solar' | 'fuel_cell' | 'rtg' | 'fission';
+export interface PowerSource { kind: PowerKind; output_w: number; fuel_wh: number }
+export const POWER_KINDS: Record<PowerKind, { name: string; desc: string; needsSun: boolean; usesFuel: boolean }> = {
+  solar: { name: '태양전지', desc: '햇빛으로 발전. 일조율·그늘이 점수에 들어갑니다', needsSun: true, usesFuel: false },
+  fuel_cell: { name: '연료전지', desc: '실은 연료가 남아 있는 동안 정격 출력', needsSun: false, usesFuel: true },
+  rtg: { name: '동위원소 발전기 (RTG)', desc: '햇빛과 무관하게 상시 정격 출력', needsSun: false, usesFuel: false },
+  fission: { name: '소형 핵분열 발전', desc: '햇빛과 무관하게 상시 정격 출력', needsSun: false, usesFuel: false },
+};
+/** PROVISIONAL */
+export const DEFAULT_POWER_SOURCE: PowerSource = { kind: 'solar', output_w: 300, fuel_wh: 50000 };
+
+/** 착륙선 질량·추진 (01 착륙선 정보, 궤도 분석에서 쓸 예정). 공개 근거 없음 → 모두 PROVISIONAL */
+export interface LanderExtra { dry_mass_kg: number; prop_mass_kg: number; thrust_n: number; isp_s: number }
+export const DEFAULT_LANDER_EXTRA: LanderExtra = { dry_mass_kg: 700, prop_mass_kg: 1300, thrust_n: 4400, isp_s: 320 };

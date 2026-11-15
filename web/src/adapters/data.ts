@@ -211,7 +211,7 @@ export async function loadTextures() {
 export const textureUrl = (file: string) => urlOf(`textures/${file}`);
 
 /** 착륙지 주변 국지 음영기복 (파이프라인 s75, LOLA 30 m). 03 기지 배치 지도 배경용 */
-export interface LocalSiteTex { file: string; lat_deg: number; lon_deg: number; elev_center_m: number; elev_min_m: number; elev_max_m: number; dem: string; missing_frac: number }
+export interface LocalSiteTex { file: string; lat_deg: number; lon_deg: number; elev_center_m: number; elev_min_m: number; elev_max_m: number; dem: string; missing_frac: number; elev_file?: string; elev_px?: number; elev_offset_m?: number; elev_step_m?: number }
 export interface LocalTerrain { half_km: number; size_px: number; m_per_px: number; frame: string; light: { az_deg: number; alt_deg: number; note: string }; sites: Record<string, LocalSiteTex> }
 export async function loadLocalTerrain() {
   return checkEnvelope(await getJson<Envelope<LocalTerrain>>('local/local.json'), 'luna.local', 'local/local.json', localCheck);

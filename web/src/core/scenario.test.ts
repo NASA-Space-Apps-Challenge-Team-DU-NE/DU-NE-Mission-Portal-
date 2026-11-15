@@ -27,3 +27,19 @@ describe('scenario', () => {
     expect(combineScore(sum({}), req, { power: 0, comm: 0, robustness: 0 }, 1).total).toBe(0);
   });
 });
+
+describe('scenario · 햇빛이 필요 없는 발전', () => {
+  it('exclude_power 면 일조·암흑 요구 조건과 전력 가중치를 뺀다', () => {
+    const dark = sum({ illum_frac: 0, longest_dark_h: 240 });
+    const w = { power: 40, comm: 30, robustness: 30 };
+    const solar = combineScore(dark, req, w, 0.5);
+    expect(solar.meets_requirements).toBe(false);
+    expect(solar.failed).toContain('min_illum_frac');
+    const other = combineScore(dark, req, { ...w, exclude_power: true }, 1);
+    expect(other.failed).toEqual([]);
+    expect(other.meets_requirements).toBe(true);
+    // 통신 만점(1)·견고성 1 → 전력을 빼면 100점
+    expect(other.total).toBeCloseTo(100, 6);
+    expect(failedRequirements(dark, req, false)).toEqual([]);
+  });
+});

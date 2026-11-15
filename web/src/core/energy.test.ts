@@ -87,3 +87,18 @@ describe('energy 회귀 (검토 보고서 F01·F02·F08)', () => {
     expect(r.stop_t).toBe(6 * 3_600_000); // 4 h 간격 표본이어도 6 h
   });
 });
+
+describe('energy · 햇빛과 무관한 발전 (연료전지·RTG·핵분열)', () => {
+  it('어두워도 정격 출력으로 운용하고, 멈춰도 원인을 일조 차단으로 두지 않는다', () => {
+    const dark = Array.from({ length: 30 }, (_, i) => s(false, true, i));
+    const ok = simulate(dark, 1, { ...sys, source: 'constant', const_w: 150, fuel_wh: null }, { min_ops_h: 20, data_mb: 1 });
+    expect(ok.stop_t).toBeNull();
+    expect(ok.gen_w[5]).toBeCloseTo(150, 6);
+    // 연료 300 Wh: 3 h 뒤 바닥 → 그 뒤 배터리로 버티다 멈춤. 교신 중이므로 원인은 소비 과다
+    const fuel = simulate(dark, 1, { ...sys, source: 'constant', const_w: 100, fuel_wh: 300 }, { min_ops_h: 20, data_mb: 1 });
+    expect(fuel.gen_w[2]).toBeCloseTo(100, 6);
+    expect(fuel.gen_w[4]).toBe(0);
+    expect(fuel.stop_t).not.toBeNull();
+    expect(fuel.stop_cause).toBe('over_consumption');
+  });
+});

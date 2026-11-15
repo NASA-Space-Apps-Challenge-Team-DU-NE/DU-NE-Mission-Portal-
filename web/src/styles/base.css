@@ -628,3 +628,39 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 /* "처음부터 다시": 예전 미검증 배지와 같은 빨간 모양, 크기는 옆 button 과 같게 */
 .macts .btn.so-btn{font-family:var(--f-mono);font-weight:600;letter-spacing:var(--ls);border-color:#5a2424;color:var(--warn);background:var(--warn-bg)}
 .macts .btn.so-btn:hover{border-color:var(--warn);color:#fff}
+/* ── 2026-11-15 UI 수정 ── */
+.topgap{flex:1}
+.pagetabs{margin:-6px 0 0;background:var(--panel);border:1px solid var(--line);position:sticky;top:-16px;z-index:5}
+.pagetabs button{padding:10px 18px;font-size:13px}
+/* 착륙지 × 시작일 점수표 */
+.hmwrap{overflow-x:auto}
+.hm{display:grid;gap:4px;align-items:stretch;min-width:min-content}
+.hmh,.hmc{font-size:11px;color:var(--muted);align-self:end;padding:0 2px 2px}
+.hmc{text-align:center;font-family:var(--f-mono)}
+.hml{display:flex;flex-direction:column;gap:1px;padding:4px 6px 6px 0;position:relative;min-width:0;font-size:11px;color:var(--muted)}
+.hml b{color:var(--fg);font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hml i{display:block;height:3px;background:var(--accent);margin-top:3px;border-radius:2px}
+.hmv{position:relative;border:1px solid transparent;border-radius:4px;min-height:40px;font:600 13px var(--f-mono);color:var(--fg);cursor:pointer;padding:0}
+.hmv.fail{color:var(--muted);font-weight:400}
+.hmv .x{position:absolute;top:1px;right:4px;font-size:10px;color:var(--warn)}
+.hmv:hover{border-color:var(--line2)}
+.hmv[aria-pressed=true]{border:2px solid var(--fg)}
+/* 검토 중인 조합 */
+.combo{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.combo-t{display:flex;flex-direction:column;gap:4px;min-width:0}
+.combo-t b{font-size:18px}
+.combo-s b{font:600 34px var(--f-mono);line-height:1}
+.combo-s span{margin-left:3px;color:var(--muted)}
+.combo-k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;border-top:1px solid var(--line);padding-top:12px}
+.combo-k div{display:flex;flex-direction:column;gap:2px}
+.combo-k span{font-size:11.5px;color:var(--muted)}
+.combo-k b{font-size:17px}
+.combo-k small{font-size:11px;color:var(--muted)}
+.view .axl{position:absolute;left:0;top:0;pointer-events:none;font:600 10.5px var(--f-mono);color:#d8d8d8;background:rgba(0,0,0,.7);padding:1px 5px;border:1px solid #3d3d42;white-space:nowrap}
+body.fs .rsz{display:none}
+/* 3D 캔버스가 자기 크기로 칸을 키우지 않게 (좁은 화면에서 높이가 끝없이 늘던 문제) */
+#gl{position:absolute;inset:0}
+@media (max-width:1050px){
+  .app.mode-explore .rail{height:calc(100vh - 96px)}
+  .app.mode-plan .rail{grid-template-rows:440px auto}
+}

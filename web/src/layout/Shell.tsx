@@ -8,10 +8,12 @@ import { useSiteWarnings, useEval, usePower, useSim } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite } from '../state/hooks';
 import { useApp, type PageId } from '../state/store';
+import { playClock } from '../state/playClock';
 import { PROFILE_UI, STEPS, useUi } from '../state/ui';
-import { HOMEPAGE_URL } from '../config';
+import { HOMEPAGE_URL, POWER_KINDS } from '../config';
 import { useLang } from '../i18n';
 import { t } from '../strings';
+
 
 const toInput = (ms: number) => new Date(ms).toISOString().slice(0, 16);
 const fromInput = (s: string) => Date.parse(`${s}:00Z`);
@@ -126,11 +128,21 @@ export function TimeBar() {
   const span = Math.max(720, app.duration_h);
   const rel = (app.t - app.landing) / HOUR_MS;
 
-  // 재생 (220 ms 마다 speed 시간씩, 끝나면 착륙 시각으로)
+  // 재생: 3D 화면은 매 프레임 부드럽게(playClock), 계산용 시각(store t)은 220 ms 마다 그 값으로 맞춘다.
+  // 빠르기는 예전과 같다 (220 ms 에 speed 시간). 끝나면 착륙 시각으로 돌아간다.
   useEffect(() => {
-    if (!app.playing) return;
-    const id = setInterval(() => useApp.setState((st) => { let t = st.t + st.speed_h * HOUR_MS; if (t > st.landing + Math.max(720, st.duration_h) * HOUR_MS) t = st.landing; return { t }; }), 220);
-    return () => clearInterval(id);
+    if (!app.playing) { playClock.playing = false; return; }
+    playClock.t = useApp.getState().t; playClock.playing = true;
+    let raf = 0, last = performance.now(), sync = last;
+    const tick = (now: number) => {
+      const st = useApp.getState();
+      playClock.t += ((now - last) / 220) * st.speed_h * HOUR_MS; last = now;
+      if (playClock.t > st.landing + Math.max(720, st.duration_h) * HOUR_MS) playClock.t = st.landing;
+      if (now - sync >= 220) { sync = now; useApp.setState({ t: Math.round(playClock.t / 60000) * 60000 }); }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); playClock.playing = false; };
   }, [app.playing]);
 
   return (
@@ -168,9 +180,9 @@ export function Sidebar() {
   const VN = { met: '요구 조건 충족', partial: '부분 충족', not_met: '미충족' } as const;
   const summary = (id: PageId): string => {
     switch (id) {
-      case 'cond': return `${PROFILE_UI[app.profile].name} · ${app.duration_h} h · 필수 ${Object.keys(app.filters).length}개`;
-      case 'site': return rs ? rs.site.name : '아직 안 고름';
-      case 'date': return ui.dateMode === 'period' && ui.periodFrom && ui.periodTo ? `${ui.periodFrom.slice(5)}~${ui.periodTo.slice(5)} 중 ${utc(app.landing).slice(5)}` : `${utc(app.landing)} UTC`;
+      case 'cond': return `${PROFILE_UI[app.profile].name} · ${app.duration_h} h · ${POWER_KINDS[app.powerSource.kind].name}`;
+      case 'site': return `${rs ? rs.site.name : '아직 안 고름'} · ${utc(app.landing).slice(5)}`;
+      case 'orbit': return '준비 중';
       case 'base': return ui.baseOff ? '기지 없음 · 착륙지 = 기지' : `기지 ${app.bases.length}개${warns.length ? ` · 경고 ${warns.length}` : ''}`;
       case 'sim': return [sim ? VN[sim.sim.verdict] : null, pw?.plan.feasible ? `패널 ${Math.round(pw.plan.panel_area_m2)} m²` : null, ev ? `교신 ${pct(ev.summary.comm_frac)}` : null].filter(Boolean).join(' · ') || '—';
       case 'delay': return `+${app.shift_days}일 지연 가정`;
@@ -287,9 +299,9 @@ export function HelpModal() {
         <div className="row" style={{ justifyContent: 'space-between' }}><h2 id="helpT" style={{ margin: 0, fontSize: 17 }}>사용법</h2><button className="ibtn" aria-label="닫기" onClick={() => set({ help: false })}>✕</button></div>
         <ol>
           <li>왼쪽 <b>단계</b>를 01부터 차례로 누릅니다. 각 단계 아래 회색 글씨는 지금 정해진 값입니다.</li>
-          <li><b>01 조건</b>, <b>02 착륙지</b>, <b>03 기지</b>, <b>04 날짜</b>를 정하면 <b>05 임무 시뮬레이션</b>(전력·통신 포함)이 그 값으로 계산됩니다.</li>
+          <li><b>01 임무 설정</b>, <b>02 착륙지·날짜</b>, <b>03 기지</b>를 정하면 <b>04 임무 분석</b>(전력·통신 탭 포함)이 그 값으로 계산됩니다.</li>
           <li>오른쪽 <b>3D 달</b>과 <b>현장 뷰</b>는 어느 단계에서나 같은 착륙지·시각을 보여 줍니다.</li>
-          <li>위쪽 <b>보는 시각</b> 막대나 ▶로 시간을 움직이면 햇빛 방향과 현장 뷰가 바뀝니다.</li>
+          <li>착륙 시각을 바꾸면 3D 달·현장 뷰가 그 시각으로 옮겨 갑니다. 그래프를 누르거나 <span className="kbd">←</span><span className="kbd">→</span>로 보는 시각을 움직일 수 있습니다.</li>
           <li>지도 색은 <b>레이어</b> 버튼에서 고릅니다. 각 레이어 옆에 무엇을 뜻하는지, 초록이 좋은 쪽인지 적혀 있습니다.</li>
         </ol>
         <p className="small muted" style={{ margin: 0 }}>단축키: <span className="kbd">Space</span> 재생 · <span className="kbd">←</span><span className="kbd">→</span> 1시간 · <span className="kbd">Shift</span>+<span className="kbd">←</span><span className="kbd">→</span> 1일 · <span className="kbd">C</span> 지도 색 · <span className="kbd">F</span> 3D 전체화면 · <span className="kbd">Esc</span> 닫기</p>

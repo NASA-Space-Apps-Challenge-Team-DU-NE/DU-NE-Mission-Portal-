@@ -1,12 +1,12 @@
-// 01 조건 정하기: 미션 프로파일(P2-03), 필수 조건·가중치(P1-18), 임무 기간·통신 여유각(P1-16), 상위 3곳 미리보기
-import { useState } from 'react';
-import { Card, Help, ScoreChip, pct } from '../components/kit';
-import { DEFAULTS } from '../config';
-import { PROFILES, type ProfileId } from '../config';
-import type { Criterion, HardFilters } from '../core/types';
+// 01 임무 설정: [임무 프로파일] 미션 프로파일(P2-03), 필수 조건·가중치(P1-18), 임무 기간·통신 여유각(P1-16)
+//              [착륙선 정보] 착륙선 프리셋(P1-29), 발전 방식, 전력·통신, 질량·추력(궤도 분석용)
+import { Card, Help, Seg, pct } from '../components/kit';
+import { DEFAULTS, POWER_KINDS, PROFILES, type LanderExtra, type PowerKind, type ProfileId } from '../config';
+import type { Criterion, HardFilters, Lander } from '../core/types';
+import { useLander } from '../state/derived';
 import { useData } from '../state/data';
 import { useGridRun } from '../state/gridRun';
-import { useApp, type ProfileSel } from '../state/store';
+import { needsSun, useApp, type ProfileSel } from '../state/store';
 import { CRIT, CRIT_COL, PROFILE_UI, useUi } from '../state/ui';
 
 type NumKey = Exclude<keyof HardFilters, 'artemis_only'>;
@@ -20,16 +20,15 @@ const FILTERS: Array<[NumKey, string, string, number, number, number, number, (v
 ];
 const CRITS = Object.keys(CRIT) as Criterion[];
 
-export default function Cond() {
+function ProfileTab() {
   const app = useApp();
-  const ui = useUi();
-  const [more, setMore] = useState(false);
+  const sun = useApp(needsSun);
   const res = useGridRun((g) => g.result);
   const grid = useData((d) => d.grid);
   const nCells = grid?.cells.length ?? 0;
   const regions = useData((d) => d.artemisRegions);
   const dis = (k: keyof HardFilters) => res?.filters.find((f) => f.key === k)?.disabled ?? false;
-  const wsum = Object.values(app.mapWeights).reduce((a, b) => a + b, 0) || 1;
+  const wsum = CRITS.reduce((a, k) => a + (k === 'power' && !sun ? 0 : app.mapWeights[k]), 0) || 1;
   const profs: ProfileSel[] = ['custom', 'long_base', 'recon', 'water'];
   return (
     <>
@@ -55,11 +54,13 @@ export default function Cond() {
             <Help>켠 조건을 하나라도 못 넘는 곳은 순위에서 빠지고 지도에서 흐리게 보입니다. 너무 적게 남으면 조건을 풀어 보세요.</Help>
             <div>
               {FILTERS.map(([k, label, op, def, mn, mx, st, fmt, hp]) => {
-                const on = app.filters[k] !== undefined, v = on ? (app.filters[k] as number) : def, d = dis(k);
+                // 햇빛이 필요 없는 발전이면 일조율·최장 그늘 조건은 계산에서 빠진다
+                const sunOnly = k === 'min_illum_frac' || k === 'max_dark_h';
+                const on = app.filters[k] !== undefined, v = on ? (app.filters[k] as number) : def, d = dis(k) || (sunOnly && !sun);
                 return (
                   <div key={k} className={`frow ${on ? '' : 'off'}`}>
                     <input type="checkbox" checked={on} disabled={d} aria-label={`${label} 조건 켜기`} onChange={(e) => app.setFilter(k, e.target.checked ? def : undefined)} />
-                    <span className="lb">{label} {op}{d ? <span className="tiny muted"> · 자료 없음</span> : null}</span>
+                    <span className="lb">{label} {op}{d ? <span className="tiny muted"> · {sunOnly && !sun ? '발전 방식상 제외' : '자료 없음'}</span> : null}</span>
                     <output>{fmt(v)}</output>
                     <input type="range" min={mn} max={mx} step={st} value={v} disabled={!on} onChange={(e) => app.setFilter(k, Number(e.target.value))} />
                     <span className="hp">{hp}</span>
@@ -76,14 +77,14 @@ export default function Cond() {
         </div>
         <div className="col">
           <Card title="가중치" sub="순위에 반영" tag={<span className="badge prov">임시값</span>}>
-            <Help>남은 곳들 중 무엇을 더 중요하게 볼지 정합니다. 비율만 의미가 있습니다.</Help>
+            <Help>남은 곳들 중 무엇을 더 중요하게 볼지 정합니다. 비율만 의미가 있습니다.{sun ? null : <> 지금 발전 방식(<b>{POWER_KINDS[app.powerSource.kind].name}</b>)은 햇빛이 필요 없어 <b>발전(일조)</b> 가중치와 시나리오 점수의 전력 항목을 계산에서 뺍니다.</>}</Help>
             <div className="share">
-              {CRITS.filter((k) => app.mapWeights[k] > 0).map((k) => { const s = (app.mapWeights[k] / wsum) * 100; return <div key={k} style={{ width: `${s}%`, background: CRIT_COL[k] }} title={`${CRIT[k]} ${Math.round(s)}%`}>{s >= 9 ? `${Math.round(s)}%` : ''}</div>; })}
+              {CRITS.filter((k) => app.mapWeights[k] > 0 && (sun || k !== 'power')).map((k) => { const s = (app.mapWeights[k] / wsum) * 100; return <div key={k} style={{ width: `${s}%`, background: CRIT_COL[k] }} title={`${CRIT[k]} ${Math.round(s)}%`}>{s >= 9 ? `${Math.round(s)}%` : ''}</div>; })}
             </div>
             {CRITS.map((k) => (
               <div key={k} className="wrow">
-                <label className="small"><i className="sw" style={{ background: CRIT_COL[k], marginRight: 6 }} />{CRIT[k].split('(')[0]}{res?.missing.includes(k) ? <span className="tiny muted"> · 자료 없음</span> : null}</label>
-                <input type="range" min={0} max={100} step={5} value={app.mapWeights[k]} aria-label={`${CRIT[k]} 가중치`} onChange={(e) => app.setWeight(k, Number(e.target.value))} />
+                <label className="small"><i className="sw" style={{ background: CRIT_COL[k], marginRight: 6 }} />{CRIT[k].split('(')[0]}{k === 'power' && !sun ? <span className="tiny muted"> · 제외</span> : res?.missing.includes(k) ? <span className="tiny muted"> · 자료 없음</span> : null}</label>
+                <input type="range" min={0} max={100} step={5} disabled={k === 'power' && !sun} value={app.mapWeights[k]} aria-label={`${CRIT[k]} 가중치`} onChange={(e) => app.setWeight(k, Number(e.target.value))} />
                 <output>{app.mapWeights[k]}</output>
               </div>
             ))}
@@ -95,29 +96,86 @@ export default function Cond() {
               <span className="tiny muted" style={{ alignSelf: 'center' }}>시간(h) 단위</span>
             </div>
             <div className="wrow"><label className="small">통신 여유각</label><input type="range" min={0} max={10} step={0.5} value={app.margin_deg} onChange={(e) => app.setMargin(Number(e.target.value))} /><output>{app.margin_deg}°</output></div>
-            <Help><b>통신 여유각</b>: 지구가 지형선보다 이 각도만큼 더 높아야 교신 가능으로 칩니다. 클수록 깐깐합니다. 05 통신 계산도 이 값을 씁니다.</Help>
-            <button className="disclose" aria-expanded={more} aria-controls="condMore" onClick={() => setMore(!more)}>
-              <span className="ar" aria-hidden>{more ? '▾' : '▸'}</span>상세 조건 <span className="tiny muted">전력 수요 · 패널 효율{more ? '' : ` — 지금 ${ui.demand_kw} kW · ${ui.eff}`}</span>
-            </button>
-            {more ? (
-              <div id="condMore" className="more">
-                <div className="row">
-                  <label className="small muted">필요 전력 (kW)<br /><input className="field num" type="number" min={0} step={1} value={ui.demand_kw} onChange={(e) => ui.set({ demand_kw: Number(e.target.value) })} /></label>
-                  <label className="small muted">패널 효율<br /><input className="field num" type="number" min={0.05} max={0.5} step={0.01} value={ui.eff} onChange={(e) => ui.set({ eff: Number(e.target.value) })} /></label>
-                </div>
-                <Help>05 임무 시뮬레이션 아래 <b>전력 계획</b>이 이 값으로 패널 면적과 배터리 용량을 계산합니다. 태양을 따라 도는 수직 패널 기준, 시스템 손실 {DEFAULTS.panel_loss * 100}%, 설계 여유 {DEFAULTS.power_margin * 100}% (임시값).</Help>
-              </div>
-            ) : null}
-          </Card>
-          <Card title="미리보기 · 지금 조건의 상위 3곳" np tag={<button className="btn sm ghost" onClick={() => app.setPage('site')}>02에서 전체 보기 →</button>}>
-            <table><tbody>
-              {res && res.top.length ? res.top.slice(0, 3).map((c, i) => (
-                <tr key={c.cell} className="click" onClick={() => app.setSite({ kind: 'cell', cell: c.cell })}><td>{i + 1}</td><td className="mono small">{c.lat_deg.toFixed(2)}°, {c.lon_deg.toFixed(1)}°</td><td><ScoreChip v={c.score * 100} /></td></tr>
-              )) : <tr><td className="muted">{res ? '조건을 만족하는 칸이 없습니다' : '격자 계산 중…'}</td></tr>}
-            </tbody></table>
+            <Help><b>통신 여유각</b>: 지구가 지형선보다 이 각도만큼 더 높아야 교신 가능으로 칩니다. 클수록 깐깐합니다. 04 임무 분석의 통신 탭도 이 값을 씁니다.</Help>
           </Card>
         </div>
       </div>
+    </>
+  );
+}
+
+const EXTRA: Array<[keyof LanderExtra, string, number]> = [
+  ['dry_mass_kg', '건조 질량 (kg)', 10], ['prop_mass_kg', '추진제 질량 (kg)', 10], ['thrust_n', '주 엔진 추력 (N)', 10], ['isp_s', '비추력 Isp (s)', 1],
+];
+const num = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? v : '');
+
+function LanderTab() {
+  const app = useApp();
+  const ui = useUi();
+  const landers = useData((d) => d.landers.items);
+  const L = useLander();
+  const ps = app.powerSource, kind = POWER_KINDS[ps.kind];
+  const fld = (k: keyof Lander, l: string, st: number) => (
+    <label className="small muted" key={k}>{l}<br /><input className="field num" type="number" step={st} value={num(L?.[k] as number)} onChange={(e) => app.editLander({ [k]: e.currentTarget.valueAsNumber } as Partial<Lander>)} /></label>
+  );
+  const ex = app.landerExtra;
+  const m0 = ex.dry_mass_kg + ex.prop_mass_kg;
+  const dv = ex.dry_mass_kg > 0 && m0 > 0 ? ex.isp_s * 9.80665 * Math.log(m0 / ex.dry_mass_kg) : NaN;
+  const tw = m0 > 0 ? ex.thrust_n / (m0 * 1.62) : NaN;
+  return (
+    <>
+      <Card title="착륙선 프리셋" tag={<span className="badge approx">근사값</span>}>
+        <div className="row">
+          <select className="field" value={L?.id ?? ''} style={{ minWidth: 300 }} onChange={(e) => app.setLander(e.target.value)}>
+            {landers.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
+          </select>
+          {Object.keys(app.landerEdits).length ? <button className="btn sm" onClick={() => L && app.setLander(L.id)}>원래 값으로</button> : null}
+        </div>
+        <Help>대표 유형의 근사값입니다. 아래 숫자를 바꾸면 04 임무 분석의 타임랩스가 바로 다시 계산됩니다.</Help>
+      </Card>
+      <Card title="발전 방식" tag={<span className="badge prov">출력·연료 임시값</span>}>
+        <Seg<PowerKind> value={ps.kind} opts={(Object.keys(POWER_KINDS) as PowerKind[]).map((k) => [k, POWER_KINDS[k].name] as [PowerKind, string])} onChange={(k) => app.setPowerSource({ kind: k })} wrap />
+        <p className="help" style={{ margin: 0 }}>{kind.desc}.{kind.needsSun ? '' : ' 햇빛이 필요 없으므로 일조율·최장 그늘은 가중치·필수 조건·점수 계산에서 빠집니다.'}</p>
+        {kind.needsSun ? (
+          <div className="row">{fld('panel_area_m2', '패널 면적 (m²)', 0.1)}{fld('efficiency', '패널 효율', 0.01)}</div>
+        ) : (
+          <div className="row">
+            <label className="small muted">정격 출력 (W)<br /><input className="field num" type="number" min={0} step={10} value={num(ps.output_w)} onChange={(e) => app.setPowerSource({ output_w: e.currentTarget.valueAsNumber })} /></label>
+            {kind.usesFuel ? <label className="small muted">실은 연료 에너지 (Wh)<br /><input className="field num" type="number" min={0} step={1000} value={num(ps.fuel_wh)} onChange={(e) => app.setPowerSource({ fuel_wh: e.currentTarget.valueAsNumber })} /></label> : null}
+          </div>
+        )}
+      </Card>
+      <div className="g2">
+        <Card title="전력 · 통신" sub="착륙선">
+          <div className="row">{fld('battery_wh', '배터리 (Wh)', 100)}{fld('load_active_w', '작업 중 소비 (W)', 10)}{fld('load_idle_w', '대기 소비 (W)', 10)}{fld('load_survival_w', '생존 최소 소비 (W)', 5)}</div>
+          <div className="row">{fld('rate_kbps', '전송 속도 (kbps)', 50)}</div>
+          <div className="row">
+            <label className="small muted">기지 필요 전력 (kW)<br /><input className="field num" type="number" min={0} step={1} value={ui.demand_kw} onChange={(e) => ui.set({ demand_kw: Number(e.target.value) })} /></label>
+            {kind.needsSun ? <label className="small muted">전력 계획 패널 효율<br /><input className="field num" type="number" min={0.05} max={0.5} step={0.01} value={ui.eff} onChange={(e) => ui.set({ eff: Number(e.target.value) })} /></label> : null}
+          </div>
+          <Help>04 임무 분석의 <b>전력</b> 탭이 기지 필요 전력으로 {kind.needsSun ? <>패널 면적과 배터리 용량을 계산합니다. 태양을 따라 도는 수직 패널 기준, 시스템 손실 {DEFAULTS.panel_loss * 100}%, 설계 여유 {DEFAULTS.power_margin * 100}% (임시값).</> : <>필요한 발전기 대수를 봅니다.</>}</Help>
+        </Card>
+        <Card title="질량 · 추진" sub="궤도 분석용" tag={<span className="badge prov">임시값 PROVISIONAL</span>}>
+          <div className="row">{EXTRA.map(([k, l, st]) => <label key={k} className="small muted">{l}<br /><input className="field num" type="number" min={0} step={st} value={num(ex[k])} onChange={(e) => app.setLanderExtra({ [k]: e.currentTarget.valueAsNumber } as Partial<LanderExtra>)} /></label>)}</div>
+          <div className="row small">
+            <span>속도 변화 여유 Δv <b className="mono">{Number.isFinite(dv) ? `${Math.round(dv).toLocaleString()} m/s` : '—'}</b></span>
+            <span>달 표면 추력 대 무게비 <b className="mono">{Number.isFinite(tw) ? tw.toFixed(2) : '—'}</b></span>
+          </div>
+          <Help>로켓 방정식 Δv = Isp·g₀·ln(전체 질량 ÷ 건조 질량)과 달 중력 1.62 m/s² 기준 추력 대 무게비입니다. 05 궤도 분석에서 쓸 입력이며 공개 근거가 없는 임시값입니다.</Help>
+        </Card>
+      </div>
+    </>
+  );
+}
+
+export default function Cond() {
+  const ui = useUi();
+  return (
+    <>
+      <div className="tabs pagetabs" role="tablist">
+        {([['profile', '임무 프로파일'], ['lander', '착륙선 정보']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={ui.condTab === k} onClick={() => ui.set({ condTab: k })}>{l}</button>)}
+      </div>
+      {ui.condTab === 'profile' ? <ProfileTab /> : <LanderTab />}
     </>
   );
 }

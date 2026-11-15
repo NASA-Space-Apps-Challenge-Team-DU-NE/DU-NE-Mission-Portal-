@@ -1,4 +1,4 @@
-// 02 착륙지 고르기: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
+// 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침) · 착륙지 부분: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
 import { useEffect, useMemo, useState } from 'react';
 import { ArtemisBadge, Card, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, hrs, pct, toast, Empty } from '../components/kit';
 import { useArtemisVintage } from '../state/artemis';
@@ -15,6 +15,7 @@ import { useResolvedSite, useSiteCtx } from '../state/hooks';
 import { makeScenario } from '../state/scenario';
 import { useApp } from '../state/store';
 import { CAT, CRIT, CRIT_COL, useUi } from '../state/ui';
+import LandingDate from './LandingDate';
 
 function RankTab() {
   const app = useApp();
@@ -32,7 +33,7 @@ function RankTab() {
       const ctx = siteContext({ ...s, elevation_m: m?.ground_elev_m ?? s.elevation_m }, m ?? flatMask(s.id, s.lat_deg, s.lon_deg, 2), eph, app.margin_deg);
       return { s, terrain: (m ? 'site' : 'flat') as 'site' | 'flat', e: evalFor(ctx, `cat|${s.id}|${m ? 1 : 0}|r${useData.getState().ephRev}`, app.landing, app.duration_h, 6) };
     }).sort((a, b) => b.e.score.total - a.e.score.total);
-  }, [app.rankMode, sites, masks, eph, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights]);
+  }, [app.rankMode, sites, masks, eph, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.powerSource]);
   const ref = app.siteRef;
   const vint = useArtemisVintage();
   return (
@@ -142,7 +143,7 @@ export default function Site() {
   // 점수 근거: 선택 지점의 격자 칸
   const cell = grid && rs ? (app.siteRef?.kind === 'cell' ? app.siteRef.cell : nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km * 2)) : -1;
   useEffect(() => { setExplain(cell >= 0 ? cell : null); }, [cell, setExplain]);
-  const prev = useMemo(() => (ctx ? [3, 7, 14].map((d) => ({ d, e: evalFor(ctx, siteKey(rs, app.margin_deg), app.landing + d * DAY_MS, app.duration_h, 6) })) : []), [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights]);
+  const prev = useMemo(() => (ctx ? [3, 7, 14].map((d) => ({ d, e: evalFor(ctx, siteKey(rs, app.margin_deg), app.landing + d * DAY_MS, app.duration_h, 6) })) : []), [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.powerSource]);
   const ex = res?.explain && cell >= 0 ? res.explain : null;
   const comp = cell >= 0 && res ? res.composite[cell] : null;
   const R = app.req;
@@ -188,6 +189,8 @@ export default function Site() {
           </div>
         </Card>
       ) : null}
+      <h2 className="sechead"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>
+      <LandingDate />
     </>
   );
 }

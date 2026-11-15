@@ -19,6 +19,12 @@ export interface SimSystem {
   load_idle_w: number;
   load_survival_w: number;
   rate_kbps: number;
+  /** 발전 방식. 'constant' 는 햇빛과 무관한 정격 출력(연료전지·RTG·핵분열). 없으면 태양전지 */
+  source?: 'solar' | 'constant';
+  /** source='constant' 정격 출력 (W) */
+  const_w?: number;
+  /** source='constant' 쓸 수 있는 연료 에너지 (Wh). 없거나 null 이면 무제한(RTG·핵분열) */
+  fuel_wh?: number | null;
 }
 
 export function systemFromLander(l: Lander, loss = 0.1): SimSystem {
@@ -71,6 +77,8 @@ export function sanitizeSystem(sys: SimSystem): SimSystem {
     load_idle_w: fin(sys.load_idle_w),
     load_survival_w: fin(sys.load_survival_w),
     rate_kbps: fin(sys.rate_kbps),
+    const_w: fin(sys.const_w),
+    fuel_wh: sys.fuel_wh == null ? null : fin(sys.fuel_wh),
   };
 }
 
@@ -90,10 +98,18 @@ export function simulate(samples: TimelineSample[], _step_h: number, sysIn: SimS
   let ops = 0, mb = 0;
   let stopIdx: number | null = null, stopT: TimeMs | null = null;
   const charge = (e: number, net: number, h: number) => Math.min(cap, Math.max(0, e + net * h * (net > 0 ? CHARGE_EFF : 1)));
+  const constant = sys.source === 'constant';
+  let fuel = sys.fuel_wh ?? Infinity;
   for (let i = 0; i < n; i++) {
     const s = samples[i];
     const dt = w[i];
-    const pg = mountIrradiance(s.sun, s.sun_frac, sys.mount, sys.panel_azimuth_deg) * sys.panel_area_m2 * sys.efficiency * (1 - sys.loss);
+    // 햇빛과 무관한 발전: 연료가 남은 동안 정격 출력 (구간 중간에 바닥나면 그 구간 평균으로)
+    let pg: number;
+    if (constant) {
+      const cw = sys.const_w ?? 0;
+      pg = dt > 0 && cw * dt > fuel ? fuel / dt : fuel > 0 ? cw : 0;
+      fuel = Math.max(0, fuel - pg * dt);
+    } else pg = mountIrradiance(s.sun, s.sun_frac, sys.mount, sys.panel_azimuth_deg) * sys.panel_area_m2 * sys.efficiency * (1 - sys.loss);
     const pl = s.earth_visible ? sys.load_active_w : sys.load_idle_w;
     soc[i] = cap > 0 ? E / cap : 0;
     gen[i] = pg;
@@ -122,8 +138,16 @@ export function simulate(samples: TimelineSample[], _step_h: number, sysIn: SimS
     verdict: opsOk && dataOk ? 'met' : opsOk || dataOk ? 'partial' : 'not_met',
     stop_t: stopT,
     stop_index: stopIdx,
-    stop_cause: stopIdx === null ? null : stopCause(samples, stopIdx, w[0] > 0 ? w[0] : 1),
+    stop_cause: stopIdx === null ? null : constant ? (samples[stopIdx].earth_visible ? 'over_consumption' : stopCauseNoSun(samples, stopIdx, w[0] > 0 ? w[0] : 1)) : stopCause(samples, stopIdx, w[0] > 0 ? w[0] : 1),
   };
+}
+
+/** 햇빛과 무관한 발전: 일조 차단은 원인이 될 수 없다 (지구 가림 또는 소비 과다) */
+function stopCauseNoSun(samples: TimelineSample[], idx: number, step_h: number): StopCause {
+  const k = Math.max(1, Math.round(12 / step_h));
+  let noComm = 0, c = 0;
+  for (let i = Math.max(0, idx - k + 1); i <= idx; i++) { c++; if (!samples[i].earth_visible) noComm++; }
+  return noComm > c / 2 ? 'earth_blocked' : 'over_consumption';
 }
 
 /** 직전 12 h: frac≈0 과반 → 일조 차단, 교신 불가 과반 → 지구 가림, 그 외 소비 과다 */
