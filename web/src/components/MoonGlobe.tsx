@@ -16,6 +16,7 @@ import { useNormLayer } from '../state/layerNorm';
 import { LAYER_UI } from '../state/layerUi';
 import { useApp } from '../state/store';
 import { playClock } from '../state/playClock';
+import { createSky } from './starfield';
 import { useUi } from '../state/ui';
 import { rampRGB } from './kit';
 import { useArtemisVintage } from '../state/artemis';
@@ -36,7 +37,6 @@ const COMPACT = { earth: 26, sun: 60 };
 const SUN_FAR = 2000;
 const subLatLon = (v: number[]) => { const n = Math.hypot(v[0], v[1], v[2]); return { lat: Math.asin(v[2] / n) * R2D, lon: Math.atan2(v[1], v[0]) * R2D }; };
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c] as string);
-function h01(i: number) { let x = (i + 1) * 374761393; x = (x ^ (x >>> 13)) * 1274126177; x ^= x >>> 16; return (x >>> 0) / 4294967295; }
 
 interface G {
   renderer: THREE.WebGLRenderer; scene: THREE.Scene; cam: THREE.PerspectiveCamera; moon: THREE.Mesh;
@@ -185,10 +185,9 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
     try { renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true }); } catch { setLoading('이 브라우저에서 WebGL 을 쓸 수 없습니다'); return; }
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
     const scene = new THREE.Scene(), cam = new THREE.PerspectiveCamera(35, 1, 0.01, 6000);
-    const sp: number[] = [];
-    for (let i = 0; i < 1500; i++) { const u = h01(i * 3) * 2 - 1, th = h01(i * 3 + 1) * 6.283, s = Math.sqrt(1 - u * u); sp.push(4000 * s * Math.cos(th), 4000 * u, 4000 * s * Math.sin(th)); }
-    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp, 3));
-    scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ color: 0x9fb3b0, size: 1.2, sizeAttenuation: false })));
+    // 배경 하늘: 실제 방향의 은하수와 별 (starfield.ts)
+    const sky = createSky();
+    scene.add(sky.group);
     const blank = new THREE.DataTexture(new Uint8Array([128, 128, 128, 255]), 1, 1, THREE.RGBAFormat); blank.needsUpdate = true;
     const blank0 = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1, THREE.RGBAFormat); blank0.needsUpdate = true;
     const uni: Record<string, THREE.IUniform> = {
@@ -341,6 +340,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       cam.lookAt(g.look);
       const L = live.current, T0 = playClock.playing ? playClock.t : L.t, b = L.eph.bodyVectors(T0), sd = meToThree(b.sun), ed = meToThree(b.earth);
       (uni.sunDir.value as THREE.Vector3).copy(sd);
+      sky.update((v) => meRaw(j2000ToMoonFixed(T0, v as [number, number, number])), cam.position, renderer.getPixelRatio());
       const kmE = Math.hypot(...b.earth), kmS = Math.hypot(...b.sun);
       const dE = view.real ? kmE / R_MOON_KM : COMPACT.earth, rE = view.real ? R_EARTH_KM / R_MOON_KM : COMPACT.earth * (R_EARTH_KM / kmE);
       const dS = view.real ? SUN_FAR : COMPACT.sun, rS = dS * (R_SUN_KM / kmS);
@@ -436,7 +436,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       cancelAnimationFrame(raf); window.clearTimeout(tm); ro.disconnect();
       c.removeEventListener('pointerdown', down); c.removeEventListener('pointermove', move); c.removeEventListener('pointerup', up);
       c.removeEventListener('click', click); c.removeEventListener('wheel', wheel); c.removeEventListener('dblclick', dbl);
-      axisGeo.dispose(); earthTex.dispose(); renderer.dispose(); view.g = null; vw.closest(".moon")?.classList.remove("far");
+      axisGeo.dispose(); earthTex.dispose(); sky.dispose(); renderer.dispose(); view.g = null; vw.closest(".moon")?.classList.remove("far");
     };
   }, []);
 
