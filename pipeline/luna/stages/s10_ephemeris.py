@@ -182,7 +182,9 @@ def _interp_error(times: list[str], rows: np.ndarray, factor: int) -> dict:
 def run_spice(ctx: Ctx) -> int:
     """작업 4: SPICE 로 범위 표와 미션별 표. Horizons 표는 대조용으로 남긴다 (build/ 에 이전 표 사본)."""
     from luna.io.spice_eph import ABCORR, KERNELS, SpiceEphemeris, hourly_times
+    from luna.validation_trace import LEGACY_NOTE, archive_record
 
+    ctx._inputs = {}
     cfg = ctx.settings.eph
     kdir = ctx.data.path(SPICE_DIR)
     eph = SpiceEphemeris(kdir)
@@ -206,6 +208,8 @@ def run_spice(ctx: Ctx) -> int:
     times = hourly_times(cfg.range_start_utc, cfg.range_stop_utc, cfg.step_h)
     rows = eph.rows(times)
     if hz:
+        ctx.record_input(ctx.build / "s10/range_horizons.json", "comparison_horizons_range")
+        ctx.record_input(ctx.build / "s10/range_horizons.bin", "comparison_horizons_range_values")
         report["vs_horizons_range"] = _diff_stats(times, rows, *hz)
     report["interp_error_if_step_widened"] = {f"{f}h": _interp_error(times, rows, f) for f in (2, 3, 6)}
     write_table_spice(ctx, "ephemeris/range", times, rows, cfg.step_h, note + [f"기간 {times[0]} ~ {times[-1]}, {cfg.step_h} h 간격 (사용자 결정 2026-11-15)"], prov)
@@ -214,6 +218,9 @@ def run_spice(ctx: Ctx) -> int:
     seed = ctx.data.first("Catalogs/missions.json")
     coords = ctx.data.first("Reference_Tables/NASA_Gap_Collection_2026-11-14/LUNA_HISTORICAL_SITE_COORDINATES_16.csv")
     missions, _ = load_missions(seed, coords)
+    for path in (seed, coords):
+        if path:
+            ctx.record_input(path, "comparison_mission_dates")
     mrep = {}
     for m in missions:
         t = _dt(m["landing_utc"])
@@ -229,13 +236,28 @@ def run_spice(ctx: Ctx) -> int:
             shutil.copy2(pjs.with_suffix(".bin"), ctx.build_path(f"s10/missions_horizons/{m['id']}.bin"))
         prev = _read_table(ctx.build / "s10" / "missions_horizons" / f"{m['id']}.json")
         if prev:
+            ctx.record_input(ctx.build / "s10/missions_horizons" / f"{m['id']}.json", "comparison_horizons_mission")
+            ctx.record_input(ctx.build / "s10/missions_horizons" / f"{m['id']}.bin", "comparison_horizons_mission_values")
             # Horizons 표의 시각 그대로 SPICE 를 계산해 비교 (두 표의 시각 격자가 다르다)
             mrep[m["id"]] = _diff_stats(prev[0], eph.rows(prev[0]), *prev)
         write_table_spice(ctx, f"ephemeris/missions/{m['id']}", mt, mr, cfg.step_h, note + [f"미션 {m['name']} 착륙 {m['landing_utc']}"], prov)
     if mrep:
         report["vs_horizons_missions"] = mrep
-    write_envelope(ctx, "validation/ephemeris_spice.json", Envelope("luna.validation.ephemeris_spice.v1", report, prov, quality="REVIEW_REQUIRED",
-                   notes=["차이를 기록할 뿐 합격·불합격을 판정하지 않는다 (허용 오차는 팀이 정함)"]))
+    # 이 PC 에 이전 Horizons 표 사본(build/s10/)이 없으면 대조를 다시 못 한다 → 이전 대조 결과를 그대로 유지한다
+    prev_rep = ctx.out / "validation" / "ephemeris_spice.json"
+    if prev_rep.exists():
+        old = json.loads(prev_rep.read_text(encoding="utf-8")).get("data", {})
+        for k in ("vs_horizons_range", "vs_horizons_missions"):
+            if not report.get(k) and old.get(k):
+                report[k] = old[k]
+                report.setdefault("carried_over", []).append(k)
+    report_prov = list(ctx._inputs.values())
+    report_notes = ["차이를 기록할 뿐 합격·불합격을 판정하지 않는다 (허용 오차는 팀이 정함)"]
+    if report.get("carried_over"):
+        report_prov.append(archive_record(ctx, prev_rep))
+        report_notes.append(LEGACY_NOTE)
+    write_envelope(ctx, "validation/ephemeris_spice.json", Envelope("luna.validation.ephemeris_spice.v1", report, report_prov,
+                   quality="REFERENCE_ONLY" if report.get("carried_over") else "REVIEW_REQUIRED", notes=report_notes))
     log.info(NAME, f"SPICE 미션 표 {len(missions)}개")
     return 0
 

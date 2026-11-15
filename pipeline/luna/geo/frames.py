@@ -135,4 +135,6 @@ def pa_to_me_matrix(tf_path: Path) -> tuple[np.ndarray, str]:
     angles, axes, units, rel = read_tk_frame(tf_path, "MOON_ME")
     if "PA" not in rel.upper():
         raise ValueError(f"MOON_ME 기준 프레임이 PA 가 아니다: {rel}")
-    return tk_matrix(angles, axes, units), f"TK {rel}→MOON_ME angles={angles} {units} axes={axes}"
+    # tk_matrix 의 곱은 정의 프레임(MOON_ME) → 기준 프레임(PA) 방향이다. SpiceyPy pxform('MOON_PA','MOON_ME') 와
+    # 정확히 전치 관계임을 s80 에서 확인했다 (2026-11-15) → PA → ME 는 전치.
+    return tk_matrix(angles, axes, units).T, f"TK {rel}→MOON_ME angles={angles} {units} axes={axes} (전치)"
