@@ -96,6 +96,77 @@ function northBackground(img: HTMLImageElement): HTMLCanvasElement {
   return out;
 }
 
+/** LOLA 경사 그림(relief_*) 이미지. 북극·전역 2D 지도의 지형 음영에 쓴다 */
+const reliefImgs: Partial<Record<'relief_north' | 'relief_global', HTMLImageElement>> = {};
+function useReliefImage(key: 'relief_north' | 'relief_global' | null): HTMLImageElement | null {
+  const tex = useData((d) => d.textures);
+  const [, bump] = useState(0);
+  useEffect(() => {
+    if (!key) return;
+    const f = tex?.[key];
+    if (!f || reliefImgs[key]) return;
+    const im = new Image();
+    im.onload = () => { reliefImgs[key] = im; bump((n) => n + 1); };
+    im.src = textureUrl(f.file);
+  }, [tex, key]);
+  return key ? reliefImgs[key] ?? null : null;
+}
+
+const RELIEF_GAIN = 255;
+const LIGHT: [number, number, number] = (() => { const el = 40 * D2R; return [Math.cos(el) * Math.sin(-Math.PI / 4), Math.cos(el) * Math.cos(-Math.PI / 4), Math.sin(el)]; })();
+/** 경사(동·북) → 화면 왼쪽 위에서 비춘 음영. 배경 그림이며 계산에는 쓰지 않는다 */
+const shadedCache = new Map<string, HTMLCanvasElement>();
+function shadedBackground(region: 'north' | 'global', relief: HTMLImageElement, albedo: HTMLImageElement | null): HTMLCanvasElement {
+  const key = `${region}|${relief.src}|${albedo?.src ?? ''}`;
+  const hit = shadedCache.get(key);
+  if (hit) return hit;
+  const read = (img: HTMLImageElement) => {
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const x = c.getContext('2d', { willReadFrequently: true })!; x.drawImage(img, 0, 0);
+    return { w: c.width, h: c.height, d: x.getImageData(0, 0, c.width, c.height).data };
+  };
+  const rl = read(relief), al = albedo ? read(albedo) : null;
+  const ex = region === 'north' ? 3 : 5;
+  let OW: number, OH: number;
+  if (region === 'north') { OW = OH = 1024; } else { OW = 2304; OH = Math.round(OW / regionAspect('global')); }
+  const out = document.createElement('canvas'); out.width = OW; out.height = OH;
+  const ox = out.getContext('2d')!, od = ox.createImageData(OW, OH);
+  // 알베도 평균(정규화용)
+  let amean = 1;
+  if (al) { let s = 0, n = 0; for (let k = 0; k < al.d.length; k += 4 * 97) { s += al.d[k]; n++; } amean = s / n / 255 || 1; }
+  for (let y = 0; y < OH; y++) for (let xx = 0; xx < OW; xx++) {
+    let lat: number, lon: number, ru: number, rv: number;
+    if (region === 'north') {
+      const ll = regionInverse('north', xx + 0.5, y + 0.5, OW, OH);
+      if (!ll) continue;
+      [lat, lon] = ll;
+      ru = Math.floor(((xx + 0.5) / OW) * rl.w); rv = Math.floor(((y + 0.5) / OH) * rl.h);
+    } else {
+      lat = BAND - ((y + 0.5) / OH) * 2 * BAND; lon = ((xx + 0.5) / OW) * 360 - 180;
+      ru = Math.floor(((lon + 180) / 360) * rl.w); rv = Math.floor(((90 - lat) / 180) * rl.h);
+    }
+    ru = Math.min(rl.w - 1, Math.max(0, ru)); rv = Math.min(rl.h - 1, Math.max(0, rv));
+    const k = (rv * rl.w + ru) * 4;
+    const gE = ((rl.d[k] - 128) / RELIEF_GAIN) * ex, gN = ((rl.d[k + 1] - 128) / RELIEF_GAIN) * ex;
+    // 동·북 단위벡터의 화면 방향 (x 오른쪽, y 위쪽)
+    let gx = gE, gy = gN;
+    if (region === 'north') { const c = Math.cos(lon * D2R), s = Math.sin(lon * D2R); gx = gE * c - gN * s; gy = gE * s + gN * c; }
+    const nz = 1 / Math.hypot(gx, gy, 1);
+    const sh = Math.max(0, (-gx * LIGHT[0] - gy * LIGHT[1] + LIGHT[2]) * nz) / LIGHT[2];
+    let a = 1;
+    if (al) {
+      const au = Math.min(al.w - 1, Math.floor(((lon + 180) / 360) * al.w)), av = Math.min(al.h - 1, Math.floor(((90 - lat) / 180) * al.h));
+      a = 0.55 + 0.45 * (al.d[(av * al.w + au) * 4] / 255 / amean);
+    }
+    const v = Math.max(0, Math.min(255, 150 * sh * a));
+    const o = (y * OW + xx) * 4;
+    od.data[o] = v; od.data[o + 1] = v; od.data[o + 2] = v; od.data[o + 3] = 255;
+  }
+  ox.putImageData(od, 0, 0);
+  shadedCache.set(key, out);
+  return out;
+}
+
 /** 지도 지역 고르기 (남극·북극·전역) */
 export function RegionSeg() {
   const region = useData((d) => d.mapRegion);
@@ -123,6 +194,8 @@ export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: n
   const nl = useNormLayer();
   const wac = useWac();
   const globe = useGlobeImage(region !== 'south');
+  const relief = useReliefImage(region === 'north' ? 'relief_north' : region === 'global' ? 'relief_global' : null);
+  const shaded = useMemo(() => (relief && region !== 'south' ? shadedBackground(region, relief, globe) : null), [relief, region, globe]);
   const ref = useRef<HTMLCanvasElement>(null);
 
   const layerImg = useMemo(() => {
@@ -180,12 +253,14 @@ export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: n
       if (region === 'global') {
         x.beginPath(); x.rect(0, 0, W, H); x.clip();
         // 배경: 등장방형 전역 텍스처의 75°S–75°N 부분
-        if (globe) { const ih = globe.naturalHeight, y0 = ((90 - BAND) / 180) * ih; x.drawImage(globe, 0, y0, globe.naturalWidth, ih - 2 * y0, 0, 0, W, H); }
+        if (shaded) x.drawImage(shaded, 0, 0, W, H);
+        else if (globe) { const ih = globe.naturalHeight, y0 = ((90 - BAND) / 180) * ih; x.drawImage(globe, 0, y0, globe.naturalWidth, ih - 2 * y0, 0, 0, W, H); }
         if (layerImg) { x.imageSmoothingEnabled = false; x.drawImage(layerImg, 0, 0, W, H); }
       } else {
         x.beginPath(); x.arc(W / 2, W / 2, W / 2, 0, 7); x.clip();
         if (region === 'south' && wac) x.drawImage(wac, 0, 0, W, W);
-        if (region === 'north' && globe) x.drawImage(northBackground(globe), 0, 0, W, W);
+        if (region === 'north' && shaded) x.drawImage(shaded, 0, 0, W, W);
+        else if (region === 'north' && globe) x.drawImage(northBackground(globe), 0, 0, W, W);
         if (layerImg && grid) {
           const ext = (grid.manifest.nx * grid.manifest.cell_km) / 2, s = (W * ext) / RAD_KM;
           x.imageSmoothingEnabled = true;
@@ -236,7 +311,7 @@ export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: n
     const ro = new ResizeObserver(draw);
     ro.observe(c);
     return () => ro.disconnect();
-  }, [region, wac, globe, layerImg, grid, sites, regions, vint, res, bases, rs, p.where]);
+  }, [region, wac, globe, shaded, layerImg, grid, sites, regions, vint, res, bases, rs, p.where]);
 
   return (
     <div className={`mapwrap${region === 'global' ? ' band' : ''}`} style={{ aspectRatio: String(regionAspect(region)) }}>
