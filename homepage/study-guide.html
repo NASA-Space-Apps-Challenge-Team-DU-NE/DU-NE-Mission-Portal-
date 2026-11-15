@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<script>
+  (() => {
+    const current = new URL(window.location.href);
+    const choice = current.searchParams.get("lang");
+    let saved;
+    try { saved = localStorage.getItem("dune-language"); } catch {}
+    const lang = choice || saved || navigator.language;
+    if (!/^ko(?:-|$)/i.test(lang)) return;
+    const koreanGuide = new URL("ko/study-guide.html", current);
+    koreanGuide.hash = current.hash;
+    window.location.replace(koreanGuide.href);
+  })();
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Study guide: landing on the Moon's south pole - Lunar Landing Site Navigator</title>
+<meta name="description" content="A study guide to light, shadow and line of sight at the Moon's south pole: how the Sun and Earth move in the lunar sky, how terrain hides them, and how landing sites are compared.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+/* Study guide: printed-textbook styling on top of the site stylesheet */
+.guide { font-size: 12px; line-height: 19px; }
+.guide p, .guide li { max-width: 680px; }
+.guide h2.page-head { font-size: 30px; line-height: 34px; margin-bottom: 4px; }
+.guide .byline { color: #555; font-style: italic; margin-bottom: 22px; }
+
+.guide .preface { max-width: 680px; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 10px 0 4px; margin-bottom: 24px; }
+.guide h3.pre { font-size: 17px; margin-bottom: 8px; }
+
+.guide h3.contents-head { font-size: 17px; margin: 0 0 6px; }
+.guide table.toc { border-collapse: collapse; margin-bottom: 10px; }
+.guide table.toc td { padding: 3px 18px 3px 0; vertical-align: top; }
+.guide table.toc td:first-child { color: #555; white-space: nowrap; }
+
+.guide .chapter { border-top: 3px double #1e253e; margin-top: 40px; padding-top: 14px; }
+.guide .chap-no { font-family: "Myriad Pro", "Source Sans 3", Arial, sans-serif; font-size: 13px; letter-spacing: 2px; text-transform: uppercase; color: #1e253e; margin: 0 0 2px; }
+.guide h2.chap { font-size: 30px; line-height: 34px; font-weight: 300; margin-bottom: 16px; }
+.guide h3.sec { font-size: 19px; line-height: 22px; color: #1e253e; margin: 26px 0 8px; }
+
+.guide .objectives { max-width: 660px; border: 1px solid #999; padding: 8px 12px 2px; margin-bottom: 18px; }
+.guide .obj-head, .guide .sum-head, .guide .q-head, .guide .wk-head, .guide .act-head {
+  font-family: "Myriad Pro", "Source Sans 3", Arial, sans-serif; font-size: 15px; font-weight: 600; margin: 0 0 6px; }
+.guide .objectives ul { margin: 0 0 8px; padding-left: 18px; }
+
+.guide .eq { font-family: "Times New Roman", Times, serif; font-size: 16px; text-align: center; margin: 14px 0; position: relative; max-width: 680px; }
+.guide .eq-no { position: absolute; right: 0; font-size: 13px; }
+
+.guide .worked { max-width: 660px; border-left: 3px solid #1e253e; padding: 2px 0 2px 14px; margin: 16px 0; }
+.guide .worked p { margin-bottom: 6px; }
+
+.guide figure.fig { margin: 18px 0; max-width: 740px; border-top: 1px solid #bbb; border-bottom: 1px solid #bbb; padding: 10px 0 6px; }
+.guide figure.fig svg, .guide figure.fig img { display: block; width: 100%; height: auto; }
+.guide figure.fig figcaption { font-size: 11px; line-height: 16px; color: #333; padding-top: 8px; max-width: 700px; }
+
+.guide table.data { border-collapse: collapse; margin: 16px 0; max-width: 700px; width: 100%; }
+.guide table.data caption { text-align: left; font-size: 11px; padding-bottom: 6px; }
+.guide table.data th, .guide table.data td { text-align: left; padding: 4px 10px 4px 0; vertical-align: top; }
+.guide table.data thead th { border-top: 2px solid #000; border-bottom: 1px solid #000; }
+.guide table.data tbody tr:last-child td { border-bottom: 2px solid #000; }
+
+.guide .summary { max-width: 660px; background: #f3f3f3; padding: 10px 12px 4px; margin-top: 24px; }
+.guide .summary ol, .guide .questions ol { padding-left: 20px; }
+.guide .summary li, .guide .questions li { margin-bottom: 6px; }
+.guide .questions { max-width: 680px; margin-top: 18px; }
+
+.guide ol.steps li { margin-bottom: 6px; }
+.guide .activity { max-width: 660px; border: 1px solid #1e253e; padding: 10px 12px 4px; margin: 22px 0; }
+.guide .activity ol { padding-left: 20px; }
+.guide .note { font-size: 11px; color: #444; }
+
+.guide .ans-ch { font-weight: bold; margin: 14px 0 4px; }
+.guide ol.answers { padding-left: 20px; }
+.guide ol.answers li { margin-bottom: 4px; }
+.guide dl.gloss { max-width: 680px; }
+.guide dl.gloss dt { font-weight: bold; margin-top: 8px; }
+.guide dl.gloss dd { margin: 2px 0 0 18px; }
+.guide ol.refs { padding-left: 20px; max-width: 680px; }
+.guide ol.refs li { margin-bottom: 6px; }
+.guide .top-link { margin-top: 30px; }
+
+/* Diagram colours: black line work, grey ground, one colour for the Sun and one for Earth */
+.guide svg text { font-family: Arial, Helvetica, sans-serif; }
+.guide svg .ink { fill: #000; }
+.guide svg .mut { fill: #555; }
+.guide svg .b { font-weight: bold; }
+.guide svg .s { font-size: 12px; }
+.guide svg .t { font-size: 13px; }
+.guide svg .line { stroke: #555; fill: none; stroke-width: 1.2; }
+.guide svg .thin { stroke: #bbb; fill: none; }
+.guide svg .dash { stroke-dasharray: 4 4; }
+.guide svg .ground { fill: #d6d6d6; stroke: none; }
+.guide svg .sunf { fill: #c06000; }
+.guide svg .suns { stroke: #c06000; fill: none; stroke-width: 2; }
+.guide svg .sunt { fill: #f7eadb; stroke: #c06000; }
+.guide svg .earthf { fill: #1e253e; }
+.guide svg .earths { stroke: #1e253e; fill: none; stroke-width: 2; }
+.guide svg .eartht { fill: #e4e6ee; stroke: #1e253e; }
+.guide svg .warnf { fill: #9b2c1f; }
+.guide svg .warns { stroke: #9b2c1f; fill: none; stroke-width: 2; }
+.guide svg .warnt { fill: #f6e6e3; stroke: #9b2c1f; }
+.guide svg .goodf { fill: #3d7a3d; }
+.guide svg .box { fill: none; stroke: #555; stroke-width: 1.2; }
+.guide svg .boxk { fill: none; stroke: #000; stroke-width: 1.4; }
+.guide svg .paper { fill: #fff; }
+
+@media print {
+  .bar-top, .bar-crumb, .bar-menu, .sidebar, .foot, .top-link { display: none; }
+  .guide .chapter { page-break-before: always; }
+  .guide figure.fig { page-break-inside: avoid; }
+}
+
+</style>
+</head>
+<body>
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="Search this site" aria-label="Search this site"><button type="submit">Search</button></form>
+     <div class="lang" aria-label="Language">
+  <a href="?lang=en" data-language="en" hreflang="en" style="color:#fff">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href="ko/study-guide.html" hreflang="ko" style="color:#fff">KR</a>
+</div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">Lunar Landing Site Navigator</a> &rsaquo; <a href="teaching.html">Learning resources</a> &rsaquo; Study guide</div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>Lunar Landing Site Navigator</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="Main">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teaching.html" aria-current="page">Learning resources</a></li>
+      <li class="has-drop"><a href="sources.html" aria-haspopup="true">Sources &amp; Checks</a>
+        <ul class="drop">
+          <li><a href="sources-list.html">Sources the project used</a></li>
+          <li><a href="checks.html">Checks</a></li>
+          <li><a href="source-code.html">Source code</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page layout">
+  <main class="content-plain guide">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#555"/></marker><marker id="ars" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#c06000"/></marker><marker id="are" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#1e253e"/></marker></defs></svg>
+<h2 class="page-head">Landing on the Moon's South Pole: Light, Shadow and Line of Sight</h2>
+<p class="byline">A study guide for students, teachers and anyone new to the subject</p>
+
+<div class="preface">
+<h3 class="pre">To the reader</h3>
+<p>Several space agencies and companies plan to land near the Moon's south pole in the next few years, and NASA intends to build a long-term base there. Whether a landing succeeds depends to a large degree on two simple questions: can the lander see the Sun, and can it see the Earth? The first decides whether its solar panels can make power. The second decides whether it can talk to people at home.</p>
+<p>At the south pole both questions are surprisingly hard to answer. The Sun never climbs more than a degree or two above the horizon, so a hill many kilometres away can cast a shadow over a site for days. Earth also sits low in the sky and can drop out of sight behind a crater rim. This guide explains why, and shows how scientists and mission planners work out the answers from real data.</p>
+<p>No previous knowledge of astronomy is assumed. Some sections use simple trigonometry; the worked examples show every step, and the rest of the guide can be followed without them. Each chapter begins with a list of what it covers and ends with a summary and review questions. Answers are given at the back, together with a glossary and a list of references.</p>
+</div>
+
+<h3 class="contents-head">Contents</h3>
+<table class="toc">
+<tr><td>Chapter 1</td><td><a href="#ch1">Positions in the sky</a></td></tr>
+<tr><td>Chapter 2</td><td><a href="#ch2">The Sun and Earth in the lunar sky</a></td></tr>
+<tr><td>Chapter 3</td><td><a href="#ch3">Terrain, light and shadow</a></td></tr>
+<tr><td>Chapter 4</td><td><a href="#ch4">Power and communication</a></td></tr>
+<tr><td>Chapter 5</td><td><a href="#ch5">Where the numbers come from</a></td></tr>
+<tr><td>Chapter 6</td><td><a href="#ch6">Choosing a landing site</a></td></tr>
+<tr><td></td><td><a href="#answers">Answers to review questions</a></td></tr>
+<tr><td></td><td><a href="#glossary">Glossary</a></td></tr>
+<tr><td></td><td><a href="#references">References</a></td></tr>
+</table>
+
+<!-- ================= CHAPTER 1 ================= -->
+<div class="chapter" id="ch1">
+<p class="chap-no">Chapter 1</p>
+<h2 class="chap">Positions in the sky</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>How the position of the Sun or Earth in the sky is described with two angles.</li>
+<li>The difference between the horizon and the skyline.</li>
+<li>Why a lander needs to know about both the Sun and the Earth.</li>
+<li>How the whole sky around a site can be drawn as one picture, the panorama.</li>
+</ul>
+</div>
+
+<h3 class="sec">1.1 Azimuth and elevation</h3>
+<p>Stand anywhere on the Moon and look at the Sun. To tell someone else where it is, you need two pieces of information: which way to face, and how far to look up. Astronomers give these as two angles.</p>
+<p>The <b>azimuth</b> is the compass direction. It is measured in degrees, starting at north (0°) and turning clockwise through east (90°), south (180°) and west (270°). The <b>elevation</b> is the angle above the <b>horizon</b>. Here the horizon means an imaginary flat line at eye level, as if the ground were perfectly level all the way round. An object exactly on that line has an elevation of 0°; an object straight overhead has an elevation of 90°.</p>
+<p>Real ground is not flat. Hills, crater rims and mountains rise above the flat horizon in some directions and fall below it in others. The line where the real ground meets the sky is called the <b>skyline</b>. The skyline is different in every direction, so it is described by giving its elevation at each azimuth.</p>
+<figure class="fig" id="fig1.1">
+<svg viewBox="0 0 760 330" role="img" aria-label="Horizon, skyline, elevation and azimuth shown on a side view and a top view">
+  <text x="200" y="22" text-anchor="middle" class="ink t b">Side view: standing at a site</text>
+  <path d="M20 230 L120 230 L170 205 L230 180 L280 200 L330 170 L380 196 L400 200 L400 260 L20 260 Z" class="ground"/>
+  <line x1="20" y1="230" x2="400" y2="230" class="line dash"/>
+  <circle cx="70" cy="226" r="6" class="ink"/>
+  <circle cx="360" cy="110" r="13" class="sunf"/>
+  <path d="M70 226 L347 114" class="suns"/>
+  <path d="M150 226 A80 80 0 0 0 144 196" class="line" stroke-width="2"/>
+  <text x="156" y="212" class="ink s b">elevation</text>
+  <text x="24" y="250" class="mut s">horizon: flat line at eye level</text>
+  <text x="210" y="276" class="mut s">skyline: where real ground meets the sky</text>
+  <path d="M300 264 L328 176" class="line"/>
+  <text x="200" y="296" text-anchor="middle" class="mut s">elevation = how many degrees up from the flat horizon</text>
+
+  <text x="580" y="22" text-anchor="middle" class="ink t b">Top view: looking down on the site</text>
+  <circle cx="580" cy="160" r="105" class="box"/>
+  <circle cx="580" cy="160" r="5" class="ink"/>
+  <text x="580" y="46" text-anchor="middle" class="ink s b">0° (north)</text>
+  <text x="696" y="164" class="mut s">90°</text>
+  <text x="580" y="282" text-anchor="middle" class="mut s">180°</text>
+  <text x="446" y="164" class="mut s">270°</text>
+  <path d="M580 160 L671 213" class="suns"/>
+  <circle cx="671" cy="213" r="11" class="sunf"/>
+  <path d="M580 105 A55 55 0 0 1 628 188" class="line" stroke-width="2" marker-end="url(#ar)"/>
+  <text x="612" y="120" class="ink s b">azimuth</text>
+  <text x="580" y="300" text-anchor="middle" class="mut s">azimuth = compass direction, measured clockwise from north</text>
+  <rect x="150" y="306" width="460" height="22" rx="6" class="eartht"/>
+  <text x="380" y="321" text-anchor="middle" class="ink s b">visible = higher than the skyline in that direction</text>
+</svg>
+<figcaption><b>Figure 1.1</b>&nbsp; Azimuth and elevation. Left: seen from the side, elevation is measured up from the flat horizon; the skyline is where the actual ground meets the sky. Right: seen from above, azimuth is measured clockwise from north.</figcaption>
+</figure>
+<p>These ideas lead to the single rule on which this whole guide rests. <i>An object is visible from a site when its elevation is greater than the elevation of the skyline in the same direction.</i> If the Sun is 1.5° above the flat horizon but a ridge in that direction rises to 3°, the Sun is hidden.</p>
+
+<h3 class="sec">1.2 What a lander needs</h3>
+<p>Most landers near the lunar poles run on solar power. Their panels produce electricity only while the Sun is visible, and the lander's batteries must carry it through every period of darkness. A lander also needs to send data home and receive commands. Radio waves travel in straight lines, so a direct link with Earth is only possible while Earth is above the skyline.</p>
+<figure class="fig" id="fig1.2">
+<svg viewBox="0 0 760 250" role="img" aria-label="A lander needs the Sun for power and Earth for radio">
+  <rect x="0" y="190" width="760" height="60" class="ground"/>
+  <path d="M0 190 L120 150 L200 175 L260 190 Z" class="ground"/>
+  <path d="M520 190 L600 140 L680 170 L760 160 L760 190 Z" class="ground"/>
+  <!-- lander -->
+  <rect x="356" y="160" width="48" height="26" rx="3" class="boxk paper"/>
+  <line x1="362" y1="186" x2="350" y2="192" class="line"/><line x1="398" y1="186" x2="410" y2="192" class="line"/>
+  <rect x="404" y="140" width="6" height="40" class="sunf"/>
+  <text x="380" y="215" text-anchor="middle" class="ink t b">lander</text>
+  <!-- sun -->
+  <circle cx="60" cy="70" r="26" class="sunf"/>
+  <text x="60" y="30" text-anchor="middle" class="ink t b">Sun</text>
+  <path d="M90 82 L398 156" class="suns" marker-end="url(#ars)"/>
+  <text x="200" y="100" class="ink t">sunlight → solar panel → power</text>
+  <!-- earth -->
+  <circle cx="690" cy="62" r="30" class="earthf"/>
+  <text x="690" y="20" text-anchor="middle" class="ink t b">Earth</text>
+  <path d="M400 156 L656 78" class="earths dash" marker-end="url(#are)"/>
+  <text x="420" y="66" class="ink t">straight line of sight → radio</text>
+</svg>
+<figcaption><b>Figure 1.2</b>&nbsp; The two questions every lunar site must answer. Sunlight reaches the solar panels only when the Sun is above the skyline; a direct radio link works only when Earth is above the skyline.</figcaption>
+</figure>
+<p>For any site and any date, then, the important questions are whether the Sun is above the skyline, whether Earth is above the skyline, and for how long each stays there. The rest of this guide explains how these questions are answered.</p>
+
+<h3 class="sec">1.3 The panorama</h3>
+<p>A convenient way to see the whole sky around a site at once is to imagine turning slowly on the spot, photographing the skyline in every direction, and laying the photographs side by side. The result is a long strip: a <b>panorama</b>. Its horizontal axis is azimuth, from 0° to 360°, and its vertical axis is elevation.</p>
+<figure class="fig" id="fig1.3">
+<svg viewBox="0 0 760 250" role="img" aria-label="The ring of hills around a site is cut at north and unrolled into a strip; each hill lands at its own azimuth">
+  <text x="150" y="22" text-anchor="middle" class="ink t b">From above: hills all around you</text>
+  <circle cx="150" cy="135" r="80" class="box"/>
+  <path d="M142 55 l8 -16 l8 16 Z M230 127 l16 8 l-16 8 Z M142 215 l8 14 l8 -14 Z M93 78 l-18 -6 l6 -12 Z" class="ground"/>
+  <circle cx="150" cy="135" r="5" class="ink"/>
+  <line x1="150" y1="55" x2="150" y2="125" class="warns"/>
+  <text x="156" y="118" class="ink s" style="fill:var(--warn)">cut at north</text>
+  <g class="mut s b"><text x="170" y="48" text-anchor="start">N</text><text x="256" y="139">E</text><text x="150" y="245" text-anchor="middle">S</text><text x="44" y="139" text-anchor="end">W</text></g>
+  <path d="M275 135 H335" class="line" marker-end="url(#ar)"/>
+  <text x="305" y="125" text-anchor="middle" class="mut s">unroll</text>
+  <text x="550" y="22" text-anchor="middle" class="ink t b">Unrolled into a strip</text>
+  <rect x="350" y="70" width="400" height="90" class="box"/>
+  <path d="M350 160 L350 122 L372 160 Z M428 160 L450 124 L472 160 Z M528 160 L550 130 L572 160 Z M678 160 L700 116 L722 160 Z M728 160 L750 122 L750 160 Z" class="ground"/>
+  <line x1="350" y1="60" x2="350" y2="170" class="warns"/><line x1="750" y1="60" x2="750" y2="170" class="warns"/>
+  <g class="mut s"><text x="350" y="184" text-anchor="middle">0° N</text><text x="450" y="184" text-anchor="middle">90° E</text><text x="550" y="184" text-anchor="middle">180° S</text><text x="650" y="184" text-anchor="middle">270° W</text><text x="750" y="184" text-anchor="middle">360° N</text></g>
+  <text x="700" y="104" text-anchor="middle" class="mut s">NW hill</text>
+  <text x="550" y="212" text-anchor="middle" class="mut s">left to right = azimuth (which way you face)</text>
+  <text x="550" y="232" text-anchor="middle" class="mut s">up = elevation (how high the skyline is)</text>
+</svg>
+<figcaption><b>Figure 1.3</b>&nbsp; Making a panorama. The ring of hills around a site (left) is cut at north and unrolled into a strip (right). Each hill keeps its compass direction; the hill to the north is cut in two and appears at both ends.</figcaption>
+</figure>
+<p>Once the skyline has been drawn in this way, the positions of the Sun and Earth can be marked on the same strip. Anything drawn above the skyline is visible; anything below it is hidden. Real examples are shown in Chapter 3.</p>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>A position in the sky is given by two angles: azimuth (compass direction, clockwise from north) and elevation (angle above the flat horizon).</li>
+<li>The skyline is where the real ground meets the sky. Its height changes with direction.</li>
+<li>An object is visible when its elevation is greater than the skyline's elevation at the same azimuth.</li>
+<li>A solar-powered lander needs the Sun above the skyline for power and Earth above the skyline for direct radio contact.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>A star has an azimuth of 270°. In which compass direction should you face to see it?</li>
+<li>What is the difference between the horizon and the skyline?</li>
+<li>The Sun has an elevation of 2.0°. In the Sun's direction the skyline has an elevation of 2.4°. Is the Sun visible?</li>
+<li>Why does a direct radio link with Earth require Earth to be above the skyline?</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= CHAPTER 2 ================= -->
+<div class="chapter" id="ch2">
+<p class="chap-no">Chapter 2</p>
+<h2 class="chap">The Sun and Earth in the lunar sky</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>Why the Moon has almost no seasons.</li>
+<li>Why the Sun at the lunar poles never rises more than about 1.5° above the horizon.</li>
+<li>How the Sun moves around the sky at the pole instead of rising and setting.</li>
+<li>Why Earth stays in nearly the same part of the sky but slowly rocks up and down.</li>
+<li>How large the Sun and Earth appear from the Moon.</li>
+</ul>
+</div>
+
+<h3 class="sec">2.1 A Moon with almost no tilt</h3>
+<p>Earth's axis of rotation is tilted by 23.4° from the line at right angles to its orbit around the Sun. This tilt gives Earth its seasons: for half of the year the northern half of the planet leans towards the Sun, and for the other half it leans away.</p>
+<p>The Moon's axis is tilted by only about 1.5° from the line at right angles to the plane in which Earth and Moon travel around the Sun. As a result the Moon has almost no seasons. At any given place on the Moon, the Sun follows nearly the same path through the sky in every month of the year.</p>
+<figure class="fig" id="fig2.1">
+<svg viewBox="0 0 760 240" role="img" aria-label="Earth is tilted 23.4 degrees, the Moon only about 1.5 degrees">
+  <line x1="20" y1="120" x2="740" y2="120" class="thin dash"/>
+  <text x="20" y="112" class="mut s">plane of Earth's orbit round the Sun</text>
+  <!-- Earth -->
+  <circle cx="200" cy="120" r="60" class="eartht"/>
+  <line x1="200" y1="120" x2="200" y2="30" class="thin dash"/>
+  <line x1="238" y1="34" x2="162" y2="206" class="earths"/>
+  <path d="M200 60 A60 60 0 0 1 224 65" class="line"/>
+  <text x="250" y="58" class="ink t b">23.4°</text>
+  <text x="200" y="225" text-anchor="middle" class="ink t b">Earth: strong seasons</text>
+  <!-- Moon -->
+  <circle cx="540" cy="120" r="44" class="ground"/>
+  <line x1="540" y1="120" x2="540" y2="40" class="thin dash"/>
+  <line x1="542.5" y1="44" x2="537.5" y2="196" class="boxk"/>
+  <text x="560" y="52" class="ink t b">about 1.5°</text>
+  <text x="540" y="225" text-anchor="middle" class="ink t b">Moon: almost no seasons</text>
+</svg>
+<figcaption><b>Figure 2.1</b>&nbsp; Axial tilt of Earth and the Moon. Earth's large tilt produces strong seasons; the Moon's tilt of about 1.5° produces almost none.</figcaption>
+</figure>
+
+<h3 class="sec">2.2 The Sun at the pole</h3>
+<p>Imagine standing exactly on the Moon's south pole. The axis of rotation points straight up through your feet, so your horizon lies in the same plane as the Moon's equator. Sunlight always arrives from within about 1.5° of that plane, because the axis is tilted by no more than that. The Sun can therefore never be more than about 1.5° above your horizon.</p>
+<figure class="fig" id="fig2.2">
+<svg viewBox="0 0 760 270" role="img" aria-label="Sunlight arrives within 1.5 degrees of the Moon's equator plane, so at the pole the Sun is at most 1.5 degrees up">
+  <circle cx="300" cy="120" r="90" class="ground"/>
+  <line x1="300" y1="10" x2="300" y2="236" class="line dash"/>
+  <text x="308" y="22" class="mut s">spin axis</text>
+  <line x1="140" y1="210" x2="460" y2="210" class="earths"/>
+  <circle cx="300" cy="210" r="6" class="ink"/>
+  <text x="300" y="236" text-anchor="middle" class="ink s b">you, standing on the south pole</text>
+  <text x="470" y="214" class="ink s b" style="fill:var(--earth)">your horizon</text>
+  <g class="suns"><path d="M20 182 L290 206" marker-end="url(#ars)"/></g>
+  <text x="20" y="150" class="ink s b">sunlight (angle exaggerated)</text>
+  <path d="M200 210 A100 100 0 0 0 199 201" class="line" stroke-width="2"/>
+  <text x="130" y="232" class="ink s b">at most ~1.5°</text>
+  <rect x="500" y="40" width="244" height="110" rx="8" class="box paper"/>
+  <text x="516" y="64" class="ink s">Sunlight always comes in within</text>
+  <text x="516" y="84" class="ink s">about 1.5° of the Moon's equator.</text>
+  <text x="516" y="104" class="ink s">At the pole your horizon is level</text>
+  <text x="516" y="124" class="ink s b">with that, so the Sun is ≤ 1.5° up.</text>
+</svg>
+<figcaption><b>Figure 2.2</b>&nbsp; Why the polar Sun stays low. At the pole the horizon is parallel to the Moon's equator, and sunlight always arrives within about 1.5° of that plane. (The angle is exaggerated so that it can be seen.)</figcaption>
+</figure>
+<p>The same reasoning applies on Earth, where the angle can reach 23.4°. That is why the midnight Sun near Earth's poles climbs much higher than the Sun at the Moon's poles ever does. A useful rule follows from the figure:</p>
+<p class="eq">maximum elevation of the Sun at a pole &asymp; tilt of the axis <span class="eq-no">(2.1)</span></p>
+
+<h3 class="sec">2.3 A Sun that circles instead of rising and setting</h3>
+<p>Near the Moon's equator the Sun behaves much as it does on Earth, except slowly: it rises, climbs high and sets, and one full day lasts about 29.5 Earth days. At the pole the picture is different. The Moon still turns once every 29.5 days, but because the Sun stays close to the horizon, it does not go up and down. Instead it travels all the way round the observer, close to the horizon, once in each 29.5-day period.</p>
+<figure class="fig" id="fig2.3">
+<svg viewBox="0 0 760 330" role="img" aria-label="At the equator the Sun arcs overhead; at the pole, seen from above, it circles around you once every 29.5 days">
+  <text x="190" y="22" text-anchor="middle" class="ink h">Near the equator (side view)</text>
+  <line x1="30" y1="230" x2="350" y2="230" class="line"/>
+  <path d="M50 230 Q190 -10 330 230" class="suns"/>
+  <circle cx="190" cy="110" r="10" class="sunf"/>
+  <text x="190" y="256" text-anchor="middle" class="mut s">rises, climbs high, sets</text>
+  <text x="570" y="22" text-anchor="middle" class="ink h">At the south pole (from above)</text>
+  <circle cx="570" cy="175" r="95" class="suns dash"/>
+  <circle cx="570" cy="175" r="5" class="ink"/>
+  <text x="570" y="195" text-anchor="middle" class="ink s">you</text>
+  <circle cx="570" cy="80" r="10" class="sunf"/><text x="570" y="57" text-anchor="middle" class="ink s b">day 0</text><circle cx="475" cy="172" r="10" class="sunf"/><text x="458" y="176" text-anchor="end" class="ink s b">day 7</text><circle cx="575" cy="270" r="10" class="sunf"/><text x="576" y="301" text-anchor="middle" class="ink s b">day 15</text><circle cx="665" cy="182" r="10" class="sunf"/><text x="682" y="186" text-anchor="start" class="ink s b">day 22</text>
+  <path d="M500 111 A95 95 0 0 0 480 137" class="line" marker-end="url(#ar)" stroke-width="2"/>
+  <g class="mut s"><text x="570" y="160" text-anchor="middle">N</text><text x="612" y="179" text-anchor="middle">E</text><text x="528" y="179" text-anchor="middle">W</text></g>
+  <text x="570" y="322" text-anchor="middle" class="mut s">the Sun circles round you, always just above the horizon</text>
+</svg>
+<figcaption><b>Figure 2.3</b>&nbsp; The path of the Sun near the equator (left) and at the south pole seen from above (right). At the pole the Sun circles the observer once every 29.5 days, moving from north to west to south to east, so that its azimuth decreases day by day.</figcaption>
+</figure>
+
+<div class="worked">
+<p class="wk-head">Worked example 2.1</p>
+<p><i>How fast does the Sun move around the sky at the pole?</i></p>
+<p>The Sun completes one circle of 360° in 29.53 days. Its rate of movement is therefore 360° &divide; 29.53 days = 12.2° per day, or about 0.5° per hour. Since the Sun's disc is about 0.5° wide (Section 2.6), it moves by roughly its own width every hour.</p>
+</div>
+
+<p>A short distance from the pole the path is no longer level. During each 29.5-day circle the Sun rises a little on one side of the sky and sinks a little on the other. The size of this rise and fall is roughly equal to the observer's distance from the pole, measured in degrees of latitude. At 89°S, one degree from the pole, the Sun's elevation swings by about 1° above and below its average; at 85°S it swings by about 5°.</p>
+
+<h3 class="sec">2.4 Earth in the lunar sky</h3>
+<p>The Moon always keeps the same face turned towards Earth. Seen from the Moon, Earth therefore stays in almost the same place in the sky. From the centre of the near side it hangs nearly overhead; from the poles it sits close to the horizon, in the direction of the near side.</p>
+<p>Earth does not stay perfectly still, however. Because the Moon's orbit is slightly elliptical and slightly tilted, the Moon appears to rock gently to and fro as seen from Earth. This effect is called <b>libration</b>. Seen from the Moon, it makes Earth move back and forth in the sky by up to about 7° in the north–south direction and about 8° in the east–west direction, over a cycle of about a month.</p>
+<p>At the south pole, where Earth sits near the horizon, the north–south part of this movement makes Earth rise and sink. For about half of each month Earth is above the flat horizon; for the other half it is below it. A crater rim or ridge in Earth's direction can hide it for longer still.</p>
+
+<h3 class="sec">2.5 A note on parallax</h3>
+<p>Earth is close enough to the Moon that its position in the lunar sky depends slightly on where the observer stands. Seen from the edge of the Moon's visible disc rather than its centre, Earth's direction shifts by about a quarter of a degree; between two opposite edges the difference is about half a degree. This shift with the observer's position is called <b>parallax</b>. For the Sun, which is about 390 times farther away, the effect is far too small to matter. Careful calculations therefore work out Earth's direction for the exact site rather than for the centre of the Moon.</p>
+
+<h3 class="sec">2.6 Discs, not points</h3>
+<p>The Sun and Earth are not points of light but discs of a definite size. The angle a disc covers, its <b>angular diameter</b>, depends on its true diameter <i>D</i> and its distance <i>d</i>:</p>
+<p class="eq">angular diameter = 2 &times; arctan (<i>D</i> / 2<i>d</i>) <span class="eq-no">(2.2)</span></p>
+
+<div class="worked">
+<p class="wk-head">Worked example 2.2</p>
+<p><i>How large do the Sun and Earth look from the Moon?</i></p>
+<p>Earth has a radius of 6,371 km and is about 384,400 km from the Moon. Its angular diameter is 2 &times; arctan (6,371 / 384,400) = 1.90°.</p>
+<p>The Sun has a radius of 696,000 km and is about 149.6 million km away. Its angular diameter is 2 &times; arctan (696,000 / 149,600,000) = 0.53°.</p>
+<p>Earth therefore appears about three and a half times as wide as the Sun.</p>
+</div>
+
+<figure class="fig" id="fig2.4">
+<svg viewBox="0 0 760 210" role="img" aria-label="Earth looks about 3.5 times wider than the Sun; half behind a ridge, three rules give different answers">
+  <path d="M0 150 L760 150 L760 210 L0 210 Z" class="ground"/>
+  <circle cx="110" cy="150" r="14" class="sunf"/>
+  <text x="110" y="110" text-anchor="middle" class="ink s b">Sun ≈ 0.53° wide</text>
+  <circle cx="300" cy="150" r="48" class="earthf"/>
+  <path d="M0 150 L760 150 L760 210 L0 210 Z" class="ground" opacity=".95"/>
+  <text x="300" y="86" text-anchor="middle" class="ink s b">Earth ≈ 3.5× wider</text>
+  <g class="s">
+    <rect x="430" y="40" width="310" height="100" rx="8" class="box paper"/>
+    <text x="446" y="64" class="ink b">Earth half behind the ridge. Visible?</text>
+    <text x="446" y="88" class="ink">'centre above skyline' → borderline</text>
+    <text x="446" y="108" class="ink">'any part above' → yes</text>
+    <text x="446" y="128" class="ink">'all of it above' → no</text>
+  </g>
+</svg>
+<figcaption><b>Figure 2.4</b>&nbsp; When Earth is partly hidden behind a ridge, whether it counts as visible depends on the rule chosen: its centre above the skyline, any part above, or the whole disc above. The same choice applies to the Sun.</figcaption>
+</figure>
+<p>When a disc is partly behind a ridge, different rules give different answers. Near the pole, where the Sun and Earth move slowly against the skyline, the choice of rule can change the time of sunset or "earthset" by hours. Any calculation should therefore state which rule it uses.</p>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>The Moon's axis is tilted by only about 1.5°, so the Moon has almost no seasons.</li>
+<li>At the poles the Sun is never more than about 1.5° above the flat horizon. It circles the observer once every 29.5 days, at about 12° per day.</li>
+<li>A little away from the pole the Sun rises and falls during each circle by roughly the distance from the pole in degrees.</li>
+<li>Earth stays in nearly the same part of the lunar sky, but libration makes it move by several degrees. At the pole this makes Earth rise above and sink below the horizon each month.</li>
+<li>The Sun appears 0.53° wide and Earth 1.90° wide. Calculations must state whether a body counts as visible when its centre, any part or all of it is above the skyline.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>Why does the Moon have almost no seasons?</li>
+<li>Mars's axis is tilted by about 25°. Roughly how high could the Sun climb above the horizon at the Martian poles?</li>
+<li>At the Moon's south pole, how many degrees does the Sun move around the sky in 3 days?</li>
+<li>An observer stands at 87°S. By roughly how much does the Sun's elevation rise and fall during one 29.5-day circle?</li>
+<li>Use Equation 2.2 to find the angular diameter of the Moon seen from Earth. (Moon's radius 1,737 km; distance 384,400 km.)</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= CHAPTER 3 ================= -->
+<div class="chapter" id="ch3">
+<p class="chap-no">Chapter 3</p>
+<h2 class="chap">Terrain, light and shadow</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>Why a distant ridge can shade a polar site for days.</li>
+<li>How some crater floors can stay dark for billions of years.</li>
+<li>How to read a real panorama of the lunar sky.</li>
+<li>Why small errors in the skyline cause large errors in timing near the pole.</li>
+</ul>
+</div>
+
+<h3 class="sec">3.1 Long shadows</h3>
+<p>When the Sun is low, shadows are long. On the Moon there is no air to scatter light into the shadows, so anything in shadow is truly dark. The length <i>L</i> of the shadow cast by a ridge of height <i>h</i> when the Sun has elevation <i>e</i> is given, over level ground, by</p>
+<p class="eq"><i>L</i> = <i>h</i> / tan <i>e</i> <span class="eq-no">(3.1)</span></p>
+
+<div class="worked">
+<p class="wk-head">Worked example 3.1</p>
+<p><i>A ridge rises 1,000 m above the surrounding plain. How long is its shadow when the Sun is 1° above the horizon?</i></p>
+<p><i>L</i> = 1,000 m / tan 1° = 1,000 m / 0.01746 = 57,300 m, or about 57 km.</p>
+<p>A single ridge can therefore shade ground more than 50 km away. (The curvature of the Moon shortens real shadows somewhat; Section 5.6 shows how to allow for it.)</p>
+</div>
+
+<figure class="fig" id="fig3.1">
+<svg viewBox="0 0 760 250" role="img" aria-label="A low Sun lights a ridge top and a hill top; everything below the shadow line behind the ridge, including a crater floor and the site, is dark">
+  <path d="M42 89 L760 134" class="suns dash" opacity=".0"/>
+  <path d="M0 225 L110 225 L200 100 L255 215 L395 215 L500 102 L560 205 L760 210 L760 250 L0 250 Z" class="ground"/>
+    <circle cx="30" cy="88" r="12" class="sunf"/>
+  <path d="M42 89 L198 99" class="suns"/>
+  <path d="M42 89 L496 102" class="suns"/>
+  <path d="M200 100 L760 135" class="warns dash"/>
+  <text x="196" y="88" text-anchor="end" class="ink s b">ridge top: lit</text>
+  <text x="500" y="92" text-anchor="middle" class="ink s b">hill top: lit</text>
+  <text x="755" y="150" text-anchor="end" class="s b" style="fill:var(--warn)">shadow edge: below this line is dark</text>
+  <text x="325" y="205" text-anchor="middle" class="ink s b">crater floor: never lit</text>
+  <text x="325" y="240" text-anchor="middle" class="mut s">(permanent shadow, ice)</text>
+  <rect x="640" y="192" width="22" height="14" rx="2" class="boxk paper"/>
+  <text x="651" y="184" text-anchor="middle" class="ink s b">site: in shadow</text>
+  <text x="60" y="130" class="mut s">sunlight arrives almost flat →</text>
+</svg>
+<figcaption><b>Figure 3.1</b>&nbsp; Light and shadow with a low Sun. Sunlight arrives almost horizontally. The tops of the ridge and the hill are lit, but everything below the dashed shadow line, including the crater floor and the site, is dark. Heights are greatly exaggerated.</figcaption>
+</figure>
+<p>High ground near the poles, such as crater rims and isolated mountains, can be lit for most of the month because it rises above the shadows of its surroundings. Low ground behind high ground may be dark for days or weeks at a time.</p>
+
+<h3 class="sec">3.2 Permanent shadow and ice</h3>
+<p>Some crater floors near the poles lie so deep that the low Sun never reaches them at all. These are called <b>permanently shadowed regions</b>. Without sunlight they remain extremely cold, colder in places than the surface of Pluto. Water and other substances that arrive there, for example in comet impacts, can stay frozen for very long periods.</p>
+<p>This ice is one of the main reasons for going to the south pole. It could supply drinking water, oxygen and rocket fuel for future crews. The result is a landscape of extremes: some high points are lit for most of the year, while nearby crater floors have not seen the Sun for perhaps billions of years.</p>
+
+<h3 class="sec">3.3 Reading a real panorama</h3>
+<p>Figures 3.2 and 3.3 are panoramas drawn from real data, in the form introduced in Section 1.3. The skyline was calculated from NASA's laser measurements of the lunar surface (Chapter 5). The positions of the Sun and Earth were calculated for every 12 hours from 14 November to 14 December 2026. Because the hills are only a few degrees high, the vertical scale has been stretched to make them visible.</p>
+<figure class="fig" id="fig3.2">
+<img src="assets/images/guide/panorama-connecting-ridge.png" alt="Panorama with a grey skyline between minus 3 and minus 1 degrees, the Sun's path between 1 and 2 degrees, and Earth tracing a tall loop near azimuth 135 degrees.">
+<figcaption><b>Figure 3.2</b>&nbsp; Panorama from Connecting Ridge (89.44°S, 222.81°E), near Shackleton crater, 14 November to 14 December 2026. Grey: the skyline (lighter shades are nearer hills). Circles: the Sun every 12 hours. Squares: Earth every 12 hours. Filled symbols are visible; open symbols are hidden behind terrain. Heights are stretched about 11 times.</figcaption>
+</figure>
+<p>Look first at the circles in Figure 3.2. The Sun travels once round the sky, from right to left as its azimuth decreases, and stays between about 1° and 2° above the flat horizon, as Chapter 2 predicts. At this site the skyline is lower still in every direction, because the site stands on high ground. The Sun therefore never sets during this month.</p>
+<p>Now look at the squares. Earth hardly moves sideways but traces a tall, narrow loop, rising to about 6° and sinking to about −7°. This is libration (Section 2.4). The open squares show the times when Earth has sunk behind the ridge. For roughly half of the month, a lander here could not talk to Earth directly.</p>
+<figure class="fig" id="fig3.3">
+<img src="assets/images/guide/panorama-malapert.png" alt="Panorama with the skyline between minus 4 and plus 1 degree, the Sun's path rising and falling between minus 3 and plus 6 degrees, and Earth staying above the skyline near north.">
+<figcaption><b>Figure 3.3</b>&nbsp; Panorama from Malapert Massif (85.96°S, 357.68°E), same dates, drawn with north in the centre. Heights are stretched about 10 times.</figcaption>
+</figure>
+<p>Figure 3.3 shows a site about 4° from the pole. Here the Sun's path rises and falls by several degrees during the month (Section 2.3). Notice that some circles lie <i>below</i> the flat horizon but are still filled: the site is on top of a mountain about 5 km high, so the skyline is lower than the flat horizon and the Sun remains visible. Near the right-hand edge, a few open circles mark the hours when the Sun is behind a hill to the east; this produces one night of about three days. Earth, near north, stays above the skyline all month.</p>
+
+<h3 class="sec">3.4 Small errors, large consequences</h3>
+<p>Near the pole the Sun's elevation changes very slowly. As a result, a small error in the height of the skyline can move the calculated time of sunrise or sunset by many hours.</p>
+<figure class="fig" id="fig3.4">
+<svg viewBox="0 0 760 275" role="img" aria-label="Because the Sun's height changes slowly, a 0.1 degree horizon error moves sunset by about 11 hours">
+  <line x1="60" y1="30" x2="60" y2="220" class="line"/>
+  <line x1="60" y1="220" x2="740" y2="220" class="line"/>
+  <g class="mut s">
+    <text x="400" y="262" text-anchor="middle">time (days), at 89°S: one lap of the Sun = 29.5 days</text>
+    <text x="52" y="60" text-anchor="end">+1°</text><text x="52" y="125" text-anchor="end">0°</text><text x="52" y="190" text-anchor="end">−1°</text>
+  </g>
+  <!-- horizon band at 0.5 deg: y = 125 - 32.5 = 92 ; band ±0.1° = ±6.5 px -->
+  <rect x="60" y="86" width="680" height="13" class="ground" opacity=".8"/>
+  <text x="736" y="80" text-anchor="end" class="ink s b">skyline height ± 0.1° error</text>
+  <!-- sun elevation slow sine -->
+  <path d="M60 125 C 160 40, 260 40, 360 125 S 560 210, 660 125" class="suns"/>
+  <line x1="290" y1="86" x2="290" y2="220" class="thin dash"/>
+  <line x1="306" y1="86" x2="306" y2="220" class="thin dash"/>
+  <line x1="60" y1="220" x2="60" y2="226" class="line"/><text x="60" y="238" text-anchor="middle" class="mut s">0</text><line x1="210" y1="220" x2="210" y2="226" class="line"/><text x="210" y="238" text-anchor="middle" class="mut s">7</text><line x1="360" y1="220" x2="360" y2="226" class="line"/><text x="360" y="238" text-anchor="middle" class="mut s">15</text><line x1="510" y1="220" x2="510" y2="226" class="line"/><text x="510" y="238" text-anchor="middle" class="mut s">22</text><line x1="660" y1="220" x2="660" y2="226" class="line"/><text x="660" y="238" text-anchor="middle" class="mut s">29.5</text>
+  <rect x="290" y="200" width="16" height="16" class="warnt"/>
+  <text x="314" y="212" class="ink s b">sunset could be anywhere in here: about 11 hours wide near 89°S</text>
+</svg>
+<figcaption><b>Figure 3.4</b>&nbsp; The Sun's elevation over one 29.5-day circle at 89°S (curve), crossing a skyline whose height is uncertain by &plusmn;0.1° (band). The time of sunset could fall anywhere within the shaded window, about 11 hours wide.</figcaption>
+</figure>
+
+<div class="worked">
+<p class="wk-head">Worked example 3.2</p>
+<p><i>At 89°S, how long does it take the Sun's elevation to change by 0.1°?</i></p>
+<p>At 89°S the Sun's elevation rises and falls by about 1° on either side of its average over 29.53 days. For a regular up-and-down motion of size <i>A</i> and period <i>T</i>, the fastest rate of change is 2&pi;<i>A</i>/<i>T</i>. Here this is 2&pi; &times; 1° / 29.53 days = 0.213° per day, or 0.0089° per hour.</p>
+<p>Even at this fastest rate, a change of 0.1° takes 0.1 / 0.0089 = 11 hours. An error of 0.1° in the skyline can therefore shift the predicted sunset by about 11 hours.</p>
+</div>
+<p>For this reason, careful calculations give sunrise and sunset near the poles as a window of time rather than a single exact minute.</p>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>With the Sun 1° up, a 1,000 m ridge casts a shadow more than 50 km long.</li>
+<li>Some polar crater floors are never lit. They are extremely cold and can hold water ice.</li>
+<li>A panorama shows at a glance when the Sun and Earth are above or below the skyline at a site.</li>
+<li>Near the pole the Sun's elevation changes so slowly that an error of 0.1° in the skyline can move sunset by about 11 hours.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>Use Equation 3.1 to find the length of the shadow of a 500 m hill when the Sun is 2° above the horizon.</li>
+<li>Why are shadows on the Moon completely dark, while shadows on Earth are not?</li>
+<li>In Figure 3.2, during which part of the month could a lander at Connecting Ridge not talk directly to Earth?</li>
+<li>In Figure 3.3 the Sun is sometimes below the flat horizon but still visible. Explain how this is possible.</li>
+<li>Why would a calculation that gives sunset at the pole to the exact minute be misleading?</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= CHAPTER 4 ================= -->
+<div class="chapter" id="ch4">
+<p class="chap-no">Chapter 4</p>
+<h2 class="chap">Power and communication</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>Why solar panels at the poles are mounted upright.</li>
+<li>Why the longest night matters more than the average amount of sunlight.</li>
+<li>What is needed for a direct radio link between a lander and a station on Earth.</li>
+</ul>
+</div>
+
+<h3 class="sec">4.1 Solar panels and a low Sun</h3>
+<p>Near the Moon, sunlight carries about 1,361 watts of power through each square metre facing the Sun. This figure is called the <b>solar constant</b>. A panel collects the full amount only when it faces the Sun directly. If the light strikes the panel at an angle <i>i</i> from the line at right angles to its surface, the power received per square metre is</p>
+<p class="eq"><i>P</i> = 1,361 W/m&sup2; &times; cos <i>i</i> <span class="eq-no">(4.1)</span></p>
+<figure class="fig" id="fig4.1">
+<svg viewBox="0 0 760 230" role="img" aria-label="With the Sun 1.5 degrees up, a flat panel gets about 36 watts per square metre and an upright panel about 1360">
+  <rect x="0" y="170" width="760" height="60" class="ground"/>
+  <circle cx="30" cy="150" r="12" class="sunf"/>
+  <path d="M44 154 L320 162" class="suns" marker-end="url(#ars)"/>
+  <path d="M44 154 L620 166" class="suns" marker-end="url(#ars)"/>
+  <!-- flat panel -->
+  <rect x="290" y="164" width="90" height="6" class="sunf"/>
+  <text x="335" y="120" text-anchor="middle" class="ink t b">flat panel</text>
+  <text x="335" y="138" text-anchor="middle" class="mut s">light arrives almost edge-on</text>
+  <text x="335" y="205" text-anchor="middle" class="ink t b">≈ 36 W/m²</text>
+  <!-- vertical panel -->
+  <rect x="622" y="100" width="6" height="70" class="sunf"/>
+  <text x="625" y="78" text-anchor="middle" class="ink t b">upright panel</text>
+  <text x="625" y="94" text-anchor="middle" class="mut s">faces the Sun head-on</text>
+  <text x="625" y="205" text-anchor="middle" class="ink t b">≈ 1,360 W/m²</text>
+</svg>
+<figcaption><b>Figure 4.1</b>&nbsp; A flat panel and an upright panel with the Sun 1.5° above the horizon. Light strikes the flat panel almost edge-on; the upright panel faces the Sun almost directly.</figcaption>
+</figure>
+
+<div class="worked">
+<p class="wk-head">Worked example 4.1</p>
+<p><i>The Sun is 1.5° above the horizon. Compare a panel lying flat with one standing upright and facing the Sun.</i></p>
+<p>For the flat panel, the light arrives 88.5° from the line at right angles to the panel: <i>P</i> = 1,361 &times; cos 88.5° = 1,361 &times; sin 1.5° = 36 W/m&sup2;.</p>
+<p>For the upright panel, <i>i</i> = 1.5°: <i>P</i> = 1,361 &times; cos 1.5° = 1,360 W/m&sup2;.</p>
+<p>The upright panel receives almost 40 times as much power. This is why landers designed for the poles carry their panels vertically, often on masts that can turn to follow the Sun around the sky.</p>
+</div>
+
+<h3 class="sec">4.2 Batteries and the longest night</h3>
+<p>When the Sun is hidden, a lander must live on its batteries. Keeping its electronics warm enough to survive the cold uses a great deal of energy, so the batteries can only last a limited time. A useful way to describe this is the number of days the batteries can support the lander without sunlight.</p>
+<p>It is tempting to judge a site by the average fraction of time it is sunlit. Figure 4.2 shows why this can be dangerous.</p>
+<figure class="fig" id="fig4.2">
+<svg viewBox="0 0 760 240" role="img" aria-label="Two sites both 70 percent sunlit; one has three 3-day nights, the other one 9-day night that drains a 4-day battery">
+  <g class="s">
+    <text x="20" y="50" class="ink b">Site A</text>
+    <text x="20" y="130" class="ink b">Site B</text>
+  </g>
+  <!-- scale: 30 days over 600 px from x=100: 20px/day -->
+  <g>
+    <rect x="100" y="34" width="600" height="26" class="sunt"/>
+    <rect x="220" y="34" width="60" height="26" class="ground"/>
+    <rect x="420" y="34" width="60" height="26" class="ground"/>
+    <rect x="620" y="34" width="60" height="26" class="ground"/>
+    <text x="706" y="52" class="ink s">70% lit</text>
+    <text x="400" y="80" text-anchor="middle" class="mut s">nights of 3 days: a 4-day battery always lasts</text>
+    <rect x="100" y="114" width="600" height="26" class="sunt"/>
+    <rect x="340" y="114" width="180" height="26" class="ground"/>
+    <rect x="420" y="114" width="100" height="26" class="warnt"/>
+    <text x="706" y="132" class="ink s">70% lit</text>
+    <path d="M340 152 H420" class="line" marker-end="url(#ar)"/>
+    <text x="380" y="168" text-anchor="middle" class="mut s">battery: 4 days</text>
+    <text x="470" y="106" text-anchor="middle" class="ink s b" style="fill:var(--warn)">empty → lander dies</text>
+  </g>
+  <g class="mut s">
+    <line x1="100" y1="196" x2="700" y2="196" class="line"/>
+    <text x="100" y="214" text-anchor="middle">day 0</text><text x="400" y="214" text-anchor="middle">15</text><text x="700" y="214" text-anchor="middle">30</text>
+  </g>
+</svg>
+<figcaption><b>Figure 4.2</b>&nbsp; Two imaginary sites, each sunlit for 70% of a 30-day period. At site A the darkness comes as three nights of three days; at site B it comes as one night of nine days. A lander whose batteries last four days survives at A but not at B.</figcaption>
+</figure>
+<p>Both sites have the same average, yet only one is safe. What matters for survival is the length of the <b>longest night</b> after landing, compared with how long the batteries last. A good site analysis therefore follows the light hour by hour from the planned landing date, rather than using an average.</p>
+
+<h3 class="sec">4.3 Talking to Earth</h3>
+<p>A direct radio link needs a clear straight line between the lander's antenna and an antenna on Earth. Two conditions must hold at the same time. Earth must be above the lunar skyline as seen from the lander; and the Moon must be above the horizon as seen from the station on Earth, usually by several degrees, so that the signal clears nearby buildings and the thickest part of the atmosphere.</p>
+<figure class="fig" id="fig4.3">
+<svg viewBox="0 0 760 200" role="img" aria-label="Contact needs Earth above the lunar skyline and the Moon above the Yeoju antenna's horizon at the same time">
+  <g class="t">
+    <rect x="16" y="60" width="170" height="70" rx="8" class="box"/><text x="101" y="90" text-anchor="middle" class="ink b">lander</text><text x="101" y="110" text-anchor="middle" class="mut s">near the south pole</text>
+    <rect x="296" y="60" width="170" height="70" rx="8" class="eartht"/><text x="381" y="90" text-anchor="middle" class="ink b">Earth</text><text x="381" y="110" text-anchor="middle" class="mut s">above the lunar skyline?</text>
+    <rect x="576" y="60" width="170" height="70" rx="8" class="box"/><text x="661" y="90" text-anchor="middle" class="ink b">Yeoju, 35 m dish</text><text x="661" y="110" text-anchor="middle" class="mut s">Moon above its horizon?</text>
+  </g>
+  <path d="M186 95 H294" class="earths" marker-end="url(#are)"/><path d="M466 95 H574" class="earths" marker-end="url(#are)"/>
+  <text x="381" y="168" text-anchor="middle" class="ink s b">both at once = a Korean contact window</text>
+  <text x="381" y="186" text-anchor="middle" class="mut s">the same test works for any ground station</text>
+</svg>
+<figcaption><b>Figure 4.3</b>&nbsp; A direct link needs two conditions at once: Earth above the skyline at the lander, and the Moon above the horizon at the ground station on Earth. The example shown is the 35 m antenna at Yeoju, South Korea.</figcaption>
+</figure>
+<p>Because Earth turns once a day, each station sees the Moon for only part of the day. Space agencies therefore use several stations spread around the globe. NASA's Deep Space Network has large antennas in California, Spain and Australia, and South Korea operates a 35 m deep-space antenna at Yeoju, built to communicate with its lunar orbiter Danuri. When a lander cannot see Earth directly, it can still communicate by relaying signals through a satellite orbiting the Moon.</p>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>Power from a panel is proportional to cos <i>i</i>. With a low Sun, upright panels collect about 40 times as much as flat ones.</li>
+<li>Two sites with the same average sunlight can differ greatly in the length of their longest night. Survival depends on the longest night, not the average.</li>
+<li>A direct radio link requires Earth above the lunar skyline and the Moon above the ground station's horizon at the same time.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>A panel is tilted so that sunlight strikes it 60° from the line at right angles to its surface. How much power does it receive per square metre?</li>
+<li>Site C is sunlit 80% of the time; site D is sunlit 65% of the time. Is site C necessarily the better choice? Explain.</li>
+<li>A lander's batteries last five days. After landing, the longest night at the site is 4.5 days. Is the site safe? What other information would you want?</li>
+<li>Why does a lunar mission need more than one ground station on Earth?</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= CHAPTER 5 ================= -->
+<div class="chapter" id="ch5">
+<p class="chap-no">Chapter 5</p>
+<h2 class="chap">Where the numbers come from</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>How the positions of the Sun and Earth are calculated, and what can go wrong.</li>
+<li>Why these positions alone cannot tell you whether a site is dark.</li>
+<li>How the height of the lunar surface is measured from orbit.</li>
+<li>What an elevation model is, and why the size of its squares matters.</li>
+<li>How a skyline is calculated from an elevation model.</li>
+</ul>
+</div>
+
+<h3 class="sec">5.1 Ephemerides</h3>
+<p>A table giving the positions of the Sun, Moon and planets over time is called an <b>ephemeris</b> (plural <i>ephemerides</i>). Two widely used sources come from NASA's Jet Propulsion Laboratory (JPL). <b>SPICE</b> is a free software toolkit that reads data files, called kernels, and calculates positions on your own computer. <b>Horizons</b> is an online service: you send a request giving the target, the place on the Moon and the dates, and JPL's computers send back the azimuth and elevation at each time step.</p>
+<figure class="fig" id="fig5.1">
+<svg viewBox="0 0 760 270" role="img" aria-label="SPICE runs on your computer; Horizons runs on JPL's server; both return azimuth and elevation">
+  <g class="t">
+    <text x="190" y="24" text-anchor="middle" class="ink h">SPICE: compute it yourself</text>
+    <rect x="30" y="40" width="320" height="56" rx="8" class="box"/>
+    <text x="190" y="64" text-anchor="middle" class="ink b">kernels (data files)</text>
+    <text x="190" y="84" text-anchor="middle" class="mut s">planet orbits, Moon's orientation, time</text>
+    <path d="M190 96 V120" class="line" marker-end="url(#ar)"/>
+    <rect x="30" y="122" width="320" height="56" rx="8" class="box"/>
+    <text x="190" y="146" text-anchor="middle" class="ink b">your Python code (SpiceyPy)</text>
+    <text x="190" y="166" text-anchor="middle" class="mut s">offline, most control, slow to learn</text>
+
+    <text x="570" y="24" text-anchor="middle" class="ink h">Horizons: ask JPL</text>
+    <rect x="410" y="40" width="320" height="56" rx="8" class="box"/>
+    <text x="570" y="64" text-anchor="middle" class="ink b">your request (web form or API)</text>
+    <text x="570" y="84" text-anchor="middle" class="mut s">target, point on the Moon, dates, step</text>
+    <path d="M570 96 V120" class="line" marker-end="url(#ar)"/>
+    <rect x="410" y="122" width="320" height="56" rx="8" class="box"/>
+    <text x="570" y="146" text-anchor="middle" class="ink b">JPL's server computes</text>
+    <text x="570" y="166" text-anchor="middle" class="mut s">official resource, easy, needs internet</text>
+
+    <path d="M190 178 V206 H380 V214" class="line"/>
+    <path d="M570 178 V206 H380 V222" class="line" marker-end="url(#ar)"/>
+    <rect x="230" y="224" width="300" height="40" rx="8" class="sunt"/>
+    <text x="380" y="249" text-anchor="middle" class="ink b">azimuth + elevation, every hour</text>
+  </g>
+</svg>
+<figcaption><b>Figure 5.1</b>&nbsp; Two ways to obtain the same positions: compute them yourself with SPICE, or ask JPL's Horizons service. Both return the azimuth and elevation of the Sun and Earth for a chosen site and time.</figcaption>
+</figure>
+<p>Horizons has been available since 1996. Since an update in 2021 it can place points on the Moon's surface to within tens of centimetres. The two methods agree closely, and many projects compute positions with SPICE and then check a sample against Horizons.</p>
+
+<h3 class="sec">5.2 Frames and clocks</h3>
+<p>Two details catch out many newcomers. The first is the <b>reference frame</b>: the set of axes that defines where north is and where longitudes are measured from. There are two common frames for the Moon, and the same latitude and longitude can refer to points about 875 m apart in the two. Maps of the lunar surface made from laser data use the frame called MOON_ME, so positions should be given in that frame when they are combined with those maps.</p>
+<p>The second is the <b>time scale</b>. Everyday clocks keep Coordinated Universal Time (UTC), but ephemerides are calculated in Barycentric Dynamical Time (TDB), which currently runs about 69 seconds ahead. In that time the Sun moves about 0.01° in the lunar sky: small, but not always negligible near the pole (Section 3.4).</p>
+<figure class="fig" id="fig5.2">
+<svg viewBox="0 0 760 170" role="img" aria-label="Frame trap: MOON_ME versus MOON_PA shifts features about 875 m. Time trap: TDB is about 69 seconds ahead of UTC">
+  <g class="t">
+    <rect x="20" y="20" width="350" height="130" rx="8" class="box"/>
+    <text x="40" y="46" class="ink b">Frame: which way is 'north' on the Moon?</text>
+    <circle cx="90" cy="100" r="6" class="earthf"/><text x="104" y="104" class="ink s">MOON_ME (terrain maps)</text>
+    <circle cx="90" cy="130" r="6" class="warnf"/><text x="104" y="134" class="ink s">MOON_PA</text>
+    <path d="M300 100 L300 130" class="line" marker-end="url(#ar)" marker-start="url(#ar)"/>
+    <text x="308" y="120" class="ink s b">≈ 875 m</text>
+    <rect x="390" y="20" width="350" height="130" rx="8" class="box"/>
+    <text x="410" y="46" class="ink b">Time: which clock?</text>
+    <line x1="420" y1="104" x2="720" y2="104" class="line"/>
+    <circle cx="520" cy="104" r="6" class="earthf"/><text x="520" y="90" text-anchor="middle" class="ink s">UTC</text>
+    <circle cx="620" cy="104" r="6" class="sunf"/><text x="620" y="90" text-anchor="middle" class="ink s">TDB</text>
+    <text x="570" y="132" text-anchor="middle" class="ink s b">≈ 69 s apart → Sun off by ≈ 0.01°</text>
+  </g>
+</svg>
+<figcaption><b>Figure 5.2</b>&nbsp; Two common sources of error. Left: the same coordinates in two lunar reference frames differ by about 875 m. Right: UTC and TDB differ by about 69 seconds.</figcaption>
+</figure>
+
+<h3 class="sec">5.3 What an ephemeris cannot tell you</h3>
+<p>An ephemeris measures elevation from a perfectly flat horizon. It knows nothing about the hills around a site. It can report that the Sun is 1° up, while a ridge in that direction rises to 3° and the site is in darkness.</p>
+<figure class="fig" id="fig5.3">
+<svg viewBox="0 0 760 210" role="img" aria-label="Horizons says the Sun is 1 degree up, but a ridge blocks it">
+  <path d="M0 160 L460 160 L560 96 L640 160 L760 160 L760 210 L0 210 Z" class="ground"/>
+  <line x1="80" y1="160" x2="760" y2="160" class="thin dash"/>
+  <text x="80" y="180" class="mut s">the flat plane Horizons and SPICE measure from</text>
+  <rect x="70" y="146" width="22" height="14" rx="2" class="boxk paper"/>
+  <path d="M92 150 L700 128" class="suns dash"/>
+  <circle cx="710" cy="127" r="11" class="sunf"/>
+  <text x="710" y="106" text-anchor="middle" class="ink s b">Sun: '1° up'</text>
+  <path d="M548 128 L548 112 M540 120 L556 120" class="warns" stroke-width="3" transform="rotate(45 548 120)"/>
+  <text x="560" y="80" text-anchor="middle" class="ink s b" style="fill:var(--warn)">the ridge blocks the Sun</text>
+</svg>
+<figcaption><b>Figure 5.3</b>&nbsp; An ephemeris measures from a flat plane. Here it reports the Sun 1° above the horizon, but a ridge blocks the line of sight.</figcaption>
+</figure>
+<p>Figure 5.4 shows how large the difference can be. The circles and squares are positions from Horizons for a point on the inner wall of Shackleton crater, about 1.8 km inside the rim. The dashed line is the real skyline at that point, calculated from laser measurements as described below.</p>
+<figure class="fig" id="fig5.4">
+<img src="assets/images/guide/horizons-vs-terrain.png" alt="Sun and Earth positions just above the flat horizon, with a dashed skyline rising to about 32 degrees in the east.">
+<figcaption><b>Figure 5.4</b>&nbsp; Sun and Earth positions from JPL Horizons for 89.77°S, 188.13°E, every 12 hours from 14 November to 14 December 2026, with the real skyline (dashed). Heights are stretched about 3 times.</figcaption>
+</figure>
+<p>Judged against the flat horizon alone, Earth is up from 18 to 29 November. Judged against the real skyline, Earth never appears at all during the month, and about two-thirds of the Sun's positions are hidden behind the crater rim. Reliable answers need both the ephemeris and the shape of the ground.</p>
+
+<h3 class="sec">5.4 Measuring height with a laser</h3>
+<p>NASA's Lunar Reconnaissance Orbiter (LRO) has been circling the Moon since 2009. One of its instruments, the Lunar Orbiter Laser Altimeter (<b>LOLA</b>), fires short pulses of laser light at the surface and times how long each pulse takes to return. Since light travels at a known speed <i>c</i>, the distance to the ground is</p>
+<p class="eq">distance = <i>c</i> <span style="font-family: Arial, sans-serif">&times;</span> <var style="font-family: Arial, sans-serif">t</var> / 2 <span class="eq-no">(5.1)</span></p>
+<p>where <var style="font-family: Arial, sans-serif">t</var> is the round-trip time. The position of the spacecraft is known accurately from tracking, so subtracting this distance gives the height of the ground beneath it. Over many years LOLA has made billions of such measurements, especially near the poles, where LRO's orbits cross.</p>
+<figure class="fig" id="fig5.5">
+<svg viewBox="0 0 760 270" role="img" aria-label="LRO fires a laser down; the return time gives the distance; known orbit minus distance gives ground height">
+  <path d="M0 220 L140 210 L220 170 L300 200 L420 214 L520 190 L620 205 L760 200 L760 270 L0 270 Z" class="ground"/>
+  <!-- spacecraft -->
+  <rect x="236" y="30" width="44" height="26" rx="3" class="boxk paper"/>
+  <rect x="200" y="38" width="34" height="10" class="earthf"/><rect x="282" y="38" width="34" height="10" class="earthf"/>
+  <text x="258" y="22" text-anchor="middle" class="ink t b">LRO (since 2009)</text>
+  <path d="M258 58 L226 172" class="warns"/>
+  <path d="M232 168 L262 60" class="warns dash"/>
+  <text x="270" y="118" class="ink s b">LOLA laser pulse: down and back</text>
+  <text x="270" y="134" class="mut s">return time → distance to ground</text>
+  <!-- explanation -->
+  <rect x="470" y="40" width="270" height="100" rx="8" class="box paper"/>
+  <text x="486" y="66" class="ink t b">ground height =</text>
+  <text x="486" y="88" class="ink t">spacecraft position (known)</text>
+  <text x="486" y="108" class="ink t">− laser distance (measured)</text>
+  <text x="486" y="128" class="mut s">repeat for years → a height map</text>
+</svg>
+<figcaption><b>Figure 5.5</b>&nbsp; How LOLA measures height. The time a laser pulse takes to return gives the distance to the ground; subtracting it from the spacecraft's known position gives the ground's height.</figcaption>
+</figure>
+
+<div class="worked">
+<p class="wk-head">Worked example 5.1</p>
+<p><i>LRO is 50 km above the ground. How long does a laser pulse take to return?</i></p>
+<p>Rearranging Equation 5.1, <var style="font-family: Arial, sans-serif">t</var> = 2 &times; distance / <i>c</i> = 2 &times; 50,000 m / (3.0 &times; 10<sup>8</sup> m/s) = 3.3 &times; 10<sup>&minus;4</sup> s, or about a third of a millisecond. To measure height to within 1 m, the instrument must time the pulse to within about 7 billionths of a second.</p>
+</div>
+
+<h3 class="sec">5.5 Elevation models</h3>
+<p>The individual measurements are turned into a <b>digital elevation model</b> (DEM): a grid of squares laid over the surface, with one number, the height of the ground, stored in each square. The squares are called pixels.</p>
+<figure class="fig" id="fig5.6">
+<svg viewBox="0 0 760 260" role="img" aria-label="Real ground turned into a grid of squares, each holding one height number">
+  <text x="190" y="22" text-anchor="middle" class="ink t b">Real ground (side view)</text>
+  <path d="M30 200 C 80 120, 120 90, 170 130 S 260 210, 350 150 L350 230 L30 230 Z" class="ground"/>
+  <text x="190" y="252" text-anchor="middle" class="mut s">hills and dips of every size</text>
+  <path d="M365 140 H405" class="line" marker-end="url(#ar)"/>
+  <text x="570" y="22" text-anchor="middle" class="ink t b">Height map (from above)</text>
+  <g class="s">
+    <rect x="420" y="40" width="70" height="60" class="box"/><text x="455" y="75" text-anchor="middle" class="ink b">12 m</text>
+    <rect x="490" y="40" width="70" height="60" class="box"/><text x="525" y="75" text-anchor="middle" class="ink b">31 m</text>
+    <rect x="560" y="40" width="70" height="60" class="box"/><text x="595" y="75" text-anchor="middle" class="ink b">40 m</text>
+    <rect x="630" y="40" width="70" height="60" class="box"/><text x="665" y="75" text-anchor="middle" class="ink b">22 m</text>
+    <rect x="420" y="100" width="70" height="60" class="box"/><text x="455" y="135" text-anchor="middle" class="ink b">9 m</text>
+    <rect x="490" y="100" width="70" height="60" class="box"/><text x="525" y="135" text-anchor="middle" class="ink b">27 m</text>
+    <rect x="560" y="100" width="70" height="60" class="box"/><text x="595" y="135" text-anchor="middle" class="ink b">35 m</text>
+    <rect x="630" y="100" width="70" height="60" class="box"/><text x="665" y="135" text-anchor="middle" class="ink b">18 m</text>
+  </g>
+  <text x="570" y="186" text-anchor="middle" class="mut s">each square = one pixel = one height number</text>
+  <text x="570" y="204" text-anchor="middle" class="mut s">numbers made up for the example</text>
+</svg>
+<figcaption><b>Figure 5.6</b>&nbsp; A digital elevation model. The real ground (left) is represented by a grid of squares, each holding a single height (right). The numbers shown are invented for the example.</figcaption>
+</figure>
+<p>Because each pixel holds only one number, any feature smaller than a pixel is averaged away. A grid of large pixels makes small rocks and bumps vanish, and the map records that ground as flat.</p>
+<figure class="fig" id="fig5.7">
+<svg viewBox="0 0 760 250" role="img" aria-label="Small bumps vanish when the ground is stored in big squares">
+  <text x="190" y="22" text-anchor="middle" class="ink t b">Real ground: three small rocks and bumps</text>
+  <path d="M20 190 L80 190 L95 150 L110 190 L160 190 L180 120 L200 190 L250 190 L262 165 L274 190 L360 190 L360 220 L20 220 Z" class="ground"/>
+  <text x="190" y="242" text-anchor="middle" class="mut s">each bump is narrower than one big square</text>
+  <text x="570" y="22" text-anchor="middle" class="ink t b">Stored in big squares</text>
+  <path d="M400 190 L400 178 L490 178 L490 172 L580 172 L580 182 L670 182 L670 188 L740 188 L740 220 L400 220 Z" class="ground"/>
+  <g class="thin"><path d="M490 220V172M580 220V172M670 220V182"/></g>
+  <text x="570" y="140" text-anchor="middle" class="ink s b" style="fill:var(--warn)">bumps gone: each square keeps one average height</text>
+  <text x="570" y="242" text-anchor="middle" class="mut s">the map now says 'flat' here</text>
+</svg>
+<figcaption><b>Figure 5.7</b>&nbsp; Small features disappear when the ground is stored in large pixels, because each pixel keeps only one average height.</figcaption>
+</figure>
+<p>The size of the pixels therefore matters, particularly close to a landing site. Figure 5.8 compares three pixel sizes with a landing zone 100 m across.</p>
+<figure class="fig" id="fig5.8">
+<svg viewBox="0 0 760 300" role="img" aria-label="To scale: a 100 m landing zone over 5 m, 80 m and 118 m pixels">
+  <g>
+    <text x="130" y="24" text-anchor="middle" class="ink t b">5 m squares (PGDA 78, 81)</text>
+    <g class="thin">
+      <rect x="30" y="40" width="200" height="200"/>
+      <path d="M40 40V240M50 40V240M60 40V240M70 40V240M80 40V240M90 40V240M100 40V240M110 40V240M120 40V240M130 40V240M140 40V240M150 40V240M160 40V240M170 40V240M180 40V240M190 40V240M200 40V240M210 40V240M220 40V240"/>
+      <path d="M30 50H230M30 60H230M30 70H230M30 80H230M30 90H230M30 100H230M30 110H230M30 120H230M30 130H230M30 140H230M30 150H230M30 160H230M30 170H230M30 180H230M30 190H230M30 200H230M30 210H230M30 220H230M30 230H230"/>
+    </g>
+    <circle cx="130" cy="140" r="100" class="earths"/>
+    <text x="130" y="262" text-anchor="middle" class="ink s b">about 300 squares inside the circle</text>
+    <text x="130" y="280" text-anchor="middle" class="mut s">you can see which spots are good or bad</text>
+    <text x="390" y="24" text-anchor="middle" class="ink t b">80 m squares (polar map)</text>
+    <rect x="310" y="60" width="160" height="160" class="ground" opacity=".55"/>
+    <rect x="310" y="60" width="160" height="160" class="box"/>
+    <circle cx="390" cy="140" r="100" class="earths"/>
+    <text x="390" y="262" text-anchor="middle" class="ink s b">about one square</text>
+    <text x="390" y="280" text-anchor="middle" class="mut s">the whole zone is one number</text>
+    <text x="630" y="24" text-anchor="middle" class="ink t b">118 m squares (global map)</text>
+    <rect x="512" y="40" width="236" height="236" class="ground" opacity=".55"/>
+    <rect x="512" y="40" width="236" height="236" class="box"/>
+    <circle cx="630" cy="158" r="100" class="earths"/>
+    <text x="630" y="292" text-anchor="middle" class="ink s b">one square is bigger than the zone</text>
+  </g>
+</svg>
+<figcaption><b>Figure 5.8</b>&nbsp; A landing zone 100 m across (circle) drawn to scale over pixels of 5 m, 80 m and 118 m. Only the 5 m grid can show differences within the zone.</figcaption>
+</figure>
+<p>Several elevation models of the south pole have been made from LOLA data and are freely available from NASA's Planetary Geodesy Data Archive (PGDA). Table 5.1 lists some of them. Each is identified by its product number in the archive.</p>
+<table class="data">
+<caption><b>Table 5.1</b> Some lunar south pole data products derived from LOLA</caption>
+<thead><tr><th>Product</th><th>Year</th><th>Content</th></tr></thead>
+<tbody>
+<tr><td>PGDA 69</td><td>2011</td><td>Average illumination at the poles over an 18.6-year cycle (Mazarico et al., 2011)</td></tr>
+<tr><td>PGDA 78</td><td>2021</td><td>Elevation models with 5 m pixels around candidate landing sites</td></tr>
+<tr><td>PGDA 81</td><td>2023</td><td>Elevation model with 5 m pixels from 87°S to the pole</td></tr>
+<tr><td>PGDA 90</td><td>2023</td><td>Wider elevation model reaching to 80°S</td></tr>
+<tr><td>PGDA 104</td><td>2025&ndash;26</td><td>Sharper models combining LOLA heights with LROC camera images</td></tr>
+</tbody>
+</table>
+<figure class="fig" id="fig5.9">
+<svg viewBox="0 0 760 270" role="img" aria-label="Fine terrain near the site, coarser terrain far away; height errors of 0.3 to 0.5 m">
+  <text x="200" y="22" text-anchor="middle" class="ink t b">Near fine, far coarse (not to scale)</text>
+  <circle cx="200" cy="148" r="112" class="ground" opacity=".35"/>
+  <circle cx="200" cy="148" r="70" class="ground" opacity=".6"/>
+  <circle cx="200" cy="148" r="30" class="ground"/>
+  <circle cx="200" cy="148" r="5" class="ink"/>
+  <text x="200" y="152" text-anchor="middle" class="ink s b" dy="-12">5 m</text>
+  <text x="200" y="100" text-anchor="middle" class="ink s">20 m to ~40 km</text>
+  <text x="200" y="52" text-anchor="middle" class="ink s">coarser to 150–250 km</text>
+  <text x="200" y="266" text-anchor="middle" class="mut s">a typical set-up</text>
+
+  <text x="570" y="22" text-anchor="middle" class="ink t b">Each 5 m map comes with</text>
+  <g class="s">
+    <rect x="430" y="40" width="280" height="30" rx="6" class="box"/><text x="444" y="60" class="ink">height</text>
+    <rect x="430" y="76" width="280" height="30" rx="6" class="box"/><text x="444" y="96" class="ink">slope</text>
+    <rect x="430" y="112" width="280" height="30" rx="6" class="warnt"/><text x="444" y="132" class="ink">height error (typically 0.3–0.5 m)</text>
+    <rect x="430" y="148" width="280" height="30" rx="6" class="box"/><text x="444" y="168" class="ink">slope error</text>
+    <rect x="430" y="184" width="280" height="30" rx="6" class="box"/><text x="444" y="204" class="ink">laser hits per pixel</text>
+  </g>
+  <text x="570" y="240" text-anchor="middle" class="mut s">most pixels are filled in between laser tracks</text>
+</svg>
+<figcaption><b>Figure 5.9</b>&nbsp; Left: a typical arrangement uses fine data near the site and coarser data farther away (not to scale). Right: the 5 m models come with extra layers, including the estimated error in each height, typically 0.3&ndash;0.5 m.</figcaption>
+</figure>
+<p>Most pixels in these models are not measured directly; they are filled in between the tracks of the laser. Good models therefore also record how many measurements fell in each pixel and the likely error in each height.</p>
+
+<h3 class="sec">5.6 Calculating the skyline</h3>
+<p>To find the skyline at a site, a computer starts at the site and steps outwards along a straight line in one direction, reading the height of the ground from the elevation model at each step. For each point it calculates the angle of elevation from the observer. The largest angle found along the line is the height of the skyline in that direction. Repeating this for many directions, often 720 of them (one every 0.5°), gives the complete skyline, known as the <b>horizon mask</b>.</p>
+<figure class="fig" id="fig5.10">
+<svg viewBox="0 0 760 300" role="img" aria-label="Rays cast in every direction from the site; the steepest terrain angle along each ray becomes the skyline">
+  <!-- top-down rays -->
+  <text x="170" y="22" text-anchor="middle" class="ink t b">From above: walk outwards</text>
+  <circle cx="170" cy="160" r="120" class="thin"/>
+  <g class="line">
+    <path d="M170 160 L170 40"/><path d="M170 160 L255 75"/><path d="M170 160 L290 160"/><path d="M170 160 L255 245"/>
+    <path d="M170 160 L170 280"/><path d="M170 160 L85 245"/><path d="M170 160 L50 160"/><path d="M170 160 L85 75"/>
+  </g>
+  <circle cx="170" cy="160" r="6" class="ink"/>
+  <circle cx="232" cy="98" r="5" class="warnf"/>
+  <text x="240" y="92" class="ink s">steepest point on this ray</text>
+  <text x="170" y="296" text-anchor="middle" class="mut s">careful teams use 720 rays (every 0.5°)</text>
+  <!-- side view one ray -->
+  <text x="560" y="22" text-anchor="middle" class="ink t b">Along one ray, side view</text>
+  <path d="M400 230 L470 222 L520 200 L560 214 L620 160 L680 190 L740 182 L740 250 L400 250 Z" class="ground"/>
+  <circle cx="400" cy="228" r="5" class="ink"/>
+  <path d="M400 228 L620 160" class="warns"/>
+  <path d="M400 228 L520 200" class="line dash"/>
+  <path d="M400 228 L740 182" class="line dash"/>
+  <text x="604" y="150" class="ink s b">steepest angle wins</text>
+  <text x="560" y="276" text-anchor="middle" class="mut s">allow for the Moon curving away beneath you</text>
+</svg>
+<figcaption><b>Figure 5.10</b>&nbsp; Calculating a horizon mask. Left: lines are traced outwards from the site in every direction. Right: along one line, the steepest angle to the terrain gives the skyline height in that direction.</figcaption>
+</figure>
+<p>Because the Moon is a sphere, distant ground curves away below the observer. Let the observer be at distance <i>r</i><sub>1</sub> from the Moon's centre, and a point of terrain at distance <i>r</i><sub>2</sub>, separated from the observer by an angle &theta; measured at the Moon's centre (&theta; = ground distance &divide; Moon's radius, in radians). The elevation angle <i>e</i> of the terrain point is then given by</p>
+<p class="eq">tan <i>e</i> = (<i>r</i><sub>2</sub> cos &theta; &minus; <i>r</i><sub>1</sub>) / (<i>r</i><sub>2</sub> sin &theta;) <span class="eq-no">(5.2)</span></p>
+
+<div class="worked">
+<p class="wk-head">Worked example 5.2</p>
+<p><i>A ridge 1,500 m higher than the observer lies 20 km away. Find its elevation angle, using a lunar radius of 1,737.4 km.</i></p>
+<p>&theta; = 20 / 1,737.4 = 0.01151 rad. Take <i>r</i><sub>1</sub> = 1,737.4 km and <i>r</i><sub>2</sub> = 1,738.9 km.</p>
+<p><i>r</i><sub>2</sub> cos &theta; &minus; <i>r</i><sub>1</sub> = 1,738.9 &times; 0.999934 &minus; 1,737.4 = 1.385 km.</p>
+<p><i>r</i><sub>2</sub> sin &theta; = 1,738.9 &times; 0.01151 = 20.02 km.</p>
+<p>tan <i>e</i> = 1.385 / 20.02 = 0.0692, so <i>e</i> = 3.96°.</p>
+<p>Ignoring curvature (tan <i>e</i> = 1.5 / 20) would give 4.29°, an error of a third of a degree. Near the pole this would shift sunrise and sunset by more than a day (compare Worked example 3.2).</p>
+</div>
+
+<h3 class="sec">5.7 Averages and specific dates</h3>
+<p>Maps of average illumination, such as PGDA 69, give a single number for each spot: the percentage of time it is sunlit over many years. They are useful for choosing a general region. They cannot say what will happen after a particular landing date, and, as Section 4.2 showed, they hide the length of the longest night.</p>
+<figure class="fig" id="fig5.11">
+<svg viewBox="0 0 760 230" role="img" aria-label="An average map gives one number per spot; a specific date needs an hour-by-hour strip">
+  <text x="170" y="24" text-anchor="middle" class="ink t b">PGDA 69 gives one number per spot</text>
+  <g>
+    <rect x="60" y="40" width="44" height="44" class="sunf" opacity=".9"/><rect x="104" y="40" width="44" height="44" class="sunf" opacity=".6"/><rect x="148" y="40" width="44" height="44" class="sunf" opacity=".3"/><rect x="192" y="40" width="44" height="44" class="sunf" opacity=".15"/>
+    <rect x="60" y="84" width="44" height="44" class="sunf" opacity=".7"/><rect x="104" y="84" width="44" height="44" class="sunf" opacity=".85"/><rect x="148" y="84" width="44" height="44" class="sunf" opacity=".5"/><rect x="192" y="84" width="44" height="44" class="sunf" opacity=".2"/>
+    <rect x="60" y="128" width="44" height="44" class="sunf" opacity=".4"/><rect x="104" y="128" width="44" height="44" class="sunf" opacity=".6"/><rect x="148" y="128" width="44" height="44" class="sunf" opacity=".7"/><rect x="192" y="128" width="44" height="44" class="ground"/>
+  </g>
+  <text x="148" y="196" text-anchor="middle" class="mut s">'this spot is lit 70% of the time, on average'</text>
+  <path d="M290 110 H370" class="line" marker-end="url(#ar)"/>
+  <text x="330" y="100" text-anchor="middle" class="ink s b">but</text>
+  <text x="560" y="24" text-anchor="middle" class="ink t b">A mission needs its own dates</text>
+  <rect x="400" y="60" width="320" height="30" class="sunt"/>
+  <rect x="500" y="60" width="90" height="30" class="ground"/>
+  <text x="560" y="114" text-anchor="middle" class="mut s">lit / dark hour by hour after landing day</text>
+  <text x="560" y="140" text-anchor="middle" class="ink s b">→ needs hourly positions and the skyline</text>
+</svg>
+<figcaption><b>Figure 5.11</b>&nbsp; An average map gives one number for each spot (top). A mission needs to know, hour by hour after its own landing date, when the site is lit and when it is dark (bottom).</figcaption>
+</figure>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>Ephemerides give the positions of the Sun and Earth. SPICE computes them locally; Horizons computes them online.</li>
+<li>Positions must use the right reference frame (MOON_ME for laser-based maps) and time scale.</li>
+<li>Ephemerides measure from a flat horizon and cannot by themselves say whether a site is dark.</li>
+<li>LOLA measures ground height by timing laser pulses. The results are stored as elevation models, grids of pixels each holding one height.</li>
+<li>A horizon mask is found by tracing lines outwards from a site and keeping the steepest elevation angle along each, allowing for the Moon's curvature.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>What is an ephemeris?</li>
+<li>Why might a calculation go wrong if positions given in one lunar reference frame are combined with a map made in another?</li>
+<li>A laser pulse returns after 2.0 &times; 10<sup>&minus;4</sup> s. How far away is the ground?</li>
+<li>Why is an elevation model with 80 m pixels unsuitable for comparing spots within a landing zone 100 m across?</li>
+<li>In Figure 5.4, Horizons shows Earth above the horizon from 18 to 29 November, yet Earth is never visible from the site. Explain why.</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= CHAPTER 6 ================= -->
+<div class="chapter" id="ch6">
+<p class="chap-no">Chapter 6</p>
+<h2 class="chap">Choosing a landing site</h2>
+
+<div class="objectives">
+<p class="obj-head">In this chapter</p>
+<ul>
+<li>What recent landings near the pole have shown.</li>
+<li>Why a landing site is a zone, not a point.</li>
+<li>Why the lighting at the moment of landing matters.</li>
+<li>How the ideas in this guide combine into a site comparison.</li>
+</ul>
+</div>
+
+<h3 class="sec">6.1 Lessons from recent landings</h3>
+<p>Between 2024 and 2025 three robotic landers reached the Moon under NASA's Commercial Lunar Payload Services programme. Their results illustrate the difficulties described in this guide.</p>
+<figure class="fig" id="fig6.1">
+<svg viewBox="0 0 760 250" role="img" aria-label="Odysseus 2024 tipped over near Malapert A; Athena 2025 on its side in a cold crater; Blue Ghost 2025 landed upright within its 100 m target">
+  <g class="t">
+    <!-- Odysseus -->
+    <rect x="16" y="16" width="232" height="218" rx="8" class="box"/>
+    <text x="132" y="40" text-anchor="middle" class="ink b">Odysseus (IM-1)</text>
+    <text x="132" y="58" text-anchor="middle" class="mut s">Feb 2024 · near Malapert A</text>
+    <rect x="16" y="150" width="232" height="30" class="ground"/>
+    <g transform="rotate(-28 132 140)"><rect x="112" y="118" width="40" height="26" rx="3" class="boxk paper"/><path d="M116 144 L108 158 M148 144 L156 158" class="line" stroke-width="2"/></g>
+    <text x="132" y="208" text-anchor="middle" class="ink s">landed, but tipped over</text>
+    <!-- Athena -->
+    <rect x="264" y="16" width="232" height="218" rx="8" class="warnt"/>
+    <text x="380" y="40" text-anchor="middle" class="ink b">Athena (IM-2)</text>
+    <text x="380" y="58" text-anchor="middle" class="mut s">Mar 2025 · about 85°S</text>
+    <path d="M264 120 L320 160 L440 160 L496 120 L496 182 L264 182 Z" class="ground"/>
+    <rect x="358" y="136" width="50" height="24" rx="3" class="boxk paper"/><path d="M358 140 L340 130 M358 156 L340 166" class="line" stroke-width="2"/>
+    <text x="380" y="204" text-anchor="middle" class="ink s">on its side in a cold crater:</text>
+    <text x="380" y="220" text-anchor="middle" class="ink s">not enough power for one Earth day</text>
+    <!-- Blue Ghost -->
+    <rect x="512" y="16" width="232" height="218" rx="8" class="box"/>
+    <text x="628" y="40" text-anchor="middle" class="ink b">Blue Ghost</text>
+    <text x="628" y="58" text-anchor="middle" class="mut s">Mar 2025 · not polar</text>
+    <circle cx="628" cy="130" r="44" class="earths"/>
+    <circle cx="640" cy="150" r="5" class="ink"/>
+    <text x="628" y="124" text-anchor="middle" class="mut s">100 m target</text>
+    <text x="628" y="204" text-anchor="middle" class="ink s">upright and precise: landed</text>
+    <text x="628" y="220" text-anchor="middle" class="ink s">within its 100 m target</text>
+  </g>
+</svg>
+<figcaption><b>Figure 6.1</b>&nbsp; Three recent landings. Odysseus (February 2024) landed near Malapert A but tipped over. Athena (March 2025) came to rest on its side in a cold crater at about 85°S. Blue Ghost (March 2025), landing far from the pole, touched down upright within its 100 m target.</figcaption>
+</figure>
+<p>Odysseus and Athena both landed near the south pole and both ended up on their sides. Athena came to rest in a cold, shadowed crater and could not generate enough power to operate for long. Its builders, Intuitive Machines, pointed to the polar terrain and the low Sun: long shadows and dim light made it hard for the lander's navigation system to judge the ground on the way down. Blue Ghost, built by Firefly Aerospace, showed what a precise landing looks like, but it landed on a flat plain far from the pole, where the light was much easier.</p>
+
+<h3 class="sec">6.2 The landing zone</h3>
+<p>No lander touches down exactly on its target point. Mission plans therefore specify a target and an allowed error. For its first crewed south-pole landing, NASA's 2024 plans required the lander to come down within 6° of the pole and within 100 m of its target, with suitable lighting during the approach. As of November 2026 NASA has not published a newer figure for later crewed missions, so 100 m remains a useful guide.</p>
+<figure class="fig" id="fig6.2">
+<svg viewBox="0 0 760 280" role="img" aria-label="Artemis III: land within 6 degrees of the pole, within 100 m of a target, with suitable approach lighting">
+  <text x="190" y="22" text-anchor="middle" class="ink t b">Within 6° of the pole</text>
+  <circle cx="190" cy="150" r="110" class="ground" opacity=".35"/>
+  <circle cx="190" cy="150" r="110" class="box"/>
+  <circle cx="190" cy="150" r="4" class="ink"/>
+  <text x="190" y="170" text-anchor="middle" class="ink s">south pole</text>
+  <text x="190" y="54" text-anchor="middle" class="mut s">84°S</text>
+  <circle cx="250" cy="110" r="5" class="earthf"/>
+  
+  <text x="570" y="22" text-anchor="middle" class="ink t b">Within 100 m of the target</text>
+  <circle cx="570" cy="130" r="80" class="eartht"/>
+  <circle cx="570" cy="130" r="4" class="ink"/>
+  <text x="570" y="150" text-anchor="middle" class="ink s">target</text>
+  <circle cx="610" cy="100" r="5" class="warnf"/>
+  <text x="570" y="226" text-anchor="middle" class="ink s">actual touchdown can be anywhere inside</text>
+  <text x="570" y="256" text-anchor="middle" class="ink s b">+ suitable lighting during the approach</text>
+</svg>
+<figcaption><b>Figure 6.2</b>&nbsp; Requirements in NASA's 2024 plan for the first crewed south-pole landing: within 6° of the pole, within 100 m of the target, and with suitable lighting during the approach.</figcaption>
+</figure>
+<p>The important consequence is that the whole zone, not just the target point, must be acceptable. As Figure 5.8 showed, checking differences within a zone 100 m across requires elevation models with pixels of a few metres.</p>
+
+<h3 class="sec">6.3 Lighting during the approach</h3>
+<p>Most of this guide concerns light after landing. The light during the last minutes of descent also matters. Many landers use cameras to find a safe spot to touch down. If the Sun is very low, or shining from a poor direction relative to the approach, long shadows can hide hazards or make the ground hard to interpret, as Athena's experience suggests.</p>
+<figure class="fig" id="fig6.3">
+<svg viewBox="0 0 760 230" role="img" aria-label="A lander descending with the Sun low behind it sees long shadows over the target">
+  <path d="M0 190 L200 190 L260 150 L320 190 L760 190 L760 230 L0 230 Z" class="ground"/>
+  <path d="M320 190 L560 190 L560 182 L320 182 Z" style="fill:var(--ink);opacity:.25"/>
+  <text x="440" y="214" text-anchor="middle" class="ink s b">long shadow over the target</text>
+  <circle cx="40" cy="150" r="12" class="sunf"/>
+  <path d="M52 150 L258 150" class="suns"/>
+  <rect x="600" y="50" width="40" height="26" rx="3" class="boxk paper"/>
+  <path d="M620 76 L520 176" class="line dash" marker-end="url(#ar)"/>
+  <text x="590" y="44" text-anchor="end" class="ink s b">lander coming down</text>
+  <text x="590" y="62" text-anchor="end" class="mut s">camera must read the ground</text>
+  <rect x="500" y="100" width="0" height="0"/>
+  <text x="40" y="40" class="ink s b">check at the landing moment:</text>
+  <text x="40" y="58" class="mut s">Sun height, Sun direction vs approach,</text>
+  <text x="40" y="76" class="mut s">how much of the zone is in shadow</text>
+</svg>
+<figcaption><b>Figure 6.3</b>&nbsp; Lighting during the approach. With the Sun low behind a ridge, a long shadow covers the target zone as the lander comes down. A planner can check, for the landing time, the Sun's elevation, its direction compared with the direction of approach, and the share of the zone in shadow.</figcaption>
+</figure>
+<p>The same ephemeris and terrain data used elsewhere in this guide can answer this, simply by checking one more moment: the planned time of landing.</p>
+
+<h3 class="sec">6.4 Putting it together</h3>
+<p>A comparison of candidate sites and dates can now be built from the ideas in the previous chapters. For each candidate site, a planner:</p>
+<ol class="steps">
+<li>calculates the horizon mask from a suitable elevation model, using fine data near the site and wider data farther out (Section 5.6);</li>
+<li>calculates the positions of the Sun and Earth for every hour of the mission, for the exact site, in the correct frame and time scale (Sections 5.1 and 5.2);</li>
+<li>compares each position with the skyline in the same direction, stating the rule used for partly hidden discs (Sections 1.1 and 2.6);</li>
+<li>summarises the result in the numbers that matter: the percentage of time sunlit, the longest night compared with battery life, the time with Earth in view, and the time until the next sunset or earthset (Chapter 4);</li>
+<li>repeats the comparison across the whole landing zone, at the moment of landing, and for later dates in case the launch is delayed (Sections 6.2 and 6.3).</li>
+</ol>
+<p>Because sunset times near the pole are sensitive to small errors (Section 3.4), results should be presented with their uncertainty, for example as windows of time.</p>
+
+<div class="activity">
+<p class="act-head">Classroom activity: which site for a solar lander?</p>
+<p>A small solar-powered lander will arrive at the lunar south pole on 14 November 2026 and must operate until 14 December. Its batteries can keep it alive for three days without sunlight. It has no relay satellite, so it must send its data directly to Earth at least once every three days.</p>
+<p>Use Figure 3.2 (Connecting Ridge) and Figure 3.3 (Malapert Massif) to compare the two sites. Each symbol is 12 hours apart.</p>
+<ol>
+<li>For each site, find the longest run of hidden Sun positions (open circles). How long is the longest night? Would the batteries last through it?</li>
+<li>For each site, find the longest run of hidden Earth positions (open squares). Does the lander meet its three-day contact rule?</li>
+<li>Which site would you choose? Write two or three sentences explaining your choice.</li>
+<li>Suggest one further piece of information you would want before making a final decision.</li>
+</ol>
+<p class="note">Teachers: there is no single right answer to question 3. Connecting Ridge stays sunlit all month but loses sight of Earth from 30 November to 13 December, far longer than three days. Malapert keeps Earth in view all month but has one night of a little over three days, starting on 9 December, slightly longer than the batteries last. Each site fails one requirement. Good answers weigh which failure is easier to fix: for example, a relay satellite would rescue Connecting Ridge, and a slightly larger battery would rescue Malapert.</p>
+</div>
+
+<div class="summary">
+<p class="sum-head">Summary</p>
+<ol>
+<li>Recent polar landings show how terrain and low sunlight make landing difficult.</li>
+<li>A landing site is a zone. NASA's 2024 plan used a zone of 100 m around the target, and every part of it must be acceptable.</li>
+<li>Lighting at the moment of landing matters as well as lighting afterwards.</li>
+<li>A full comparison combines a horizon mask, hourly positions of the Sun and Earth, a visibility rule and a summary of sunlight, darkness and Earth contact.</li>
+</ol>
+</div>
+
+<div class="questions">
+<p class="q-head">Review questions</p>
+<ol>
+<li>Why must a landing zone be checked as a whole, rather than only at its centre?</li>
+<li>How might a low Sun make a landing more dangerous, even if the site will be well lit after landing?</li>
+<li>A launch is delayed by one week. Why might a site that was good for the original date no longer be suitable?</li>
+</ol>
+</div>
+</div>
+
+<!-- ================= BACK MATTER ================= -->
+<div class="chapter" id="answers">
+<h2 class="chap">Answers to review questions</h2>
+<p class="ans-ch">Chapter 1</p>
+<ol class="answers">
+<li>West.</li>
+<li>The horizon is an imaginary flat line at eye level; the skyline is where the real ground meets the sky, and its height varies with direction.</li>
+<li>No. Its elevation (2.0°) is less than the skyline's (2.4°) in that direction.</li>
+<li>Radio waves travel in straight lines, so the path from lander to Earth must not be blocked by terrain.</li>
+</ol>
+<p class="ans-ch">Chapter 2</p>
+<ol class="answers">
+<li>Its axis is tilted by only about 1.5°, so the Sun's path hardly changes through the year.</li>
+<li>About 25°, by Equation 2.1.</li>
+<li>About 3 &times; 12.2° = 37°.</li>
+<li>About 3°, roughly equal to its distance from the pole.</li>
+<li>2 &times; arctan (1,737 / 384,400) = 0.52°.</li>
+</ol>
+<p class="ans-ch">Chapter 3</p>
+<ol class="answers">
+<li><i>L</i> = 500 / tan 2° = 500 / 0.0349 = about 14 km.</li>
+<li>The Moon has no air to scatter sunlight into the shadows.</li>
+<li>When the squares are open: from the start of the period until 16 November, and again from 30 November until 13 December, while Earth's loop sinks behind the ridge.</li>
+<li>The site is on top of a mountain, so the skyline lies below the flat horizon, and the Sun can be below 0° yet above the skyline.</li>
+<li>The Sun's elevation changes so slowly that a small error in the skyline moves the crossing time by hours (Worked example 3.2).</li>
+</ol>
+<p class="ans-ch">Chapter 4</p>
+<ol class="answers">
+<li>1,361 &times; cos 60° = 680 W/m&sup2;.</li>
+<li>Not necessarily. Site C could have one long night that exceeds the lander's battery life, while site D's darkness is broken into short nights.</li>
+<li>Only just: the margin is half a day. You would want to know how accurate the predicted night length is (Section 3.4), and what happens if the landing date slips.</li>
+<li>Each station sees the Moon for only part of each day as Earth turns.</li>
+</ol>
+<p class="ans-ch">Chapter 5</p>
+<ol class="answers">
+<li>A table of the positions of the Sun, Moon and planets over time.</li>
+<li>The same coordinates can refer to points about 875 m apart in the two frames, so the site would be placed in the wrong spot on the map.</li>
+<li>Distance = <i>c t</i> / 2 = 3.0 &times; 10<sup>8</sup> &times; 2.0 &times; 10<sup>&minus;4</sup> / 2 = 30 km.</li>
+<li>The whole zone falls within one or two pixels, so every spot in it has the same height on the map.</li>
+<li>Horizons measures from a flat horizon. At this site the crater rim rises well above Earth's highest elevation, so Earth stays hidden.</li>
+</ol>
+<p class="ans-ch">Chapter 6</p>
+<ol class="answers">
+<li>The lander may come down anywhere within the zone, and conditions can change greatly over tens of metres near the pole.</li>
+<li>Long shadows can hide hazards and make it hard for cameras to judge the ground during descent.</li>
+<li>The Sun and Earth will be in different positions a week later, so the site may face a long night or lose Earth contact at the new time.</li>
+</ol>
+</div>
+
+<div class="chapter" id="glossary">
+<h2 class="chap">Glossary</h2>
+<dl class="gloss">
+<dt>Angular diameter</dt><dd>The angle a disc such as the Sun or Earth covers in the sky.</dd>
+<dt>Azimuth</dt><dd>Compass direction, measured in degrees clockwise from north.</dd>
+<dt>Digital elevation model (DEM)</dt><dd>A grid of squares (pixels), each holding the height of the ground.</dd>
+<dt>Elevation</dt><dd>The angle of an object above the flat horizon.</dd>
+<dt>Ephemeris</dt><dd>A table of the positions of bodies in space over time.</dd>
+<dt>Horizon</dt><dd>An imaginary flat line at eye level, as if the ground were level all round.</dd>
+<dt>Horizon mask</dt><dd>The height of the skyline in every direction around a site.</dd>
+<dt>Horizons</dt><dd>JPL's online service for calculating ephemerides.</dd>
+<dt>Libration</dt><dd>The slow apparent rocking of the Moon, which makes Earth move by several degrees in the lunar sky.</dd>
+<dt>LOLA</dt><dd>Lunar Orbiter Laser Altimeter, the instrument on LRO that measures ground height.</dd>
+<dt>LRO</dt><dd>Lunar Reconnaissance Orbiter, a NASA spacecraft orbiting the Moon since 2009.</dd>
+<dt>LROC</dt><dd>The camera system on LRO.</dd>
+<dt>Panorama</dt><dd>The skyline around a site drawn as a strip, with azimuth across and elevation upwards.</dd>
+<dt>Parallax</dt><dd>The change in an object's apparent direction caused by a change in the observer's position.</dd>
+<dt>Permanently shadowed region</dt><dd>Ground near a pole that the Sun never reaches.</dd>
+<dt>PGDA</dt><dd>NASA's Planetary Geodesy Data Archive, which distributes lunar elevation and illumination products.</dd>
+<dt>Reference frame</dt><dd>The set of axes used to give positions, defining north and the zero of longitude.</dd>
+<dt>Skyline</dt><dd>The line where the real ground meets the sky.</dd>
+<dt>Solar constant</dt><dd>The power of sunlight per square metre at Earth's (and the Moon's) distance from the Sun: about 1,361 W/m&sup2;.</dd>
+<dt>SPICE</dt><dd>A software toolkit from JPL for calculating positions of bodies in space.</dd>
+<dt>TDB, UTC</dt><dd>Two time scales. UTC is everyday clock time; TDB is used in ephemerides and runs about 69 seconds ahead.</dd>
+</dl>
+</div>
+
+<div class="chapter" id="references">
+<h2 class="chap">References</h2>
+<ol class="refs">
+<li>Mazarico, E., Neumann, G. A., Smith, D. E., Zuber, M. T. and Torrence, M. H. (2011). Illumination conditions of the lunar polar regions using LOLA topography. <i>Icarus</i>, 211, 1066&ndash;1081.</li>
+<li>NASA Goddard Space Flight Center. Planetary Geodesy Data Archive (PGDA), products 69, 78, 81, 90 and 104. <a href="https://pgda.gsfc.nasa.gov/">pgda.gsfc.nasa.gov</a></li>
+<li>NASA Jet Propulsion Laboratory. Horizons System. <a href="https://ssd.jpl.nasa.gov/horizons/">ssd.jpl.nasa.gov/horizons</a></li>
+<li>NASA Navigation and Ancillary Information Facility. SPICE Toolkit. <a href="https://naif.jpl.nasa.gov/naif/">naif.jpl.nasa.gov</a></li>
+<li>NASA Planetary Data System, Geosciences Node. LRO LOLA data. <a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">pds-geosciences.wustl.edu</a></li>
+<li>NASA (2024). Artemis landing system update: south pole landing requirements. NASA Technical Reports Server.</li>
+<li>NASA. Artemis IV mission overview. <a href="https://www.nasa.gov/mission/artemis-iv/">nasa.gov/mission/artemis-iv</a></li>
+<li>Firefly Aerospace (2 March 2025). Firefly's Blue Ghost lunar lander softly touched down in Mare Crisium. Press release.</li>
+<li>Intuitive Machines (2025). IM-2 mission update. Press release.</li>
+<li>Korea Aerospace Research Institute. Korea Deep Space Antenna, Yeoju.</li>
+</ol>
+<p class="note">Figures 3.2, 3.3 and 5.4 were made for this guide from NASA LOLA elevation models (PGDA) and JPL ephemerides. Photographs on this website are from NASA. This guide is not affiliated with or endorsed by NASA.</p>
+</div>
+
+<p class="top-link"><a href="#">Back to top</a></p>
+  </main>
+
+  <aside class="sidebar">
+    <div class="box">
+      <h2>In this guide</h2>
+      <ul>
+        <li><a href="#ch1">1. Positions in the sky</a></li>
+        <li><a href="#ch2">2. The Sun and Earth in the lunar sky</a></li>
+        <li><a href="#ch3">3. Terrain, light and shadow</a></li>
+        <li><a href="#ch4">4. Power and communication</a></li>
+        <li><a href="#ch5">5. Where the numbers come from</a></li>
+        <li><a href="#ch6">6. Choosing a landing site</a></li>
+        <li><a href="#answers">Answers</a></li>
+        <li><a href="#glossary">Glossary</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>Using this guide</h2>
+      <p>The chapters are meant to be read in order. Worked examples can be skipped on a first reading.</p>
+      <p>Figures may be used in teaching with credit to this website.</p>
+    </div>
+    <div class="box">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="teaching.html">Learning resources</a></li>
+        <li><a href="index.html#south-pole">Why the south pole?</a></li>
+        <li><a href="mission-portal/">Plan a landing</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>Contact</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>This project</h3>
+      <p><a href="mission-portal/">Plan a landing</a></p>
+      <p><a href="teaching.html">Learning resources</a></p>
+      <p><a href="sources.html">Sources &amp; Checks</a></p>
+      <p><a href="source-code.html">Source code</a></p>
+    </div>
+    <div class="col">
+      <h3>Pictures and data</h3>
+      <p>Photographs: NASA. Data: NASA Planetary Data System.</p>
+      <p>Not affiliated with or endorsed by NASA.</p>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/language.js"></script>
+</body>
+</html>

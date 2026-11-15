@@ -16,6 +16,17 @@ docs/       결정·검증·출처·좌표계 확인표
 tests/      Python↔TS 교차 테스트 입력
 ```
 
+## 홈페이지 + 포탈 사이트 (배포)
+
+배포 사이트는 `/`에 팀 홈페이지(`homepage/`, 정적 HTML), `/mission-portal/`에 이 포탈을 둡니다. 홈페이지의 "착륙 계획 세우기"가 `/mission-portal/`로 이동합니다.
+
+```sh
+npm run build          # 포탈(web/dist) + 사이트(dist/: 홈페이지 + /mission-portal/)
+npm run preview:site   # http://127.0.0.1:5176  (홈페이지 → 착륙 계획 세우기 → 포탈)
+```
+
+`dist/`는 `scripts/build-site.mjs`가 만들고 Cloudflare(`wrangler.jsonc`)가 이 폴더를 올립니다. 홈페이지 문구를 고치면 `homepage/`에서 고치고, 검색 색인은 `homepage/tools/build_search_index.py`로 다시 만듭니다.
+
 ## 포탈 + Orbit 실행
 
 프로젝트 **루트**에서 실행합니다. Node.js 22 이상을 권장합니다.

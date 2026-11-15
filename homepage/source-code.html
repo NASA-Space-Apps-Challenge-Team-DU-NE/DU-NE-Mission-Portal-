@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Source code - Lunar Landing Site Navigator</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.github-link { display: inline-block; padding: 0.65rem 1rem; border-radius: 4px; background: #1e253e; }
+.content-plain a.github-link { color: #fff; text-decoration: none; }
+.content-plain a.github-link:hover { background: #303b60; }
+</style>
+<link rel="stylesheet" href="sources-section.css">
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="Search this site" aria-label="Search this site"><button type="submit">Search</button></form>
+     <div class="lang" aria-label="Language">
+  <a href="?lang=en" data-language="en" hreflang="en" style="color:#fff">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href="?lang=ko" data-language="ko" hreflang="ko" style="color:#fff">KR</a>
+</div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">Lunar Landing Site Navigator</a> &rsaquo; <a href="sources.html">Sources &amp; Checks</a></div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>Lunar Landing Site Navigator</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="Main">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teaching.html">Learning resources</a></li>
+      <li class="has-drop"><a href="sources.html" aria-current="page" aria-haspopup="true">Sources &amp; Checks</a>
+        <ul class="drop">
+          <li><a href="sources-list.html">Sources the project used</a></li>
+          <li><a href="checks.html">Checks</a></li>
+          <li><a href="source-code.html">Source code</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page sources-section">
+  <h2 class="sources-section-heading" data-ko="출처 및 검증">Sources &amp; Checks</h2>
+  <nav class="source-tabs" aria-label="Sources and checks">
+  <a href="sources-list.html" data-ko="참고 자료">Sources</a>
+  <a href="checks.html" data-ko="검증">Checks</a>
+  <a href="source-code.html" aria-current="page"
+     data-ko="소스 코드">Source code</a>
+</nav>
+<div class="layout sources-section-content">
+  <main class="content-plain">
+    <h2 class="page-head" data-ko="소스 코드">Source code</h2>
+    <p class="intro" data-ko="달 착륙지 탐색기가 착륙 후보지와 날짜를 비교하는 데 사용하는 코드를 살펴보세요.">Explore the code behind the Lunar Landing Site Navigator and see how it compares candidate landing sites and dates.</p>
+    <h3 class="sub" data-ko="코드가 하는 일">What the code does</h3>
+    <ul>
+      <li data-ko="달 지형 데이터를 사용해 착륙 후보지 주변의 지형과 지평선을 분석합니다.">Uses lunar terrain data to assess the ground and local horizon around candidate landing sites.</li>
+      <li data-ko="선택한 위치와 시간의 태양·지구 위치를 지평선과 비교해 일조와 지구 가시성을 추정합니다.">Compares the positions of the Sun and Earth with the local horizon to estimate sunlight and Earth visibility for a selected site and time.</li>
+    </ul>
+    <p><a class="github-link" href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator" data-ko="GitHub에서 소스 코드 보기">View source code on GitHub</a></p>
+  </main>
+</div>
+
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>Contact</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>This project</h3>
+      <p><a href="mission-portal/">Plan a landing</a></p>
+      <p><a href="teaching.html">Learning resources</a></p>
+      <p><a href="sources.html">Sources &amp; Checks</a></p>
+      <p><a href="source-code.html">Source code</a></p>
+    </div>
+    <div class="col">
+      <h3>Pictures and data</h3>
+      <p>Photographs: NASA. Data: NASA Planetary Data System.</p>
+      <p>Not affiliated with or endorsed by NASA.</p>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/language.js"></script>
+</body>
+</html>

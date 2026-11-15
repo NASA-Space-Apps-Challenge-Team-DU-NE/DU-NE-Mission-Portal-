@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>출처 - 달 착륙지 탐색기</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="../assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/language.js"></script>
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="../assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="사이트 검색" aria-label="사이트 검색"><button type="submit">검색</button></form>
+      <div class="lang" aria-label="언어"><a href="../sources.html?lang=en" hreflang="en" style="color:#fff">EN</a><span class="sep" aria-hidden="true">/</span><a href="sources.html?lang=ko" hreflang="ko" style="color:#fff" aria-current="true" class="on">KR</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">달 착륙지 탐색기</a> &rsaquo; 출처</div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>달 착륙지 탐색기</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="주 메뉴">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">홈</a></li>
+      <li><a href="teaching.html">학습 자료</a></li>
+      <li class="has-drop"><a href="sources.html" aria-current="page" aria-haspopup="true">출처</a>
+        <ul class="drop">
+          <li><a href="sources.html">프로젝트 참고 자료</a></li>
+          <li><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">팀 소개</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page layout">
+  <main class="content-plain">
+    <h2 class="page-head">출처</h2>
+    <p class="intro">프로젝트에서 사용한 자료를 용도별로 정리하고 각 자료에 대한 설명을 덧붙였습니다.</p>
+    <p class="status">This list is a working draft. The team will add, remove and update entries after discussion. Last updated 14 November 2026.</p>
+    <h3 class="sub">챌린지 소개</h3>
+    <dl class="sources">
+      <dt><a href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/">NASA Space Apps Challenge 2026: Lunar Landing Site Navigator</a></dt>
+      <dd><span class="url">www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator</span>The challenge brief. Our main source for what the tool should do and who it is for.</dd>
+    </dl>
+    <h3 class="sub">챌린지에서 소개한 도구</h3>
+    <dl class="sources">
+      <dt><a href="https://quickmap.lroc.asu.edu/">LROC QuickMap</a></dt>
+      <dd><span class="url">quickmap.lroc.asu.edu</span>Web map of Lunar Reconnaissance Orbiter data. Useful for looking at sites and data layers by eye.</dd>
+      <dt><a href="https://trek.nasa.gov/moon/">NASA Moon Trek</a></dt>
+      <dd><span class="url">trek.nasa.gov/moon</span>NASA&#x27;s online lunar mapping portal, with terrain and image layers.</dd>
+      <dt><a href="https://ssd.jpl.nasa.gov/horizons/">JPL Horizons System</a></dt>
+      <dd><span class="url">ssd.jpl.nasa.gov/horizons</span>Online service that gives the Sun&#x27;s and Earth&#x27;s positions for a chosen place and time. We use it to check our own calculations.</dd>
+      <dt><a href="https://www.asc-csa.gc.ca/eng/astronomy/moon-exploration/">Canadian Space Agency: Moon exploration</a></dt>
+      <dd><span class="url">www.asc-csa.gc.ca/eng/astronomy/moon-exploration</span>Background reading on lunar exploration.</dd>
+    </dl>
+    <h3 class="sub">달 정찰 궤도선(LRO)</h3>
+    <dl class="sources">
+      <dt><a href="https://science.nasa.gov/mission/lro/">NASA: Lunar Reconnaissance Orbiter</a></dt>
+      <dd><span class="url">science.nasa.gov/mission/lro</span>Overview of the spacecraft whose measurements most lunar south pole data comes from.</dd>
+      <dt><a href="https://science.nasa.gov/mission/lro/science-and-data/">NASA: LRO science and data</a></dt>
+      <dd><span class="url">science.nasa.gov/mission/lro/science-and-data</span>What LRO measures and where its data products are kept, including LOLA heights.</dd>
+    </dl>
+    <h3 class="sub">지형 및 일조 데이터</h3>
+    <dl class="sources">
+      <dt><a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">PDS Geosciences Node: LRO LOLA archive</a></dt>
+      <dd><span class="url">pds-geosciences.wustl.edu/missions/lro/lola.htm</span>The official archive for LOLA data. Its product documents explain how to read each file.</dd>
+      <dt><a href="https://pgda.gsfc.nasa.gov/products/78">NASA PGDA product 78: high-resolution topography of south pole sites</a></dt>
+      <dd><span class="url">pgda.gsfc.nasa.gov/products/78</span>Elevation and slope maps with 5 m pixels around named candidate sites, such as the Shackleton rim and Malapert Massif.</dd>
+      <dt><a href="https://pgda.gsfc.nasa.gov/products/81">NASA PGDA product 81: south pole elevation mosaic</a></dt>
+      <dd><span class="url">pgda.gsfc.nasa.gov/products/81</span>A single 5 m elevation map of the region around the pole. The full file is large.</dd>
+      <dt><a href="https://pgda.gsfc.nasa.gov/products/69">NASA PGDA product 69: lunar polar illumination</a></dt>
+      <dd><span class="url">pgda.gsfc.nasa.gov/products/69</span>Maps of how much of the time each spot is sunlit, averaged over many years. Good for choosing a region, not for a specific date.</dd>
+      <dt><a href="https://ode.rsl.wustl.edu/mars/pagehelp/Content/Missions_Instruments/LRO/LOLA/GDR/GDRVIS.htm">LOLA GDRVIS product notes</a></dt>
+      <dd><span class="url">ode.rsl.wustl.edu/mars/pagehelp/Content/Missions_Instruments/LRO/LOLA/GDR/GDRVIS.htm</span>Explains maps of average sunlight and average Earth visibility over an 18.6-year cycle.</dd>
+      <dt><a href="https://ode.rsl.wustl.edu/moon/pagehelp/content/missions_instruments/lro/lola/GDR/GDRSKY.htm">LOLA GDRSKY product notes</a></dt>
+      <dd><span class="url">ode.rsl.wustl.edu/moon/pagehelp/content/missions_instruments/lro/lola/GDR/GDRSKY.htm</span>Explains maps of how much of the sky can be seen from each spot.</dd>
+      <dt><a href="https://ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf">NASA Lunar Surface Data Book</a></dt>
+      <dd><span class="url">ntrs.nasa.gov/api/citations/20230007818/downloads/ACD-50044%20Lunar%20Surface%20Data%20Book%20Rev%20A.pdf</span>NASA&#x27;s reference on lunar sunlight, Earth visibility and permanent shadow products, and the limits of each.</dd>
+      <dt><a href="https://ode.rsl.wustl.edu/moon/">Lunar Orbital Data Explorer</a></dt>
+      <dd><span class="url">ode.rsl.wustl.edu/moon</span>Search, map and download tool for lunar mission data.</dd>
+    </dl>
+    <h3 class="sub">위치와 시간</h3>
+    <dl class="sources">
+      <dt><a href="https://naif.jpl.nasa.gov/naif/data_generic.html">JPL NAIF: generic SPICE kernels</a></dt>
+      <dd><span class="url">naif.jpl.nasa.gov/naif/data_generic.html</span>The data files SPICE uses for positions, body shapes and time.</dd>
+      <dt><a href="https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/kernel.html">JPL NAIF: SPICE kernel guide</a></dt>
+      <dd><span class="url">naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/kernel.html</span>Explains what each type of kernel file does.</dd>
+      <dt><a href="https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/azlcpo_c.html">JPL NAIF: azlcpo_c</a></dt>
+      <dd><span class="url">naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/azlcpo_c.html</span>The SPICE routine that gives azimuth and elevation as seen from a point on the surface.</dd>
+      <dt><a href="https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subsol_c.html">JPL NAIF: subsol_c</a></dt>
+      <dd><span class="url">naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/subsol_c.html</span>The SPICE routine for the point directly below the Sun. Background only.</dd>
+    </dl>
+    <h3 class="sub">달 남극 환경</h3>
+    <dl class="sources">
+      <dt><a href="https://science.nasa.gov/resource/shadows-near-the-moons-south-pole/">NASA: Shadows near the Moon&#x27;s south pole</a></dt>
+      <dd><span class="url">science.nasa.gov/resource/shadows-near-the-moons-south-pole</span>Visualisation of how a low Sun casts long shadows over the polar terrain.</dd>
+      <dt><a href="https://www.nasa.gov/glenn/glenn-expertise-space-exploration/scan/lunar-surface-propagation/">NASA: Lunar surface propagation</a></dt>
+      <dd><span class="url">www.nasa.gov/glenn/glenn-expertise-space-exploration/scan/lunar-surface-propagation</span>How terrain affects radio signals between the lunar surface and Earth.</dd>
+      <dt><a href="https://www.nasa.gov/reference/moonbase-environment/">NASA: Moon base environment</a></dt>
+      <dd><span class="url">www.nasa.gov/reference/moonbase-environment</span>Lighting, shadow and temperature conditions at the lunar south pole.</dd>
+    </dl>
+    <h3 class="sub">Pictures on this website</h3>
+    <dl class="sources">
+      <dt><a href="https://images.nasa.gov/">NASA Image and Video Library</a></dt>
+      <dd><span class="url">images.nasa.gov</span>Source of the photographs on these pages: art002e015231, art002e009575 and art002e014055 (Artemis II, April 2026), PIA13523 (the lunar south pole), AS11-44-6552 (Apollo 11), AS16-113-18289 (Apollo 16), PIA12909 and PIA12897 (Lunar Reconnaissance Orbiter views of the Apollo 11 and 14 sites), AS12-48-7121 (Apollo 12), AS15-87-11748 (Apollo 15) and AS17-134-20435 (Apollo 17).</dd>
+    </dl>
+    <h3 class="sub">How we use sources</h3>
+    <ul class="plain">
+      <li>Cite the product's own documentation or the scientific paper, not only an archive's front page.</li>
+      <li>For every data file we download, record its product name, version, file name, date downloaded, map projection, reference frame, units and resolution.</li>
+      <li>Keep measured data, modelled products and made-up demonstration values clearly apart.</li>
+      <li>Do not put large mission data files in the repository; link to where they can be downloaded.</li>
+    </ul>
+  </main>
+
+  <aside class="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul>
+        <li>챌린지 소개</li>
+        <li>챌린지에서 소개한 도구</li>
+        <li>달 정찰 궤도선(LRO)</li>
+        <li>지형 및 일조 데이터</li>
+        <li>위치와 시간</li>
+        <li>달 남극 환경</li>
+        <li>Pictures on this website</li>
+        <li>How we use sources</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>함께 보기</h2>
+      <ul>
+        <li><a href="study-guide.html#references">Study guide references</a></li>
+        <li><a href="planning.html">착륙 계획 세우기</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>연락처</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>이 프로젝트</h3>
+      <p><a href="planning.html">착륙 계획 세우기</a></p>
+      <p><a href="teaching.html">학습 자료</a></p>
+      <p><a href="sources.html">출처</a></p>
+      <p><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></p>
+    </div>
+    <div class="col">
+      <h3>사진 및 데이터</h3>
+      <p>사진은 NASA, 데이터는 NASA Planetary Data System에서 제공했습니다.</p>
+      <p>이 프로젝트는 NASA 소속이 아니며 NASA의 공식 승인을 받지 않았습니다.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

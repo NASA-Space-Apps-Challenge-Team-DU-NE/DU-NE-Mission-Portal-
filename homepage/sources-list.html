@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources - Lunar Landing Site Navigator</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="assets/css/style.css">
+<style>
+.sources-page { padding-block: 26px 54px; }
+.sources-page .sources-heading { color: #162743; font-size: clamp(28px, 4vw, 36px); font-weight: 730; line-height: 1.15; }
+.sources-page .sources-intro { margin: 10px 0 18px; color: #525b67; font-size: 14px; line-height: 1.6; }
+.sources-page .source-tabs { margin: 0 0 28px; border-color: #d8dde4; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.sources-page .source-tabs a { padding: 9px 10px; border-color: #d8dde4; }
+.sources-page .source-tabs a[aria-current="page"] { background: #fff; color: #162743; box-shadow: inset 0 -2px #162743; }
+.sources-detail-layout { display: grid; grid-template-columns: 224px minmax(0, 1fr); gap: 30px; align-items: start; }
+.sources-detail-layout aside { position: sticky; top: 18px; border-right: 1px solid #d8dde4; padding-right: 14px; }
+.sources-detail-layout .toc a { display: block; padding: 9px 10px; border-left: 2px solid transparent; line-height: 1.45; font-size: 14px; }
+.sources-detail-layout .toc a[aria-current] { background: #eaf0f6; color: #162743; border-left-color: #162743; font-weight: 700; }
+.sources-panels section[hidden] { display: none; }
+.sources-panels section { scroll-margin-top: 18px; }
+.sources-panels h2 { color: #162743; font-size: 23px; line-height: 1.3; font-weight: 700; }
+.sources-panels .entry { display: grid; grid-template-columns: minmax(0, 44%) minmax(0, 1fr); gap: 22px; padding: 15px 0; border-bottom: 1px solid #d8dde4; }
+.sources-panels .identity > a, .sources-panels .identity > strong { font-size: 16px; line-height: 1.4; font-weight: 700; }
+.sources-panels .identity > a { text-decoration: underline; text-decoration-color: #a1acb9; text-underline-offset: 3px; }
+.sources-panels .entry p { margin: 0; color: #333d49; font-size: 14px; line-height: 1.65; }
+@media (max-width: 720px) {
+  .sources-detail-layout { grid-template-columns: 1fr; gap: 23px; }
+  .sources-detail-layout aside { position: static; border: 0; border-bottom: 1px solid #d8dde4; padding: 0 0 13px; }
+  .sources-detail-layout .toc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 470px) {
+  .sources-panels .entry { grid-template-columns: 1fr; gap: 7px; }
+}
+</style>
+<link rel="stylesheet" href="sources-section.css">
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="Search this site" aria-label="Search this site"><button type="submit">Search</button></form>
+     <div class="lang" aria-label="Language">
+  <a href="?lang=en" data-language="en" hreflang="en" style="color:#fff">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href="?lang=ko" data-language="ko" hreflang="ko" style="color:#fff">KR</a>
+</div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">Lunar Landing Site Navigator</a> &rsaquo; <a href="sources.html">Sources &amp; Checks</a></div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>Lunar Landing Site Navigator</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="Main">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teaching.html">Learning resources</a></li>
+      <li class="has-drop"><a href="sources.html" aria-current="page" aria-haspopup="true">Sources &amp; Checks</a>
+        <ul class="drop">
+          <li><a href="sources-list.html">Sources the project used</a></li>
+          <li><a href="checks.html">Checks</a></li>
+          <li><a href="source-code.html">Source code</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page sources-section">
+  <h2 class="sources-section-heading" data-ko="출처 및 검증">Sources &amp; Checks</h2>
+  <nav class="source-tabs" aria-label="Sources and checks">
+  <a href="sources-list.html" aria-current="page" data-ko="참고 자료">Sources</a>
+  <a href="checks.html" data-ko="검증">Checks</a>
+  <a href="source-code.html"
+     data-ko="소스 코드">Source code</a>
+</nav>
+<main class="sources-page">
+  <h2 class="sources-heading" data-ko="참고 자료">Sources</h2>
+  <p class="sources-intro" data-ko="달 착륙지 탐색기의 지도와 계산에 관련된 자료의 출처와 용도를 확인할 수 있습니다.">Explore the sources behind the navigator’s maps and calculations, and see how each is used.</p>
+  <div class="sources-detail-layout">
+    <aside><nav class="toc" aria-label="On this page"><a href="#artemis" data-ko="아르테미스 III 후보지역">Artemis III candidate regions</a><a href="#terrain" data-ko="지형·일조 데이터">Terrain and illumination</a><a href="#positions" data-ko="태양·지구 위치">Sun and Earth positions</a><a href="#validation" data-ko="검증·보조 자료">Validation and context</a><a href="#records" data-ko="출처·검증 기록">Source and check records</a></nav></aside>
+    <div class="sources-panels">
+      <section id="artemis"><h2 data-ko="아르테미스 III 후보지역">Artemis III candidate regions</h2><article class="entry"><div class="identity"><strong data-ko="2024년 달 남극 후보지역 경계">2024 lunar south pole candidate region boundaries</strong></div><p data-ko="QuickMap의 2024년 레이어에 공개된 아르테미스 III 후보지역 9곳의 경계입니다. 지도에서 후보지역의 위치와 대략적인 범위를 살펴볼 수 있습니다. 정밀 좌표 기준과 경계 정확도는 확인되지 않아 착륙 안전성 판정에는 사용할 수 없습니다.">QuickMap’s 2024 layer shows the approximate extent of nine Artemis III candidate regions. The precise coordinate frame and boundary accuracy remain unconfirmed, so this layer cannot establish landing safety.</p></article><article class="entry"><div class="identity"><strong data-ko="지역 목록과 경계 확인 기록">Region summary and boundary checks</strong></div><p data-ko="지역명과 ID, 원본 면적 속성을 정리했습니다. 검증 기록에는 원본 파일 해시, 9개 지역명, 경계의 닫힘 여부와 도형 유효성 확인이 포함됩니다.">The summary records region names, IDs and source area attributes. The validation record checks the source file hash, nine region names, polygon closure and geometry validity.</p></article></section><section id="terrain"><h2 data-ko="지형·일조 데이터">Terrain and illumination</h2><article class="entry"><div class="identity"><a href="https://pgda.gsfc.nasa.gov/products/78" data-ko="LRO LOLA 고도·경사">LRO LOLA elevation and slope</a></div><p data-ko="Site01 주변 지형을 보는 데 쓰는 5 m 자료입니다. 고도·경사 값을 NASA 원본 셀과 비교했고, 넓은 범위의 80 m·240 m 지도는 별도로 대조했습니다.">The 5 m Site01 maps describe the terrain near the candidate site. Elevation and slope were checked against the original NASA cells, with wider 80 m and 240 m maps checked separately.</p></article><article class="entry"><div class="identity"><a href="https://pgda.gsfc.nasa.gov/products/69" data-ko="달 극지 일조·지구 가시성 지도">Lunar polar illumination maps</a></div><p data-ko="NASA의 60 m 지도에서 장기 평균 일조율·지구 가시율과 영구 음영을 확인합니다. 지역을 비교할 때 쓰는 자료이며, 특정 날짜의 가시성은 별도로 계산합니다.">NASA’s 60 m maps summarize long-term sunlight, Earth visibility and permanent shadow. They provide regional context. Date-specific visibility uses separate calculations.</p></article></section><section id="positions"><h2 data-ko="태양·지구 위치">Sun and Earth positions</h2><article class="entry"><div class="identity"><a href="https://ssd.jpl.nasa.gov/horizons/" data-ko="JPL Horizons 기준표">JPL Horizons tables</a></div><p data-ko="선택한 달 지점에서 매시간 태양과 지구가 어디에 보이는지 정리한 표입니다. 같은 위치와 시각에서 계산한 값과 대조하는 기준으로 씁니다.">Hourly Sun and Earth positions for selected lunar sites. The team uses these tables to compare position calculations at matching locations and times.</p></article><article class="entry"><div class="identity"><a href="https://naif.jpl.nasa.gov/naif/data_generic.html" data-ko="JPL SPICE 기준표">JPL SPICE reference tables</a></div><p data-ko="팀이 SPICE로 별도로 계산한 위치 기준표입니다. Horizons와 같은 계열의 JPL 원천 데이터를 사용하므로 두 표의 비교는 계산 일관성을 확인하는 데 활용합니다.">The team generated a second set of position tables with SPICE. Comparing these with Horizons checks calculation consistency because both use related JPL underlying data.</p></article></section><section id="validation"><h2 data-ko="검증·보조 자료">Validation and context</h2><article class="entry"><div class="identity"><a href="https://ode.rsl.wustl.edu/moon/" data-ko="LROC NAC 그림자 영상">LROC NAC shadow images</a></div><p data-ko="Site01을 촬영한 NAC 영상의 목록을 확인했습니다. 예측한 그림자와 실제 영상의 비교는 예정된 검증입니다.">The team identified NAC products that cover Site01. Comparing predicted shadows with the images is planned.</p></article><article class="entry"><div class="identity"><strong data-ko="Diviner 표면 온도">Diviner surface temperature</strong></div><p data-ko="지역별 온도 환경을 비교하는 계절 평균 참고 자료입니다. 추출 값은 원본 표와 대조했고, 착륙지 계산 결과 검증에는 아직 사용하지 않았습니다.">Seasonal surface-temperature averages for regional context. The team checked extracted values against the source table.</p></article></section><section id="records"><h2 data-ko="출처·검증 기록">Source and check records</h2><article class="entry"><div class="identity"><strong data-ko="자료 수집 보고서">Collection report</strong></div><p data-ko="수집한 자료의 원본 출처와, 복사하거나 잘라 쓴 지형 파일의 대조 기록을 확인할 수 있는 팀 문서입니다.">The project record for tracing collected files to their sources and checking the terrain files that were copied or extracted.</p></article><article class="entry"><div class="identity"><strong data-ko="검증 기록">Recorded checks</strong></div><p data-ko="원본 파일 대조와 위치 기준표 비교를 정리한 팀 기록입니다.">The team’s recorded comparisons for source files and reference calculations.</p></article></section>
+    </div>
+  </div>
+</main>
+
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>Contact</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>This project</h3>
+      <p><a href="mission-portal/">Plan a landing</a></p>
+      <p><a href="teaching.html">Learning resources</a></p>
+      <p><a href="sources.html">Sources &amp; Checks</a></p>
+      <p><a href="source-code.html">Source code</a></p>
+    </div>
+    <div class="col">
+      <h3>Pictures and data</h3>
+      <p>Photographs: NASA. Data: NASA Planetary Data System.</p>
+      <p>Not affiliated with or endorsed by NASA.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+{
+  const url = new URL(location.href);
+  try {
+    const saved = localStorage.getItem("dune-language");
+    if (!["en", "ko"].includes(url.searchParams.get("lang")) && !["en", "ko"].includes(saved)) {
+      url.searchParams.set("lang", "en");
+      history.replaceState(null, "", url);
+    }
+  } catch {
+    // The shared language switch still handles explicit EN and KR links.
+  }
+}
+</script>
+<script src="assets/js/language.js"></script>
+<script>
+const links = [...document.querySelectorAll(".toc a")];
+const panels = links.map(link => document.getElementById(link.hash.slice(1)));
+const compact = matchMedia("(max-width: 720px)");
+
+function showCategory() {
+  const active = links.find(link => link.hash === location.hash) ?? links[0];
+  links.forEach((link, index) => {
+    const selected = link === active;
+    panels[index].hidden = !selected;
+    if (selected) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+  return panels[links.indexOf(active)];
+}
+
+links.forEach(link => {
+  link.addEventListener("click", event => {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    if (location.hash !== link.hash) history.pushState(null, "", link.hash);
+    const panel = showCategory();
+    if (compact.matches) panel.scrollIntoView({ block: "start" });
+  });
+});
+addEventListener("hashchange", showCategory);
+addEventListener("popstate", showCategory);
+showCategory();
+</script>
+</body>
+</html>

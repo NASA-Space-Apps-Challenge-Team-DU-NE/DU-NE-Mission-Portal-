@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sources &amp; Checks - Lunar Landing Site Navigator</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="sources-section.css">
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="Search this site" aria-label="Search this site"><button type="submit">Search</button></form>
+     <div class="lang" aria-label="Language">
+  <a href="?lang=en" data-language="en" hreflang="en" style="color:#fff">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href="?lang=ko" data-language="ko" hreflang="ko" style="color:#fff">KR</a>
+</div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">Lunar Landing Site Navigator</a> &rsaquo; <a href="sources.html">Sources &amp; Checks</a></div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>Lunar Landing Site Navigator</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="Main">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="teaching.html">Learning resources</a></li>
+      <li class="has-drop"><a href="sources.html" aria-current="page" aria-haspopup="true">Sources &amp; Checks</a>
+        <ul class="drop">
+          <li><a href="sources-list.html">Sources the project used</a></li>
+          <li><a href="checks.html">Checks</a></li>
+          <li><a href="source-code.html">Source code</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page sources-section">
+  <h2 class="sources-section-heading" data-ko="출처 및 검증">Sources &amp; Checks</h2>
+  <nav class="source-tabs" aria-label="Sources and checks">
+  <a href="sources-list.html" data-ko="참고 자료">Sources</a>
+  <a href="checks.html" data-ko="검증">Checks</a>
+  <a href="source-code.html"
+     data-ko="소스 코드">Source code</a>
+</nav>
+<div class="layout sources-section-content">
+  <main class="content-plain">
+    <p class="intro">Where the tool's numbers come from, and how we test that they are right.</p>
+    <div class="previews">
+      <section class="preview">
+        <a href="sources-list.html" tabindex="-1" aria-hidden="true"><img src="assets/images/checks/preview-sources.jpg" alt=""></a>
+        <h3><a href="sources-list.html">Sources</a></h3>
+        <p class="define">The data, tools and documents the project is built on.</p>
+        <p>Terrain maps from NASA's LOLA archive, Sun and Earth positions from JPL's SPICE files, the challenge brief itself and more, each with a short note on what we use it for.</p>
+        <p class="more"><a href="sources-list.html">See all sources</a></p>
+      </section>
+      <section class="preview">
+        <a href="checks.html" tabindex="-1" aria-hidden="true"><img src="assets/images/checks/preview-checks.jpg" alt=""></a>
+        <h3><a href="checks.html">Checks</a></h3>
+        <p class="define">Tests that compare the tool's numbers with outside sources.</p>
+        <p>Every check of the tool's numbers against outside sources, with the result and the file it comes from. Sun and Earth directions pass in all 16 cases; long-term sunlight matches NASA Goddard's maps to RMSE 0.06. Open problems and bugs are listed too.</p>
+        <p class="more"><a href="checks.html">See the checks</a></p>
+      </section>
+    </div>
+    <p class="credit">Pictures: the same stretch of the lunar south pole drawn by the team from NASA data. Left card: LOLA heights, LROC WAC images and NASA Goddard's PGDA69 sunlight map. Right card: PGDA69 sunlight beside our own calculation.</p>
+  </main>
+
+  <aside class="sidebar">
+    <div class="box">
+      <h2>On this page</h2>
+      <ul>
+        <li><a href="sources-list.html">Sources</a></li>
+        <li><a href="checks.html">Checks</a></li>
+        <li><a href="source-code.html">Source code</a></li>
+      </ul>
+    </div>
+    <div class="box">
+      <h2>See also</h2>
+      <ul>
+        <li><a href="study-guide.html#references">Study guide references</a></li>
+        <li><a href="mission-portal/">Plan a landing</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>Contact</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>This project</h3>
+      <p><a href="mission-portal/">Plan a landing</a></p>
+      <p><a href="teaching.html">Learning resources</a></p>
+      <p><a href="sources.html">Sources &amp; Checks</a></p>
+      <p><a href="source-code.html">Source code</a></p>
+    </div>
+    <div class="col">
+      <h3>Pictures and data</h3>
+      <p>Photographs: NASA. Data: NASA Planetary Data System.</p>
+      <p>Not affiliated with or endorsed by NASA.</p>
+    </div>
+  </div>
+</footer>
+<script src="assets/js/language.js"></script>
+</body>
+</html>

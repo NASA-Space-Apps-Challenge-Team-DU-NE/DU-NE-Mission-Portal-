@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+  
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lunar Landing Site Navigator - Team DU:NE</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+<script>
+  // Photos load from ./assets/images when they are there; otherwise straight from NASA's image library.
+  function useNasaCopy(img) {
+    if (img.dataset.nasa && img.src !== img.dataset.nasa) img.src = img.dataset.nasa;
+  }
+</script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="Search this site" aria-label="Search this site"><button type="submit">Search</button></form>
+      <div class="lang" aria-label="Language">
+  <a href="?lang=en" data-language="en" hreflang="en" style="color:#fff">EN</a>
+  <span class="sep" aria-hidden="true">/</span>
+  <a href="?lang=ko" data-language="ko" hreflang="ko" style="color:#fff">KR</a>
+</div>   
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="https://www.spaceappschallenge.org/2026/">Space Apps 2026, Seoul</a> &rsaquo; Lunar Landing Site Navigator</div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>Lunar Landing Site Navigator</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="Main">
+  <div class="page">
+    <ul>
+      <li><a href="index.html" aria-current="page">Home</a></li>
+      <li><a href="teaching.html">Learning resources</a></li>
+      <li class="has-drop"><a href="sources.html" aria-haspopup="true">Sources &amp; Checks</a>
+        <ul class="drop">
+          <li><a href="sources-list.html">Sources the project used</a></li>
+          <li><a href="checks.html">Checks</a></li>
+          <li><a href="source-code.html">Source code</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">Team</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page layout">
+  <main class="content">
+
+    <div class="slides" aria-roledescription="carousel" aria-label="Pictures">
+      <div class="track">
+      <figure class="slide on" style="margin:0">
+        <div class="pair">
+          <img src="assets/images/earth-over-horizon.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e015231/art002e015231~medium.jpg" onerror="useNasaCopy(this)" alt="A thin crescent Earth just above the Moon's horizon">
+          <img src="https://images-assets.nasa.gov/image/art002e009575/art002e009575~medium.jpg" alt="The Sun appearing from behind the Moon at the end of an eclipse, with the Orion spacecraft in front">
+        </div>
+        <p>Left: Earth just above the lunar horizon. Right: the Sun coming out from behind the Moon. Both seen by the Artemis II crew, April 2026</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="assets/images/terminator-craters.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e014055/art002e014055~medium.jpg" onerror="useNasaCopy(this)" alt="Craters along the line between lunar day and night, with long shadows">
+        <p>Low sunlight along the line between lunar day and night, Artemis II, April 2026</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="assets/images/south-pole.jpg" data-nasa="https://images-assets.nasa.gov/image/PIA13523/PIA13523~medium.jpg" onerror="useNasaCopy(this)" alt="The region around the Moon's south pole seen from orbit">
+        <p>The lunar south pole, where the Sun never rises far above the horizon</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="assets/images/apollo11-earthrise.jpg" data-nasa="https://images-assets.nasa.gov/image/as11-44-6552/as11-44-6552~medium.jpg" onerror="useNasaCopy(this)" alt="Earth rising over the lunar horizon, photographed from Apollo 11">
+        <p>Earth rising over the Moon, photographed from Apollo 11, July 1969</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/PIA12909/PIA12909~orig.jpg" alt="The Apollo 11 landing site photographed from orbit, with the lunar module descent stage labelled">
+        <p>The Apollo 11 landing site seen from orbit by the Lunar Reconnaissance Orbiter, 2009</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as12-48-7121/as12-48-7121~medium.jpg" alt="The Surveyor 3 lander standing in a shallow crater">
+        <p>Surveyor 3, photographed by the Apollo 12 crew at its landing site, November 1969</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/PIA12897/PIA12897~medium.jpg" alt="The Apollo 14 landing site and Cone crater photographed from orbit">
+        <p>The Apollo 14 landing site at Fra Mauro seen by the Lunar Reconnaissance Orbiter, 2009</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as15-87-11748/as15-87-11748~medium.jpg" alt="A large lunar mountain, Hadley Delta, rising behind a flat plain">
+        <p>Hadley Delta, seen from the Apollo 15 lunar module just after landing, July 1971</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as17-134-20435/as17-134-20435~medium.jpg" alt="A wide view of the Apollo 17 landing site with the lunar module and rover in the distance">
+        <p>The Apollo 17 landing site in the Taurus-Littrow valley, December 1972</p>
+      </figure>
+      </div>
+      <div class="dots"></div>
+    </div>
+
+    <a class="plan-bar" href="mission-portal/">
+      <span class="plan-title">Plan a landing</span>
+      <span class="plan-text">Compare landing sites and dates by sunlight and the view of Earth</span>
+    </a>
+
+    <section class="about" id="south-pole">
+      <h2>Why the south pole?</h2>
+      <div class="moon-canvas">
+        <figure class="main"><img src="assets/images/moon-base/landing.jpg" alt="Artist's concepts of the two crewed Moon landers on the lunar surface: SpaceX's Starship HLS with Earth in the sky, and Blue Origin's Blue Moon with an astronaut beside it"><figcaption>Landing</figcaption></figure>
+        <figure><img src="assets/images/moon-base/habitat.jpg" alt="A cylindrical habitat module on the lunar surface"><figcaption>Living</figcaption></figure>
+        <figure><img src="assets/images/moon-base/solar-array.jpg" alt="A tall vertical solar array standing on a lander platform"><figcaption>Power</figcaption></figure>
+      </div>
+      <p class="canvas-credit">Artists' concepts of a future Moon base near the south pole. Landing: SpaceX and Blue Origin, via NASA. Living and power: NASA.</p>
+      <p>Some craters near the Moon's south pole have not seen sunlight for billions of years. Water ice is thought to be trapped inside them, and that is why many future missions plan to land nearby.</p>
+      <p>The same place is hard to land at. Near the pole the Sun never climbs far above the horizon, so shadows are long and a small hill can block the light. Earth also sits low in the sky, and from some spots a crater rim hides it completely. A lander there needs sunlight for power and a view of Earth to send data home.</p>
+      <p>Moving a landing site a few kilometres, or the date by a few days, can change both. This project is building a tool that shows those changes clearly.</p>
+    </section>
+
+    <div class="below">
+      <div class="items">
+        <div class="item">
+          <img src="assets/images/terminator-craters.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e014055/art002e014055~medium.jpg" onerror="useNasaCopy(this)" alt="">
+          <div>
+            <h2><a href="mission-portal/">Plan a landing</a></h2>
+            <p>Compare sites and dates side by side: Sun elevation, hours of sunlight, and when Earth is in view.</p>
+          </div>
+        </div>
+        <div class="item">
+          <img src="assets/images/apollo16-earthrise.jpg" data-nasa="https://images-assets.nasa.gov/image/as16-113-18289/as16-113-18289~medium.jpg" onerror="useNasaCopy(this)" alt="">
+          <div>
+            <h2><a href="teaching.html">Learning resources</a></h2>
+            <p>A study guide to how the Sun and Earth move in the lunar sky, for learning on your own or teaching in class.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="sidebar">
+    <div class="box news">
+      <h2>Latest news</h2>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/?p=995350">NASA sets out its Moon Base plans</a></h3>
+        <p class="date">7 Nov 2026</p>
+        <p>New contracts and mission plans for a base near the south pole, including PROMISE, a rover that will look for ice.</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/?p=1034664">Griffin-1 lander getting ready to launch</a></h3>
+        <p class="date">Late 2026</p>
+        <p>Astrobotic's Griffin-1 plans to launch late this year, carrying the largest commercial payload yet sent to the Moon's surface.</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/missions/artemis/nasa-shares-plans-to-accelerate-artemis-return-to-moon/" data-ko="NASA, 아르테미스 달 복귀 가속화 계획 공개">NASA Shares Plans to Accelerate Artemis, Return to Moon</a></h3>
+        <p class="date" data-ko="2026년 11월 4일">4 Nov 2026</p>
+        <p data-ko="NASA가 아르테미스 III 시험 비행과 아르테미스 IV 달 착륙 준비 상황을 공개했습니다.">NASA outlined preparations for the Artemis III test flight and the Artemis IV lunar landing.</p>
+      </div>
+      <script defer src="assets/js/home-news.js"></script>
+    </div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>Contact</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>This project</h3>
+      <p><a href="mission-portal/">Plan a landing</a></p>
+      <p><a href="teaching.html">Learning resources</a></p>
+      <p><a href="sources.html">Sources &amp; Checks</a></p>
+      <p><a href="source-code.html">Source code</a></p>
+    </div>
+    <div class="col">
+      <h3>Pictures and data</h3>
+      <p>Photographs: NASA. Data: NASA Planetary Data System.</p>
+      <p>Not affiliated with or endorsed by NASA.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var slides = document.querySelectorAll('.slide');
+    var dots = document.querySelector('.dots');
+    var current = 0, timer;
+    slides.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.setAttribute('aria-label', 'Picture ' + (i + 1));
+      b.addEventListener('click', function () { show(i); restart(); });
+      dots.appendChild(b);
+    });
+    var track = document.querySelector('.track');
+    function show(i) {
+      slides[current].classList.remove('on');
+      dots.children[current].setAttribute('aria-current', 'false');
+      current = i;
+      slides[current].classList.add('on');
+      dots.children[current].setAttribute('aria-current', 'true');
+      track.style.transform = 'translateX(' + (-100 * current) + '%)';
+    }
+    // A copy of the first picture sits after the last, so the show keeps sliding forward
+    var loop = slides[0].cloneNode(true);
+    loop.classList.remove('on');
+    loop.setAttribute('aria-hidden', 'true');
+    track.appendChild(loop);
+    function advance() {
+      if (current < slides.length - 1) { show(current + 1); return; }
+      track.style.transform = 'translateX(' + (-100 * slides.length) + '%)';
+      track.addEventListener('transitionend', function back() {
+        track.removeEventListener('transitionend', back);
+        track.style.transition = 'none';
+        show(0);
+        void track.offsetWidth;
+        track.style.transition = '';
+      });
+    }
+    function restart() {
+      clearInterval(timer);
+      timer = setInterval(advance, 7000);
+    }
+    show(0);
+    restart();
+  })();
+</script>
+  <script src="assets/js/language.js"></script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script>
+  (() => {
+    const isKoreanPage = document.documentElement.lang === "ko";
+    const url = new URL(location.href);
+    const choice = url.searchParams.get("lang");
+    let savedLanguage;
+    if (choice === "en" || choice === "ko") {
+      try { localStorage.setItem("dune-language", choice); } catch {}
+      return;
+    }
+    try { savedLanguage = localStorage.getItem("dune-language"); } catch {}
+    if (!isKoreanPage && (savedLanguage || navigator.language).split("-")[0].toLowerCase() === "ko") {
+      const koreanPage = new URL("ko/index.html", url);
+      koreanPage.search = url.search;
+      koreanPage.hash = url.hash;
+      location.replace(koreanPage);
+    }
+  })();
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>달 착륙지 탐색기 - 팀 DU:NE</title>
+<meta name="description" content="태양과 지구의 고도를 기준으로 달 착륙 후보지와 날짜를 비교하는 팀 DU:NE의 프로젝트입니다.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="../assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+<script>
+  // Photos load from ./assets/images when they are there; otherwise straight from NASA's image library.
+  function useNasaCopy(img) {
+    if (img.dataset.nasa && img.src !== img.dataset.nasa) img.src = img.dataset.nasa;
+  }
+</script>
+
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="../assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="../search.html" role="search"><input type="search" name="q" placeholder="사이트 검색" aria-label="사이트 검색"><button type="submit">검색</button></form>
+      <div class="lang" aria-label="언어">
+        <a href="../index.html?lang=en" hreflang="en" style="color: #fff;" aria-label="English">EN</a>
+        <span class="sep" aria-hidden="true">/</span>
+        <span class="on" aria-current="true" style="color: #fff;">KR</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="https://www.spaceappschallenge.org/2026/">스페이스 앱스 2026 서울</a> &rsaquo; 달 착륙지 탐색기</div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>달 착륙지 탐색기</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="주 메뉴">
+  <div class="page">
+    <ul>
+      <li><a href="index.html" aria-current="page">홈</a></li>
+      <li><a href="study-guide.html">학습 자료</a></li>
+      <li class="has-drop"><a href="sources.html" aria-haspopup="true">출처</a>
+        <ul class="drop">
+          <li><a href="sources.html">프로젝트 참고 자료</a></li>
+          <li><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">팀 소개</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page layout">
+  <main class="content">
+
+    <div class="slides" aria-roledescription="슬라이드 쇼" aria-label="사진 모음">
+      <div class="track">
+      <figure class="slide on" style="margin:0">
+        <div class="pair">
+          <img src="../assets/images/earth-over-horizon.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e015231/art002e015231~medium.jpg" onerror="useNasaCopy(this)" alt="달 지평선 위의 초승달 모양 지구">
+          <img src="https://images-assets.nasa.gov/image/art002e009575/art002e009575~medium.jpg" alt="달 뒤에서 모습을 드러낸 태양과 오리온 우주선">
+        </div>
+        <p>왼쪽은 달 지평선 위의 지구, 오른쪽은 달 뒤에서 모습을 드러낸 태양입니다. 아르테미스 2호 승무원 촬영, 2026년 4월.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="../assets/images/terminator-craters.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e014055/art002e014055~medium.jpg" onerror="useNasaCopy(this)" alt="달의 낮과 밤 경계를 따라 길게 드리운 크레이터 그림자">
+        <p>달의 낮과 밤 경계에 낮게 비치는 햇빛. 아르테미스 2호, 2026년 4월.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="../assets/images/south-pole.jpg" data-nasa="https://images-assets.nasa.gov/image/PIA13523/PIA13523~medium.jpg" onerror="useNasaCopy(this)" alt="달 궤도에서 본 남극 주변 지형">
+        <p>태양이 지평선 가까이에 머무는 달 남극.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="../assets/images/apollo11-earthrise.jpg" data-nasa="https://images-assets.nasa.gov/image/as11-44-6552/as11-44-6552~medium.jpg" onerror="useNasaCopy(this)" alt="아폴로 11호가 촬영한 지구돋이">
+        <p>달 지평선 위로 떠오르는 지구. 아폴로 11호 촬영, 1969년 7월.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/PIA12909/PIA12909~orig.jpg" alt="달 궤도에서 본 아폴로 11호 착륙지와 착륙선 하강단">
+        <p>달 정찰 궤도선이 촬영한 아폴로 11호 착륙지, 2009년.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as12-48-7121/as12-48-7121~medium.jpg" alt="얕은 크레이터에 서 있는 서베이어 3호">
+        <p>아폴로 12호 승무원이 착륙지에서 촬영한 서베이어 3호, 1969년 11월.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/PIA12897/PIA12897~medium.jpg" alt="달 궤도에서 본 아폴로 14호 착륙지와 콘 크레이터">
+        <p>달 정찰 궤도선이 촬영한 프라 마우로의 아폴로 14호 착륙지, 2009년.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as15-87-11748/as15-87-11748~medium.jpg" alt="평원 너머로 솟은 해들리 델타산">
+        <p>아폴로 15호 착륙선에서 착륙 직후 바라본 해들리 델타산, 1971년 7월.</p>
+      </figure>
+      <figure class="slide" style="margin:0">
+        <img src="https://images-assets.nasa.gov/image/as17-134-20435/as17-134-20435~medium.jpg" alt="착륙선과 로버가 보이는 아폴로 17호 착륙지">
+        <p>타우루스–리트로 계곡의 아폴로 17호 착륙지, 1972년 12월.</p>
+      </figure>
+      </div>
+      <div class="dots"></div>
+    </div>
+
+    <a class="plan-bar" href="../mission-portal/">
+      <span class="plan-title">착륙 계획 세우기</span>
+      <span class="plan-text">일조와 지구 가시성을 기준으로 착륙 후보지와 날짜를 비교하세요.</span>
+    </a>
+
+    <section class="about" id="south-pole">
+      <h2>왜 달 남극일까?</h2>
+      <div class="moon-canvas">
+        <figure class="main"><img src="../assets/images/moon-base/landing.jpg" alt="달 표면에 선 두 유인 착륙선 구상도: 하늘에 지구가 보이는 SpaceX의 Starship HLS와, 옆에 우주비행사가 선 Blue Origin의 Blue Moon"><figcaption>착륙</figcaption></figure>
+        <figure><img src="../assets/images/moon-base/habitat.jpg" alt="달 표면에 놓인 원통형 거주 모듈"><figcaption>거주</figcaption></figure>
+        <figure><img src="../assets/images/moon-base/solar-array.jpg" alt="착륙선 위에 세운 높은 수직 태양광 패널"><figcaption>전력</figcaption></figure>
+      </div>
+      <p class="canvas-credit">달 남극 근처에 들어설 기지 구상도. 착륙: SpaceX, Blue Origin (NASA 제공). 거주, 전력: NASA.</p>
+      <p>달 남극의 일부 크레이터에는 수십억 년 동안 햇빛이 닿지 않았습니다. 이곳에 물 얼음이 남아 있을 가능성이 있어 여러 달 탐사 임무가 주변 지역을 착륙 후보지로 검토하고 있습니다.</p>
+      <p>하지만 달 남극에 착륙해 임무를 수행하기는 쉽지 않습니다. 태양이 지평선 가까이에 머물러 그림자가 길고, 낮은 언덕도 햇빛을 가릴 수 있습니다. 지구 역시 낮게 보이기 때문에 크레이터 가장자리에 완전히 가려지는 곳이 있습니다. 착륙선이 태양광으로 전력을 얻고 지구로 직접 데이터를 보내려면 두 조건을 모두 살펴야 합니다.</p>
+      <p>착륙 지점을 몇 킬로미터 옮기거나 날짜를 며칠 바꾸는 것만으로도 일조와 지구 가시성이 달라집니다. 이 프로젝트는 그 차이를 한눈에 확인할 수 있는 도구를 개발하고 있습니다.</p>
+    </section>
+
+    <div class="below">
+      <div class="items">
+        <div class="item">
+          <img src="../assets/images/terminator-craters.jpg" data-nasa="https://images-assets.nasa.gov/image/art002e014055/art002e014055~medium.jpg" onerror="useNasaCopy(this)" alt="">
+          <div>
+            <h2><a href="../mission-portal/">착륙 계획 세우기</a></h2>
+            <p>태양 고도, 일조 시간, 지구가 보이는 시간대를 후보지와 날짜별로 나란히 비교하세요.</p>
+          </div>
+        </div>
+        <div class="item">
+          <img src="../assets/images/apollo16-earthrise.jpg" data-nasa="https://images-assets.nasa.gov/image/as16-113-18289/as16-113-18289~medium.jpg" onerror="useNasaCopy(this)" alt="">
+          <div>
+            <h2><a href="study-guide.html">학습 자료</a></h2>
+            <p>달에서 본 태양과 지구가 하늘에서 어떻게 움직이는지 알아보세요. 개인 학습과 수업에 모두 활용할 수 있습니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <aside class="sidebar">
+    <div class="box news">
+      <h2>최신 소식</h2>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/?p=995350">NASA, 달 기지 건설 계획 공개</a></h3>
+        <p class="date">2026년 11월 7일</p>
+        <p>NASA는 얼음을 탐사할 로버 PROMISE를 비롯해 달 남극 인근 기지 건설을 위한 새 계약과 임무 계획을 공개했습니다.</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/?p=1034664">그리핀 1호 착륙선, 발사 준비</a></h3>
+        <p class="date">2026년 말</p>
+        <p>애스트로보틱의 그리핀 1호는 달 표면으로 보내는 상업용 탑재체 중 역대 최대 규모의 탑재체를 싣고 올해 말 발사될 예정입니다.</p>
+      </div>
+      <div class="entry">
+        <h3><a href="https://www.nasa.gov/missions/artemis/nasa-shares-plans-to-accelerate-artemis-return-to-moon/">NASA, 아르테미스 달 복귀 가속화 계획 공개</a></h3>
+        <p class="date">2026년 11월 4일</p>
+        <p>NASA가 아르테미스 III 시험 비행과 아르테미스 IV 달 착륙 준비 상황을 공개했습니다.</p>
+      </div>
+      <script defer src="../assets/js/home-news.js"></script>
+    </div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>문의</h3>
+      <p>Team DU:NE</p>
+      <p>2026 NASA 스페이스 앱스 챌린지 서울</p>
+    </div>
+    <div class="col">
+      <h3>프로젝트</h3>
+      <p><a href="../mission-portal/">착륙 계획 세우기</a></p>
+      <p><a href="study-guide.html">학습 자료</a></p>
+      <p><a href="sources.html">출처</a></p>
+      <p><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></p>
+    </div>
+    <div class="col">
+      <h3>사진 및 데이터</h3>
+      <p>사진 제공 NASA. 데이터 출처 NASA 행성 데이터 시스템(PDS).</p>
+      <p>이 프로젝트는 NASA와 제휴하지 않았으며 NASA의 공식 승인을 받은 프로젝트가 아닙니다.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var slides = document.querySelectorAll('.slide');
+    var dots = document.querySelector('.dots');
+    var current = 0, timer;
+    slides.forEach(function (s, i) {
+      var b = document.createElement('button');
+      b.setAttribute('aria-label', '사진 ' + (i + 1));
+      b.addEventListener('click', function () { show(i); restart(); });
+      dots.appendChild(b);
+    });
+    var track = document.querySelector('.track');
+    function show(i) {
+      slides[current].classList.remove('on');
+      dots.children[current].setAttribute('aria-current', 'false');
+      current = i;
+      slides[current].classList.add('on');
+      dots.children[current].setAttribute('aria-current', 'true');
+      track.style.transform = 'translateX(' + (-100 * current) + '%)';
+    }
+    // A copy of the first picture sits after the last, so the show keeps sliding forward
+    var loop = slides[0].cloneNode(true);
+    loop.classList.remove('on');
+    loop.setAttribute('aria-hidden', 'true');
+    track.appendChild(loop);
+    function advance() {
+      if (current < slides.length - 1) { show(current + 1); return; }
+      track.style.transform = 'translateX(' + (-100 * slides.length) + '%)';
+      track.addEventListener('transitionend', function back() {
+        track.removeEventListener('transitionend', back);
+        track.style.transition = 'none';
+        show(0);
+        void track.offsetWidth;
+        track.style.transition = '';
+      });
+    }
+    function restart() {
+      clearInterval(timer);
+      timer = setInterval(advance, 7000);
+    }
+    show(0);
+    restart();
+  })();
+</script>
+</body>
+</html>

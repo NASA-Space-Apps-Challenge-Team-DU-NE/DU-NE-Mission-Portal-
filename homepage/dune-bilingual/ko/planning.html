@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>착륙 계획 세우기 - 달 착륙지 탐색기</title>
+<meta name="description" content="Team DU:NE's project for the NASA Space Apps Challenge 2026: comparing lunar landing sites and dates by the position of the Sun and Earth above the local horizon.">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="../assets/images/favicon-32.png">
+<link rel="apple-touch-icon" href="../assets/images/apple-touch-icon.png">
+
+<!-- Headings: Myriad Pro if installed, otherwise Source Sans 3 (stored in assets/fonts). Body: Verdana. -->
+
+<link rel="stylesheet" href="../assets/css/style.css">
+<script src="../assets/js/language.js"></script>
+</head>
+<body>
+
+<div class="bar-top">
+  <div class="page">
+    <div class="name"><a href="index.html"><img class="logo" src="../assets/images/dune-logo.png" alt="DU:NE" width="221" height="80"></a><a class="event" href="https://www.spaceappschallenge.org/2026/challenges/lunar-landing-site-navigator/"><span class="nasa">NASA</span>&nbsp;Space Apps Challenge 2026</a></div>
+    <div class="tools">
+      <form class="search" action="search.html" role="search"><input type="search" name="q" placeholder="사이트 검색" aria-label="사이트 검색"><button type="submit">검색</button></form>
+      <div class="lang" aria-label="언어"><a href="../planning.html?lang=en" hreflang="en" style="color:#fff">EN</a><span class="sep" aria-hidden="true">/</span><a href="planning.html?lang=ko" hreflang="ko" style="color:#fff" aria-current="true" class="on">KR</a></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar-crumb">
+  <div class="page"><a href="index.html">달 착륙지 탐색기</a> &rsaquo; 착륙 계획 세우기</div>
+</div>
+
+<div class="bar-title">
+  <div class="page"><h1>달 착륙지 탐색기</h1></div>
+</div>
+
+<nav class="bar-menu" aria-label="주 메뉴">
+  <div class="page">
+    <ul>
+      <li><a href="index.html">홈</a></li>
+      <li><a href="teaching.html">학습 자료</a></li>
+      <li class="has-drop"><a href="sources.html" aria-haspopup="true">출처</a>
+        <ul class="drop">
+          <li><a href="sources.html">프로젝트 참고 자료</a></li>
+          <li><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></li>
+        </ul>
+      </li>
+      <li><a href="team.html">팀 소개</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page layout">
+  <main class="content-plain">
+    <h2 class="page-head">착륙 계획 세우기</h2>
+    <p class="intro">착륙 장소와 시기를 정하는 사람을 위한 페이지입니다. 후보지와 날짜를 비교하고, 햇빛이 충분한지와 지구와 직접 통신할 수 있는지 확인합니다.</p>
+    <p class="status"><strong>개발 중입니다.</strong> 도구는 개발 중이며, 이 페이지에서 구현 예정인 기능을 소개합니다.</p>
+    <h3 class="sub">계획 도구의 주요 기능</h3>
+    <ul class="plain">
+      <li>아폴로 착륙지와 상업 착륙 예정지 등을 목록에서 고르거나 좌표를 직접 입력합니다.</li>
+      <li>착륙 날짜와 시간을 선택하고 시간에 따른 변화를 살펴봅니다.</li>
+      <li>착륙지 지평선을 기준으로 태양과 지구의 위치를 확인합니다.</li>
+      <li>태양 고도, 일조 시간, 지구 가시 시간대, 태양 또는 지구가 지평선 아래로 내려가기까지 남은 시간을 확인합니다.</li>
+      <li>두 곳 이상의 착륙지 또는 같은 착륙지의 두 날짜를 나란히 비교합니다.</li>
+    </ul>
+    <h3 class="sub">계획이 바뀔 때</h3>
+    <p class="intro">발사 일정이 밀리면, 변경된 날짜에 기존 후보지의 조건이 어떻게 달라지는지와 주변 후보지 가운데 여전히 조건을 만족하는 곳을 확인합니다.</p>
+  </main>
+
+  <aside class="sidebar">
+    <div class="box">
+      <h2>함께 보기</h2>
+      <ul>
+        <li><a href="index.html#south-pole">왜 달 남극일까?</a></li>
+        <li><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<footer class="foot">
+  <div class="page">
+    <div class="col">
+      <h3>연락처</h3>
+      <p>Team DU:NE</p>
+      <p>NASA Space Apps Challenge 2026, Seoul</p>
+    </div>
+    <div class="col">
+      <h3>이 프로젝트</h3>
+      <p><a href="planning.html">착륙 계획 세우기</a></p>
+      <p><a href="teaching.html">학습 자료</a></p>
+      <p><a href="sources.html">출처</a></p>
+      <p><a href="https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/Lunar-Landing-Site-Navigator">소스 코드</a></p>
+    </div>
+    <div class="col">
+      <h3>사진 및 데이터</h3>
+      <p>사진은 NASA, 데이터는 NASA Planetary Data System에서 제공했습니다.</p>
+      <p>이 프로젝트는 NASA 소속이 아니며 NASA의 공식 승인을 받지 않았습니다.</p>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
