@@ -1,5 +1,5 @@
 // 앱 틀: 검은 띠(로고·화면 이동) | 지도 모드(달이 가운데 전체) ↔ 계획 모드(단계 | 단계 화면 | 오른쪽 달 + 현장 뷰)
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HOUR_MS } from '../core/constants';
 import { reportText, toCsv } from '../core/export';
 import { Toast, toast, utc, pct, LayerPopover } from '../components/kit';
@@ -22,6 +22,57 @@ function download(name: string, text: string, type: string) {
   a.download = name;
   a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+const QUALITY_KO: Record<string, string> = { REVIEW_REQUIRED: '검토 필요', REFERENCE_ONLY: '참고용' };
+
+/** "일부 수치 미검증" 배지: 마우스를 올리면 요약, 누르면 무엇이 미검증인지 목록 */
+function UnverifiedBadge() {
+  const sites = useData((d) => d.sites);
+  const ephEnv = useData((d) => d.ephEnv);
+  const app = useApp();
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!open) return;
+    const off = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('mousedown', off);
+    document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', off); document.removeEventListener('keydown', esc); };
+  }, [open]);
+  const bad = sites.items.filter((x) => !x.verified);
+  const files = [
+    { name: '천체력 표', q: ephEnv?.quality ?? null, missing: !ephEnv },
+    { name: '착륙지 카탈로그', q: sites.env?.quality ?? null, missing: !sites.env },
+  ].filter((f) => f.missing || (f.q && f.q in QUALITY_KO));
+  const summary = `미검증 착륙지 좌표 ${bad.length}곳 · 검토 단계 자료 ${files.length}개 (눌러서 보기)`;
+  return (
+    <div className="unv" ref={box}>
+      <button type="button" className="badge warn" title={summary} aria-expanded={open} onClick={() => setOpen((v) => !v)}>일부 수치 미검증</button>
+      {open ? (
+        <div className="unv-pop" role="dialog" aria-label="미검증 항목">
+          <div className="unv-h">무엇이 미검증인가</div>
+          <p className="unv-p">점수 계산은 그대로 하지만, 아래 값은 출처로 확인되지 않았거나 팀 검토 전입니다.</p>
+          {files.length ? (
+            <>
+              <div className="unv-k">자료 품질</div>
+              <ul>{files.map((f) => <li key={f.name}><b>{f.name}</b> · {f.missing ? '자료 없음' : QUALITY_KO[f.q as string]}</li>)}</ul>
+            </>
+          ) : null}
+          {bad.length ? (
+            <>
+              <div className="unv-k">좌표가 확인되지 않은 착륙지 ({bad.length}곳)</div>
+              <ul>{bad.map((x) => (
+                <li key={x.id}><button type="button" className="unv-site" onClick={() => { app.setSite({ kind: 'catalog', id: x.id }); setOpen(false); }}>{x.name}</button>{x.note ? <span className="unv-n">{x.note}</span> : null}</li>
+              ))}</ul>
+            </>
+          ) : null}
+          <div className="unv-f">자세한 대조 결과는 검증 → ④ 착륙지 좌표 대조</div>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 /** 맨 위 검은 띠: 팀 로고(홈페이지와 같은 크기·위치) · 화면 이동 · 데이터 상태 · 내보내기 */
@@ -75,7 +126,7 @@ export function Masthead() {
       <div className="macts">
         {gridError ? <button className="btn" title={gridError} onClick={retryGrid}>{t('grid.retry')}</button> : null}
         <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? (gridApprox ? '데이터 일부 근사' : '데이터 준비됨') : status === 'loading' || status === 'idle' ? '불러오는 중' : status === 'degraded' ? `일부 자료 없음 (${reasons.length})` : status === 'failed' ? '불러오기 실패' : '자료 없음'}</span>
-        {unverified ? <span className="badge warn" title="verified:false 항목이 있음">일부 수치 미검증</span> : null}
+        {unverified ? <UnverifiedBadge /> : null}
         <button className="btn sm" onClick={report}>보고서 복사</button>
         <button className="btn sm" onClick={csv} disabled={!res}>순위 CSV</button>
         <button className="ibtn" aria-label="도움말" onClick={() => ui.set({ help: true })}>?</button>

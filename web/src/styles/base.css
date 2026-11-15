@@ -568,3 +568,16 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 
 /* 지구 방향 표시: 형광 청록 대신 차분한 회청색 (어두운 배경에서 읽히되 튀지 않게) */
 .chipb.earth{color:#93A8B6}
+/* "일부 수치 미검증" 설명 창 */
+.unv{position:relative}
+.unv>button.badge{cursor:pointer;font:inherit}
+.unv-pop{position:absolute;right:0;top:calc(100% + 10px);z-index:60;width:420px;max-height:70vh;overflow:auto;background:#0d0d0d;border:1px solid #3d3d42;padding:14px 16px;color:#d8d8d8;font-size:12px;line-height:1.5;box-shadow:0 12px 32px rgba(0,0,0,.6)}
+.unv-h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-bottom:6px}
+.unv-p{margin:0 0 10px;color:#9a9a9a}
+.unv-k{margin:10px 0 4px;font-size:11px;color:#9a9a9a;letter-spacing:.06em}
+.unv-pop ul{list-style:none;margin:0;padding:0}
+.unv-pop li{padding:6px 0;border-top:1px solid #2c2c2e}
+.unv-site{background:none;border:0;padding:0;color:#fff;font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:#57575e;text-underline-offset:3px}
+.unv-site:hover{text-decoration-color:#fff}
+.unv-n{display:block;color:#9a9a9a;margin-top:2px}
+.unv-f{margin-top:10px;padding-top:8px;border-top:1px solid #2c2c2e;color:#6b6b6b;font-size:11px}
