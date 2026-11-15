@@ -8,6 +8,7 @@ import { nearestCell } from '../core/gridScore';
 import type { MastRow } from '../core/light';
 import type { PanelPick } from '../core/power';
 import { useData } from '../state/data';
+import { calculationSource } from '../state/calculationSource';
 import { usePower } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite } from '../state/hooks';
@@ -23,6 +24,7 @@ export default function Power() {
   const rs = useResolvedSite();
   const grid = useData((d) => d.grid);
   const refs = useData((d) => d.powerRefs);
+  const tableSource = useData((d) => d.ephMeta?.source);
   const ready = useGridRun((g) => g.ready);
   const gres = useGridRun((g) => g.result);
   const P = usePower(ui.demand_kw, ui.eff);
@@ -42,27 +44,38 @@ export default function Power() {
 
   const [mast, setMast] = useState<MastRow[] | null | 'missing'>(null);
   useEffect(() => {
+    // 입력이 바뀌면 이전 요청(fetch·Worker) 결과는 버린다: 지점을 빨리 바꿔 응답 순서가 뒤집혀도 현재 지점 결과만 남는다
+    let alive = true;
+    const put = (v: MastRow[] | null | 'missing') => { if (alive) setMast(v); };
     setMast(null);
     if (!FEATURES.mastCompare || !rs || rs.terrain !== 'site') { setMast('missing'); return; }
     loadMastMasks(rs.site.id).then((r) => {
-      if (r.status !== 'ok') return setMast('missing');
+      if (!alive) return;
+      if (r.status !== 'ok') return put('missing');
       const sites = r.value.data.masks.map((m) => ({ height_m: m.observer_height_m, site: { site: rs.site, mask: maskOf(m), ground_elev_m: m.ground_elev_m, observer_height_m: m.observer_height_m } }));
-      simWorker().request<MastRow[]>('mast', { eph: ephPayload(), sites, margin_deg: app.margin_deg, start: app.landing, duration_h: 30 * 24, demand_kw: ui.demand_kw, eff: ui.eff, loss: DEFAULTS.panel_loss, margin: DEFAULTS.power_margin }).then(setMast).catch(() => setMast('missing'));
-    });
+      simWorker().request<MastRow[]>('mast', { eph: ephPayload(), sites, margin_deg: app.margin_deg, start: app.landing, duration_h: 30 * 24, demand_kw: ui.demand_kw, eff: ui.eff, loss: DEFAULTS.panel_loss, margin: DEFAULTS.power_margin })
+        .then(put)
+        .catch((e) => { if (!isCancelled(e)) put('missing'); });
+    }).catch(() => put('missing'));
+    return () => { alive = false; };
   }, [rs, app.landing, ui.demand_kw, ui.eff, app.margin_deg]);
 
   const [relay, setRelay] = useState<Array<{ cell: number; km: number; either_lit_frac: number; longest_both_dark_h: number }> | null>(null);
   useEffect(() => {
+    let alive = true;
     setRelay(null);
     if (!FEATURES.lightRelay || cell < 0 || !ready || !gres) return;
-    gridWorker().request<typeof relay>('relay', { cell, radius_km: 30, step_h: DEFAULTS.grid_step_h }).then((r) => setRelay(r ? r.slice(0, 5) : r)).catch(() => setRelay(null));
+    gridWorker().request<typeof relay>('relay', { cell, radius_km: 30, step_h: DEFAULTS.grid_step_h }).then((r) => { if (alive) setRelay(r ? r.slice(0, 5) : r); }).catch(() => { if (alive) setRelay(null); });
+    return () => { alive = false; };
   }, [cell, ready, gres]);
 
   if (!rs || !P) return <NoData what="전력 계획" why="02에서 착륙지를 먼저 고르세요" />;
   const { plan, samples } = P;
+  const source = calculationSource(samples.map((s) => s.source), tableSource);
+  const terrain = rs.terrain === 'flat' ? '지형 미반영' : rs.terrain === 'grid' ? '격자 지평선' : '지점 지평선';
   return (
     <>
-      <Card title="전력 계산" tag={<span className="badge">출처: JPL Horizons · LOLA 240 m</span>}>
+      <Card title="전력 계산" tag={<span className={`badge ${source.approx ? 'approx' : ''}`}>출처: {source.label} · {terrain}</span>}>
         <div className="row">
           <span className="small">필요 전력 <b className="mono">{ui.demand_kw} kW</b> · 패널 효율 <b className="mono">{ui.eff}</b></span>
           <button className="btn sm ghost" onClick={() => app.setPage('cond')}>01 조건 정하기 › 상세 조건에서 바꾸기</button>
@@ -94,7 +107,7 @@ export default function Power() {
           <div className="tblwrap"><table>
             <thead><tr><th>#</th><th>위치</th><th>거리</th><th>필요 패널</th><th>필요 배터리</th><th /></tr></thead>
             <tbody>{picks.map((p, i) => (
-              <tr key={p.cell}><td>{i + 1}</td><td className="mono small">{p.lat_deg.toFixed(3)}, {p.lon_deg.toFixed(2)}</td><td className="mono">{km(p.distance_km)}</td><td className="mono">{Math.round(p.panel_area_m2)} m²</td><td className="mono">{Math.round(p.battery_kwh).toLocaleString()} kWh</td>
+              <tr key={p.cell}><td>{i + 1}</td><td className="mono small">{p.lat_deg.toFixed(3)}, {p.lon_deg.toFixed(2)}</td><td className="mono">{km(p.distance_km)}</td><td className="mono">{Math.round(p.panel_area_m2)} m²</td><td className="mono">{Math.max(0, Math.round(p.battery_kwh)).toLocaleString()} kWh</td>
                 <td><button className="btn sm" onClick={() => app.setSite({ kind: 'cell', cell: p.cell })}>여기로 착륙지 바꾸기</button></td></tr>
             ))}</tbody>
           </table></div>
@@ -107,7 +120,7 @@ export default function Power() {
               <table>
                 <thead><tr><th>높이</th><th>일조율</th><th>최장 그늘</th><th>패널</th><th>배터리</th></tr></thead>
                 <tbody>{mast.map((r) => (
-                  <tr key={r.height_m}><td className="mono">{r.height_m} m</td><td className="mono">{pct(r.summary.illum_frac)}</td><td className="mono">{hrs(r.summary.longest_dark_h)}</td><td className="mono">{Number.isFinite(r.panel_area_m2) ? `${Math.round(r.panel_area_m2)} m²` : '—'}</td><td className="mono">{Number.isFinite(r.battery_kwh) ? `${Math.round(r.battery_kwh).toLocaleString()} kWh` : '—'}</td></tr>
+                  <tr key={r.height_m}><td className="mono">{r.height_m} m</td><td className="mono">{pct(r.summary.illum_frac)}</td><td className="mono">{hrs(r.summary.longest_dark_h)}</td><td className="mono">{Number.isFinite(r.panel_area_m2) ? `${Math.round(r.panel_area_m2)} m²` : '—'}</td><td className="mono">{Number.isFinite(r.battery_kwh) ? `${Math.max(0, Math.round(r.battery_kwh)).toLocaleString()} kWh` : '—'}</td></tr>
                 ))}</tbody>
               </table>
               <p className="help" style={{ padding: '8px 12px' }}>패널을 높이 세우면 주변 지형에 덜 가려집니다. 높이별 지평선 마스크로 계산.</p>

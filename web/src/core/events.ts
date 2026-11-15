@@ -20,13 +20,15 @@ export function findEvents(samples: TimelineSample[], margin_deg: number): SkyEv
 }
 
 /** 태양 원반 ≥ 50% 이고 지구 보이는 구간이 min_h 이상 이어지는 구간 */
-export function landingWindows(samples: TimelineSample[], step_h: number, min_h: number, sun_min = WINDOW_SUN_FRAC): LandingWindow[] {
+export function landingWindows(samples: TimelineSample[], _step_h: number, min_h: number, sun_min = WINDOW_SUN_FRAC): LandingWindow[] {
   const out: LandingWindow[] = [];
   let startIdx = -1;
   const close = (endIdx: number) => {
     if (startIdx < 0) return;
-    const hours = (endIdx - startIdx + 1) * step_h;
-    if (hours >= min_h) out.push({ start: samples[startIdx].t, end: samples[endIdx].t, hours });
+    // 구간은 다음 표본 시각까지 이어진다 (마지막 표본이면 종료 시각에서 끝남)
+    const endT = samples[Math.min(endIdx + 1, samples.length - 1)].t;
+    const hours = (endT - samples[startIdx].t) / 3_600_000;
+    if (hours >= min_h && hours > 0) out.push({ start: samples[startIdx].t, end: endT, hours });
     startIdx = -1;
   };
   for (let i = 0; i < samples.length; i++) {

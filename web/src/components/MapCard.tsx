@@ -1,6 +1,9 @@
 // 남극 지도 카드 (UI 예시 mapCard): 02 착륙지 고르기·04 기지 배치 공용
 import type { ReactNode } from 'react';
+import { useData } from '../state/data';
+import { useGridRun } from '../state/gridRun';
 import { LAYER_UI } from '../state/layerUi';
+import { layerView } from '../state/layers';
 import { useApp } from '../state/store';
 import { Card, Help, LayerPickButton, pct, Seg } from './kit';
 import { pickNear, SouthMap } from './SouthMap';
@@ -8,6 +11,20 @@ import { pickNear, SouthMap } from './SouthMap';
 export function MapCard(p: { where: 'site' | 'base'; tag?: ReactNode; onPick?(lat: number, lon: number): void }) {
   const app = useApp();
   const l = LAYER_UI[app.mapLayer] ?? LAYER_UI.composite;
+  const grid = useData((d) => d.grid);
+  const approx = useData((d) => d.gridApprox);
+  const layers = useData((d) => d.layers);
+  const metas = useData((d) => d.layerMetas);
+  const res = useGridRun((g) => g.result);
+  const sources = useGridRun((g) => g.sources);
+  // 고정 문구 대신 실제 격자 해상도·근사 여부·품질을 보여 준다
+  const lv = grid ? layerView(app.mapLayer, res, layers, metas, grid.cells.length, approx, sources) : null;
+  const cellKm = grid?.manifest.cell_km;
+  const resText = cellKm ? l.res.replace(/5 km/g, `${cellKm} km`) : l.res;
+  const kindText = !lv || lv.kind === 'missing' ? '자료 없음' : approx ? '근사 · 지형 미반영' : lv.kind === 'approx' ? '근사 천체력 포함' : l.kind;
+  const dynamic = ['composite', 'illum_mission', 'comm_mission', 'dark_h', 'sun_now'].includes(app.mapLayer);
+  const source = app.mapLayer === 'sun_now' ? sources?.now : sources?.mission;
+  const sourceText = dynamic ? `${source?.label ?? '자료 없음'} · ${approx ? '구면 지평선' : '지형 지평선'}` : l.src;
   const isBase = p.where === 'base';
   return (
     <Card title={isBase ? '기지 놓기' : '남극 지도'} sub={isBase ? '' : '75°S 이남 · 위쪽이 경도 0°'} tag={p.tag}>
@@ -38,7 +55,8 @@ export function MapCard(p: { where: 'site' | 'base'; tag?: ReactNode; onPick?(la
             <label className="muted" style={{ display: 'flex', gap: 6, alignItems: 'center' }}><input type="checkbox" checked={app.colorOn} onChange={(e) => app.setMap({ colorOn: e.target.checked })} /> 색 켜기 <span className="kbd">C</span></label>
           </div>
           <div className="row tiny muted" style={{ gap: 6 }}>
-            <span className={`badge ${l.kind === '실제' ? 'ok' : 'approx'}`}>{l.kind}</span><span>해상도 {l.res}</span><span>· 출처 {l.src}</span>
+            <span className={`badge ${kindText === '실제' ? 'ok' : kindText === '계산' ? '' : 'approx'}`}>{kindText}</span><span>해상도 {resText}</span><span>· 출처 {sourceText}</span>
+            {lv?.quality && lv.quality !== 'VALIDATED' ? <span className="badge warn">품질 {lv.quality}</span> : null}
             {l.warn ? <span className="badge warn">{l.warn}</span> : null}{l.tag ? <span className="badge">{l.tag}</span> : null}
           </div>
           <Help>지도를 클릭하면 그 좌표가 착륙지로 선택됩니다. 배경: LROC WAC 남극 모자이크.</Help>

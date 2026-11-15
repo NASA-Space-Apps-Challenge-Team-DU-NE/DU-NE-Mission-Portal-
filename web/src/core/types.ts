@@ -78,6 +78,12 @@ export interface Site extends LatLon {
   source_keys: string[];
   verified: boolean;
   note?: string;
+  /** 좌표 종류 (2026-11-15 대조): 착륙점 · 논문 착륙 후보점 · 지역 대표점 */
+  coord_kind?: 'landing_point' | 'candidate_point' | 'region_point' | 'unknown';
+  /** 좌표 근거 수준 */
+  coord_evidence?: 'official' | 'peer_reviewed' | 'inside_official_region' | 'none';
+  coord_source_url?: string | null;
+  coord_uncertainty_m?: number | null;
 }
 
 export type Outcome = 'success' | 'partial' | 'failure';
@@ -98,6 +104,12 @@ export interface Mission {
   ephemeris?: string | null;
   source_keys: string[];
   verified: boolean;
+  /** 조명 관련 결과인가 — 근거 문장이 있을 때만 yes/no */
+  lighting_related?: 'yes' | 'no' | 'unknown';
+  lighting_evidence?: { quote: string | null; reason: string; source_url: string | null } | null;
+  /** 착륙 시각 정밀도 ('date' 면 시·분은 근거 없음) */
+  landing_precision?: 'second' | 'minute' | 'date' | 'unknown';
+  evidence?: Record<string, { level: string; source_url: string; approx?: boolean }>;
 }
 
 export type PanelMount = 'horizontal' | 'vertical_fixed' | 'vertical_tracking';
@@ -322,14 +334,19 @@ export type StaticLayerName =
   | 'psr_dist_km'
   | 'h_ppm'
   | 'feo_wt'
-  | 'tio2_wt'
+  | 'tio2_wt_lp'
+  | 'tio2_lp_sigma'
   | 'feo_wt_kaguya'
   | 'feo_kaguya_valid_frac'
-  | 'tio2_wt_jaxa'
-  | 'tio2_jaxa_ge2_frac'
-  | 'tio2_jaxa_valid_frac'
+  | 'tio2_jaxa_mi_research'
+  | 'tio2_jaxa_mi_flags'
+  | 'psr_poly_dist_km'
+  | 'plains_frac'
+  | 'boulder_count'
+  | 'wac_ill_twi'
   | 'scarp_dist_km'
   | 'rockfall_density'
+  | 'rockfall_coverage'
   | 'wac_ill_pct'
   | 'sky_sr';
 export type DynamicLayerName = 'illum_mission' | 'comm_mission' | 'sun_now' | 'dark_h';

@@ -2,6 +2,7 @@
 export type Lang = 'ko' | 'en';
 
 const ko = {
+  'grid.retry': '격자 계산 실패 · 다시 시도',
   'app.name': 'LUNA-NAV',
   'app.sub': 'Lunar Base Planner',
   'app.unverified': '일부 수치 미검증',
@@ -25,6 +26,8 @@ const ko = {
   'common.off': '끄기',
   'common.days': '일',
   'common.hours': '시간',
+  'base.invalid_input': '부하·패널·배터리는 0 이상의 유한한 수를 입력해 주세요. 효율·손실·배터리 기준은 0~1이어야 합니다.',
+  'base.run_failed': '기지 시뮬레이션을 계산하지 못했습니다. 입력을 확인한 뒤 다시 실행해 주세요.',
   'quality.VALIDATED': '검증됨',
   'quality.LIMITED_USE': '제한 사용',
   'quality.REVIEW_REQUIRED': '검토 필요',
@@ -34,7 +37,7 @@ const ko = {
   'terrain.site': '지형 반영',
   'terrain.grid': '격자 근사',
   'terrain.flat': '지형 미반영',
-  'eph.table': 'Horizons 표',
+  'eph.table': 'SPICE 표',
   'eph.analytic': '근사 천체력',
   'nav.01': '후보지 탐색',
   'nav.02': '시간 윈도',
@@ -118,7 +121,7 @@ const ko = {
   'map.illum_avg': '장기 평균 일조율(PGDA69)',
   'map.comm_mission': '임무 기간 지구 교신율',
   'map.earth_vis_avg': '장기 평균 지구 가시율(PGDA69)',
-  'map.safety': '착륙 안전 (경사)',
+  'map.safety': '착륙 안전 (경사 90분위)',
   'map.slope_p90_deg': '경사 90분위',
   'map.geo_hazard': '지질 위험',
   'map.water': '물·얼음 지표 — 얼음 가능성 지표 · 검출 아님',
@@ -126,11 +129,14 @@ const ko = {
   'map.h_ppm': '수소 (LP, ppm) — 얼음 가능성 지표 · 검출 아님',
   'map.metal': '금속 지표',
   'map.feo_wt': 'FeO · LP 0.5° (wt%) — 원 격자 거침',
-  'map.tio2_wt': 'TiO₂ · LP 원 격자 2–20° (wt%)',
+  'map.tio2_wt_lp': 'TiO₂ · LP 2° 셀 약 60 km (wt%) — 지역 조성, 추정 분포',
   'map.feo_wt_kaguya': 'FeO · Kaguya SP 약 1 km (wt%) — 추정 분포',
-  'map.tio2_wt_jaxa': 'TiO₂ · JAXA MI 약 1.9 km (wt%, 2 wt% 이상만) — 추정 분포',
-  'map.tio2_jaxa_ge2_frac': 'TiO₂ 2 wt% 이상 비율 · JAXA MI — 추정 분포',
+  'map.tio2_jaxa_mi_research': 'JAXA MI TiO₂ 추정값 — 남극 고위도 정량 미검증 (연구용)',
   'map.wac_ill_pct': 'WAC 실측 조명률 (88–90°S)',
+  'map.wac_ill_twi': 'WAC 시간가중 조명률 (88–90°S)',
+  'map.psr_poly_dist_km': '영구음영까지 거리 · 폴리곤 (5 km² 이상) — 얼음 가능성 지표 · 검출 아님',
+  'map.plains_frac': '극지 평원 비율 (지질도)',
+  'map.boulder_count': '섀클턴 바위 수 (매핑 범위만)',
   'map.color': '색 켜기 (C)',
   'map.opacity': '진하기',
   'map.fail_mode': '미달 칸',
@@ -373,3 +379,10 @@ export function t(key: StringKey, vars?: Record<string, string | number>): strin
 }
 
 export const ALL_STRINGS = { ko, en };
+
+/** 천체력 표 출처 라벨 (메타의 source 값 기준. 고정 문구로 Horizons 라고 쓰지 않는다) */
+export function ephTableLabel(source?: string | null): string {
+  if (source === 'spice') return 'SPICE 표';
+  if (source === 'horizons' || source === 'jpl_horizons') return 'Horizons 표';
+  return '사전 계산 표';
+}

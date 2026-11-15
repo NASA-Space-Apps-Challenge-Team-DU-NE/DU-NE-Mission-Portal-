@@ -4,6 +4,7 @@ import { geoValues, metalValues, safetyValues, waterValues, type StaticLayers } 
 import type { DataKind, LayerMeta, LayerName, Quality, StaticLayerName } from '../core/types';
 import { t, type StringKey } from '../strings';
 import type { GridScoreRes } from '../workers/grid.worker';
+import type { gridSources } from './calculationSource';
 
 export interface LayerView {
   name: LayerName;
@@ -33,17 +34,23 @@ export const LAYER_OPTIONS: Array<{ name: LayerName; label: StringKey; feature?:
   { name: 'h_ppm', label: 'map.h_ppm', feature: 'waterMap' },
   { name: 'metal', label: 'map.metal', feature: 'metalMap' },
   { name: 'feo_wt', label: 'map.feo_wt', feature: 'metalMap' },
-  { name: 'tio2_wt', label: 'map.tio2_wt', feature: 'metalMap' },
+  { name: 'tio2_wt_lp', label: 'map.tio2_wt_lp', feature: 'metalMap' },
   { name: 'feo_wt_kaguya', label: 'map.feo_wt_kaguya', feature: 'metalMap' },
-  { name: 'tio2_wt_jaxa', label: 'map.tio2_wt_jaxa', feature: 'metalMap' },
-  { name: 'tio2_jaxa_ge2_frac', label: 'map.tio2_jaxa_ge2_frac', feature: 'metalMap' },
+  { name: 'tio2_jaxa_mi_research', label: 'map.tio2_jaxa_mi_research', feature: 'metalMap' },
   { name: 'wac_ill_pct', label: 'map.wac_ill_pct' },
+  { name: 'wac_ill_twi', label: 'map.wac_ill_twi' },
+  { name: 'psr_poly_dist_km', label: 'map.psr_poly_dist_km', feature: 'waterMap' },
+  { name: 'plains_frac', label: 'map.plains_frac' },
+  { name: 'boulder_count', label: 'map.boulder_count' },
 ];
 
 const metaOf = (metas: LayerMeta[], n: StaticLayerName) => metas.find((m) => m.name === n);
 
-export function layerView(name: LayerName, res: GridScoreRes | null, st: StaticLayers, metas: LayerMeta[], n: number, approx = false): LayerView {
-  const dynKind: DataKind = res ? (approx ? 'approx' : 'real') : 'missing';
+export function layerView(name: LayerName, res: GridScoreRes | null, st: StaticLayers, metas: LayerMeta[], n: number, approx = false, sources?: ReturnType<typeof gridSources> | null): LayerView {
+  const usedSource = name === 'sun_now' ? sources?.now : sources?.mission;
+  const dynKind: DataKind = res ? (approx || usedSource?.approx ? 'approx' : 'real') : 'missing';
+  const terrainKeys = approx ? [] : metaOf(metas, 'elev_m')?.source_keys ?? [];
+  const dynamicKeys = [...new Set([...(usedSource?.keys ?? []), ...terrainKeys])];
   const label = LAYER_OPTIONS.find((o) => o.name === name)?.label ?? 'map.composite';
   const base = { name, label, kind: 'real' as DataKind, quality: null as Quality | null, caution: null as string | null, source_keys: [] as string[] };
   const fromStatic = (sn: StaticLayerName, over: Partial<LayerView> = {}): LayerView => {
@@ -53,13 +60,13 @@ export function layerView(name: LayerName, res: GridScoreRes | null, st: StaticL
   };
   switch (name) {
     case 'composite':
-      return { ...base, values: res?.composite ?? null, mode: 'score', range: [0, 1], kind: dynKind, source_keys: ['jpl_horizons', 'lola_dem_240m'] };
+      return { ...base, values: res?.composite ?? null, mode: 'score', range: [0, 1], kind: dynKind, source_keys: dynamicKeys };
     case 'illum_mission':
     case 'comm_mission':
     case 'sun_now':
-      return { ...base, values: res?.dyn[name] ?? null, mode: 'score', range: [0, 1], kind: dynKind, source_keys: ['jpl_horizons', 'lola_dem_240m', 'lola_dem_80m'] };
+      return { ...base, values: res?.dyn[name] ?? null, mode: 'score', range: [0, 1], kind: dynKind, source_keys: dynamicKeys };
     case 'dark_h':
-      return { ...base, values: res?.dyn.dark_h ?? null, mode: 'score', invert: true, kind: dynKind, source_keys: ['jpl_horizons'] };
+      return { ...base, values: res?.dyn.dark_h ?? null, mode: 'score', invert: true, kind: dynKind, source_keys: dynamicKeys };
     case 'safety': {
       const c = safetyValues(st, n);
       const m = metaOf(metas, 'slope_p90_deg');
@@ -75,21 +82,27 @@ export function layerView(name: LayerName, res: GridScoreRes | null, st: StaticL
     }
     case 'metal': {
       const c = metalValues(st, n);
-      return { ...base, values: c.available ? c.values : null, mode: 'score', range: [0, 1], kind: c.available ? 'real' : 'missing', quality: metaOf(metas, 'feo_wt')?.quality ?? null, caution: t('map.tio2_wt'), source_keys: ['lp_grs'] };
+      return { ...base, values: c.available ? c.values : null, mode: 'score', range: [0, 1], kind: c.available ? 'real' : 'missing', quality: metaOf(metas, 'feo_wt')?.quality ?? null, caution: t('map.tio2_wt_lp'), source_keys: ['lp_grs'] };
     }
     case 'slope_p90_deg':
       return fromStatic('slope_p90_deg', { mode: 'score', range: [0, 30], invert: true });
     case 'psr_dist_km':
       return fromStatic('psr_dist_km', { mode: 'score', range: [0, 60], invert: true });
+    case 'psr_poly_dist_km':
+      return fromStatic('psr_poly_dist_km', { mode: 'score', range: [0, 60], invert: true });
+    case 'boulder_count':
+      return fromStatic('boulder_count', { range: [0, 800] });
     case 'illum_avg':
     case 'earth_vis_avg':
     case 'wac_ill_pct':
-    case 'tio2_jaxa_ge2_frac':
+    case 'wac_ill_twi':
+    case 'plains_frac':
       return fromStatic(name, { mode: 'score', range: [0, 1] });
     case 'feo_wt_kaguya':
       return fromStatic(name, { range: [4, 20] });
-    case 'tio2_wt_jaxa':
-      return fromStatic(name, { range: [2, 15] });
+    case 'tio2_jaxa_mi_research':
+      // 연구용 보기: 원래 값(0~30 wt%)을 자르지 않고 그대로. 점수·필터·순위·내보내기에 연결하지 않는다
+      return fromStatic(name, { range: [0, 15], caution: t('map.tio2_jaxa_mi_research') });
     default:
       return fromStatic(name as StaticLayerName);
   }

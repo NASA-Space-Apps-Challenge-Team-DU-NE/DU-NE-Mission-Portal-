@@ -4,26 +4,16 @@ import { EarthGlobe } from '../components/EarthGlobe';
 import { Card, Help, Kpi, NoData, deg, dur, hrs, pct, utc, Empty } from '../components/kit';
 import { BandChart, LineChart } from '../components/viz';
 import { stationSees, stationWindows } from '../core/stations';
-import { longestRun } from '../core/timeline';
+import { intervalHours, intervalSpans, longestRun } from '../core/timeline';
 import type { Station } from '../core/types';
 import { useData } from '../state/data';
 import { siteKey, timelineFor, useLander } from '../state/derived';
 import { useNextEvents, useResolvedSite, useSiteCtx } from '../state/hooks';
 import { useApp } from '../state/store';
+import { skyState } from '../core/sky';
 
 type St = Station & { custom?: boolean; short?: string };
 const NAME_KO: Record<string, string> = { goldstone: '골드스톤', madrid: '마드리드', canberra: '캔버라', yeoju: '여주 심우주 안테나' };
-
-function spans(times: number[], flags: ArrayLike<number | boolean>) {
-  const out: Array<{ start: number; end: number; h: number }> = [];
-  let s = -1;
-  for (let i = 0; i <= times.length; i++) {
-    const on = i < times.length && !!flags[i];
-    if (on && s < 0) s = i;
-    if (!on && s >= 0) { out.push({ start: times[s], end: times[i - 1], h: i - s }); s = -1; }
-  }
-  return out;
-}
 
 export default function Comm() {
   const app = useApp();
@@ -39,17 +29,25 @@ export default function Comm() {
   const tl = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), app.landing, 720, 1) : null), [ctx, rs, app.margin_deg, app.landing]);
   const times = useMemo(() => tl?.map((s) => s.t) ?? [], [tl]);
   const sw = useMemo(() => (tl && all.length ? stationWindows(all, times, tl.map((s) => s.earth_visible), 1) : null), [tl, all, times]);
-  if (!rs || !ctx || !tl) return <NoData what="통신" why="02에서 착륙지를 먼저 고르세요" />;
+  // 임무 지표는 30일 계획 그래프와 별도로 실제 임무 기간(duration_h)으로 계산한다
+  const mtl = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), app.landing, app.duration_h, 1) : null), [ctx, rs, app.margin_deg, app.landing, app.duration_h]);
+  const msw = useMemo(() => (mtl && all.length ? stationWindows(all, mtl.map((s) => s.t), mtl.map((s) => s.earth_visible), 1) : null), [mtl, all]);
+  // 보는 시각이 30일 배열 밖이면 그 시각의 하늘을 따로 계산
+  const nowSky = useMemo(() => (ctx ? skyState(ctx.frame, ctx.mask, ctx.eph, app.t, ctx.margin_deg) : null), [ctx, app.t]);
+  if (!rs || !ctx || !tl || !mtl || !nowSky) return <NoData what="통신" why="02에서 착륙지를 먼저 고르세요" />;
 
   const vis = tl.map((s) => (s.earth_visible ? 1 : 0));
-  const commFrac = vis.reduce((a: number, b) => a + b, 0) / vis.length;
-  const link = sw?.link ?? vis, linkFrac = sw ? sw.link_frac : commFrac;
-  const gap = longestRun(Array.from(link, (v) => !v), 1);
-  const daily = sw ? sw.daily_link_h_min : 0;
-  const wins = spans(times, link);
+  const mw = intervalHours(mtl);
+  const mTot = mw.reduce((a, b) => a + b, 0);
+  const mVis = mtl.map((s) => (s.earth_visible ? 1 : 0));
+  const commFrac = mTot > 0 ? mVis.reduce((a: number, b, i) => a + b * mw[i], 0) / mTot : mVis[0];
+  const link = sw?.link ?? vis;
+  const mLink = msw?.link ?? mVis, linkFrac = msw ? msw.link_frac : commFrac;
+  const gap = longestRun(Array.from(mLink, (v) => !v), mw);
+  const daily = msw ? msw.daily_link_h_min : 0;
+  const wins = intervalSpans(times, link);
   const mbDay = L ? (L.rate_kbps * 3600 * linkFrac * 24) / 8000 : null;
-  const iNow = Math.round((app.t - app.landing) / 3_600_000);
-  const now = tl[Math.max(0, Math.min(tl.length - 1, iNow))];
+  const now = nowSky;
   return (
     <>
       <Card title="지구 교신" sub={`${rs.site.name} · ${utc(app.landing)} + 30일`}>
@@ -57,8 +55,8 @@ export default function Comm() {
         <div className="kpis">
           <Kpi l="지금 · 지구 고도" v={deg(now.earth.el_deg, 2)} s={`필요: 지형 + 여유각 ${deg(now.horizon_earth_deg + app.margin_deg, 2)}`} tone={now.earth_visible ? 'good' : 'bad'} />
           <Kpi l="다음 변화" v={now.earth_visible ? dur(nx?.next_earthset != null ? nx.next_earthset - app.t : null) : dur(nx?.next_earthrise != null ? nx.next_earthrise - app.t : null)} s={now.earth_visible ? '지구몰까지' : '지구돋이까지'} />
-          <Kpi l="임무 기간 교신율" v={pct(commFrac)} s="지구 보임 기준" />
-          <Kpi l="교신 가능 (지구 보임 ∩ 지상국)" v={pct(linkFrac)} />
+          <Kpi l="임무 기간 교신율" v={pct(commFrac)} s={`지구 보임 기준 · ${app.duration_h} h`} />
+          <Kpi l="교신 가능 (지구 보임 ∩ 지상국)" v={pct(linkFrac)} s={`임무 기간 ${app.duration_h} h`} />
           <Kpi l="하루 최소 교신" v={hrs(daily)} s={`기준 ≥ ${app.req.min_daily_comm_h} h`} tone={daily >= app.req.min_daily_comm_h ? 'good' : 'bad'} />
           <Kpi l="최장 교신 끊김" v={hrs(gap)} />
           <Kpi l="예상 전송량" v={mbDay == null ? '—' : `${Math.round(mbDay).toLocaleString()} MB/일`} s={L ? `${L.name.split(' (')[0]} · ${L.rate_kbps} kbps` : ''} />

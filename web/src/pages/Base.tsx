@@ -6,7 +6,7 @@ import { Card, Help, NoData, Seg, km, Empty } from '../components/kit';
 import { LocalMap, useLocalTerrain } from '../components/LocalMap';
 import { DEFAULTS } from '../config';
 import { distanceTable, type BaseKind } from '../core/hazards';
-import { useBases, useSiteWarnings } from '../state/derived';
+import { useBases, useFaultCheck, useSiteWarnings } from '../state/derived';
 import { useResolvedSite } from '../state/hooks';
 import { useApp } from '../state/store';
 import { useUi } from '../state/ui';
@@ -21,6 +21,7 @@ export default function Base() {
   const ui = useUi();
   const rs = useResolvedSite();
   const W = useSiteWarnings();
+  const FC = useFaultCheck();
   const bases = useBases();
   const [kind, setKind] = useState<BaseKind>('landing_pad');
   const D = distanceTable(bases);
@@ -76,7 +77,7 @@ export default function Base() {
         <div className="col">
           <Card title="단층애 근접 경고" sub={rs?.site.name ?? ''} tag={<span className="badge approx">경고 거리 {DEFAULTS.fault_warn_km} km (임시값)</span>}>
             <p className="note">착륙지가 관측된 단층애(LROC 목록)에서 경고 거리 안이면 알립니다. 경고는 참고용이며 안전을 보장하지 않습니다. 착륙 먼지 도달 반경은 공개 근거가 없어 검사하지 않습니다.</p>
-            {!rs ? <NoData what="착륙지" /> : W.length === 0 ? <span className="badge ok">경고 없음</span> : (
+            {!rs ? <NoData what="착륙지" /> : FC.state === 'unknown' ? <span className="badge warn" title={FC.reason ?? ''}>평가 못 함 · {FC.reason ?? '자료 없음'}</span> : W.length === 0 ? <span className="badge ok">경고 없음</span> : (
               <table><tbody>{W.map((w, i) => (
                 <tr key={i}><td><span className="badge warn">경고</span></td><td className="wrap"><b>{WK[w.kind]}</b><div className="small muted">{w.target_name}</div></td><td className="mono">{km(w.distance_km)}</td><td className="mono small muted">≤ {km(w.limit_km, 0)}</td></tr>
               ))}</tbody></table>

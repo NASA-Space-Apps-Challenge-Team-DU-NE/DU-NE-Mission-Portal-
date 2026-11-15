@@ -97,7 +97,8 @@ export default function Delay() {
         ) : null}
       </Card>
       <Card title="대안 1 · 같은 곳 다른 날짜">
-        <Help>새 착륙 날짜 앞뒤 {DEFAULTS.alt_span_days}일 안에서 같은 착륙지의 더 나은 시각 3개. 차이는 "밀린 원래 안" 대비입니다.</Help>
+        <Help>새 착륙 날짜 앞뒤 {DEFAULTS.alt_span_days}일 안에서 같은 착륙지의 점수 상위 시각 3개. 차이는 "밀린 원래 안" 대비입니다.</Help>
+        {res && res.same.length && res.same[0].score.total <= res.re.after.score.total ? <p className="help">이 범위 안에는 밀린 원래 안보다 점수가 높은 시각이 없습니다. 아래는 점수가 같거나 낮은 상위 시각입니다.</p> : null}
         {res ? table(res.same.slice(0, 3).map((ev) => ({ site: rs.site, ev }))) : <Progress p={prog ?? 0} />}
       </Card>
       <Card title="대안 2 · 다른 곳 같은 날짜" tag={<span className="tiny muted">후보 {cands.length}곳 · {DEFAULTS.alt_radius_km} km</span>}>

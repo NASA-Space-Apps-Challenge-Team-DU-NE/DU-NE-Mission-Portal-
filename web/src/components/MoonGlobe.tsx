@@ -106,6 +106,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
   const app = useApp();
   const tex = useData((d) => d.textures);
   const grid = useData((d) => d.grid);
+  const gridApprox = useData((d) => d.gridApprox);
   const sites = useData((d) => d.sites.items);
   const regions = useData((d) => d.artemisRegions);
   const vint = useArtemisVintage();
@@ -448,7 +449,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
             <div style={{ fontWeight: 600, marginBottom: 3 }}>{l.name}{app.mapLayer === 'composite' && app.failMode !== 'show' ? <span className="muted" style={{ fontWeight: 400 }}> · 미달 {app.failMode === 'dim' ? '흐리게' : '숨김'}</span> : null}</div>
             <div className="ramp" style={{ width: 150 }} />
             <div className="ramp-t" style={{ width: 150 }}><span>{l.lo}</span><span>{l.hi}</span></div>
-            <div className="muted" style={{ marginTop: 3 }}>색은 75°S 이남 실제 격자만</div>
+            <div className="muted" style={{ marginTop: 3 }}>{grid ? `75°S 이남 ${grid.manifest.cell_km} km 격자${gridApprox ? ' · 근사, 지형 미반영' : ''}` : '격자 자료 없음'}</div>
           </>
         ) : <span className="muted">지도 색 꺼짐 (C)</span>}
       </div>

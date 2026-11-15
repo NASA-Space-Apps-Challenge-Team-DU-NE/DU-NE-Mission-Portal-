@@ -110,6 +110,6 @@ serve({
   },
   relay(p: { cell: number; radius_km: number; step_h: number }) {
     if (!g || !dyn) throw new Error('먼저 점수 계산');
-    return relayCandidates(g, dyn.lit_bits, dyn.n_samples, p.cell, p.radius_km, p.step_h, 5);
+    return relayCandidates(g, dyn.lit_bits, dyn.n_samples, p.cell, p.radius_km, dyn.sample_hours, 5);
   },
 });

@@ -1,5 +1,6 @@
 // 데이터 어댑터 (ARCHITECTURE 6.3). web/public/data 산출물만 읽는다. 실패하면 던지지 않고 'missing' 을 돌려준다.
 import { DATA_BASE } from '../config';
+import { artemisCheck, catalogCheck, ellipseCheck, ephemerisCheck, ephemerisRowsCheck, extraChecks, gridCheck, layerCheck, layersCheck, localCheck, manifestCheck, maskCheck, mastCheck, object, quality, qualityCheck, sourcesCheck, texturesCheck, validationRowsCheck, type Check, type ExtraValidationName } from './schemaChecks';
 import type {
   Envelope, EphemerisMeta, GridManifest, HorizonMask, LayerMeta, Lander, MastMasks, Mission, PowerRef, QualityEntry,
   Site, SourceEntry, StaticLayerName, Station, ValidationResult,
@@ -52,22 +53,44 @@ async function getBin(path: string): Promise<Loaded<ArrayBuffer>> {
   }
 }
 
-function checkEnvelope<T>(r: Loaded<Envelope<T>>, schemaPrefix: string, path: string): Loaded<Envelope<T>> {
+/** 이 앱이 읽을 수 있는 스키마 버전 (접두사만 맞는 v99 등은 거부) */
+const SCHEMA_VERSION = 'v1';
+const BLOCKED: ReadonlyArray<string> = ['VALIDATION_FAILED', 'NO_DATA'];
+
+function checkEnvelope<T>(r: Loaded<Envelope<T>>, schemaPrefix: string, path: string, dataCheck: Check, allowFailedValidation = false, minimal = false): Loaded<Envelope<T>> {
   if (r.status !== 'ok') return r;
   const env = r.value;
   if (!env || typeof env !== 'object' || !('data' in env)) return missing(`${path}: 형식이 다르다`);
-  if (!env.schema?.startsWith(schemaPrefix)) return missing(`${path}: 스키마 ${env.schema} (기대 ${schemaPrefix})`);
-  if (env.quality === 'VALIDATION_FAILED' || env.quality === 'NO_DATA') return missing(`${path}: 품질 ${env.quality}`);
+  if (env.schema !== `${schemaPrefix}.${SCHEMA_VERSION}`) return missing(`${path}: 스키마 ${typeof env.schema === 'string' ? env.schema : '형식 오류'} (기대 ${schemaPrefix}.${SCHEMA_VERSION})`);
+  if (!minimal && (!quality(env.quality) || !['real', 'approx', 'assumed', 'missing'].includes(env.kind) || !Array.isArray(env.provenance) || !env.provenance.every(object) || !Array.isArray(env.notes) || !env.notes.every((x) => typeof x === 'string'))) return missing(`${path}: 품질·출처 메타 형식이 다르다`);
+  if (env.quality === 'NO_DATA' || (env.quality === 'VALIDATION_FAILED' && !allowFailedValidation)) return missing(`${path}: 품질 ${env.quality}`);
+  let bad: string | null;
+  try { bad = dataCheck(env.data); } catch { bad = '내부 데이터 구조가 다르다'; }
+  if (bad) return missing(`${path}: ${bad}`);
   return r;
+}
+
+/** 바이너리 길이·정렬 검사 후 형식 배열 생성 (3바이트 파일 등은 RangeError 대신 missing) */
+function typed<A>(buf: ArrayBuffer, Ctor: { new (b: ArrayBuffer): A; BYTES_PER_ELEMENT: number }, path: string): Loaded<A> {
+  if (buf.byteLength % Ctor.BYTES_PER_ELEMENT !== 0) return missing(`${path}: 바이트 길이 ${buf.byteLength} 가 ${Ctor.BYTES_PER_ELEMENT} 의 배수가 아니다`);
+  return ok(new Ctor(buf));
 }
 
 export async function loadManifest(): Promise<Loaded<DataManifest>> {
+  // 검증 전에 전역 캐시에 넣지 않는다. 이전에 실패한 목록도 다음 로드를 오염시키지 않는다.
+  manifest = null;
   const r = await getJson<DataManifest>('manifest.json');
-  if (r.status === 'ok') manifest = r.value;
+  if (r.status === 'ok') {
+    const bad = manifestCheck(r.value);
+    if (bad) return missing(`manifest.json: ${bad}`);
+    manifest = r.value;
+  }
   return r;
 }
 
-export const loadSources = () => getJson<{ data: SourceEntry[] }>('sources.json');
+export async function loadSources() {
+  return checkEnvelope(await getJson<Envelope<SourceEntry[]>>('sources.json'), 'luna.sources', 'sources.json', sourcesCheck, false, true);
+}
 export interface ArtemisRegion {
   id: string;
   name: string;
@@ -77,25 +100,25 @@ export interface ArtemisRegion {
   rings: Array<Array<[number, number]>>;
 }
 export async function loadArtemisRegions() {
-  return checkEnvelope(await getJson<Envelope<ArtemisRegion[]>>('catalog/artemis_regions.json'), 'luna.artemis_regions', 'catalog/artemis_regions.json');
+  return checkEnvelope(await getJson<Envelope<ArtemisRegion[]>>('catalog/artemis_regions.json'), 'luna.artemis_regions', 'catalog/artemis_regions.json', artemisCheck);
 }
-export const loadQuality = () => getJson<{ data: Record<string, QualityEntry> }>('quality.json');
+export async function loadQuality() {
+  return checkEnvelope(await getJson<Envelope<Record<string, QualityEntry>>>('quality.json'), 'luna.quality', 'quality.json', qualityCheck, false, true);
+}
 
 export async function loadCatalog<T extends 'sites' | 'missions' | 'landers' | 'stations' | 'power_refs'>(name: T) {
   type M = { sites: Site[]; missions: Mission[]; landers: Lander[]; stations: Station[]; power_refs: PowerRef[] };
   const path = `catalog/${name}.json`;
-  return checkEnvelope(await getJson<Envelope<M[T]>>(path), `luna.${name}`, path);
+  return checkEnvelope(await getJson<Envelope<M[T]>>(path), `luna.${name}`, path, catalogCheck(name));
 }
 
 export async function loadMask(path: string): Promise<Loaded<Envelope<HorizonMask>>> {
-  const r = checkEnvelope(await getJson<Envelope<HorizonMask>>(path), 'luna.mask', path);
-  if (r.status === 'ok' && r.value.data.elevation_deg.length * r.value.data.az_step_deg !== 360) return missing(`${path}: 방위 개수가 360° 와 맞지 않는다`);
-  return r;
+  return checkEnvelope(await getJson<Envelope<HorizonMask>>(path), 'luna.mask', path, maskCheck);
 }
 
 export async function loadMastMasks(siteId: string) {
   const path = `masks/heights/${siteId}.json`;
-  return checkEnvelope(await getJson<Envelope<MastMasks>>(path), 'luna.mast_masks', path);
+  return checkEnvelope(await getJson<Envelope<MastMasks>>(path), 'luna.mast_masks', path, mastCheck);
 }
 
 export interface EphemerisLoaded {
@@ -103,13 +126,17 @@ export interface EphemerisLoaded {
   rows: Float32Array;
 }
 export async function loadEphemeris(jsonPath: string): Promise<Loaded<EphemerisLoaded>> {
-  const env = checkEnvelope(await getJson<Envelope<EphemerisMeta>>(jsonPath), 'luna.ephemeris', jsonPath);
+  const env = checkEnvelope(await getJson<Envelope<EphemerisMeta>>(jsonPath), 'luna.ephemeris', jsonPath, ephemerisCheck);
   if (env.status !== 'ok') return env;
   const dir = jsonPath.slice(0, jsonPath.lastIndexOf('/') + 1);
   const bin = await getBin(dir + env.value.data.bin);
   if (bin.status !== 'ok') return bin;
-  const rows = new Float32Array(bin.value);
+  const tr = typed(bin.value, Float32Array, dir + env.value.data.bin);
+  if (tr.status !== 'ok') return tr;
+  const rows = tr.value;
   if (rows.length !== env.value.data.count * 6) return missing(`${jsonPath}: 행 수가 manifest 와 다르다`);
+  const badRows = ephemerisRowsCheck(rows);
+  if (badRows) return missing(`${jsonPath}: ${badRows}`);
   return ok({ env: env.value, rows });
 }
 
@@ -118,38 +145,54 @@ export interface GridLoaded {
   cells: Uint32Array;
   horizon: Int16Array;
   layersEnv: Envelope<LayerMeta[]> | null;
+  /** 격자 자체는 사용 가능해도 정적 레이어 목록 실패는 숨기지 않는다. */
+  layersReason?: string;
 }
 export async function loadGrid(): Promise<Loaded<GridLoaded>> {
-  const env = checkEnvelope(await getJson<Envelope<GridManifest>>('grid/manifest.json'), 'luna.grid', 'grid/manifest.json');
+  const env = checkEnvelope(await getJson<Envelope<GridManifest>>('grid/manifest.json'), 'luna.grid', 'grid/manifest.json', gridCheck);
   if (env.status !== 'ok') return env;
   const m = env.value.data;
   const [c, h] = await Promise.all([getBin(`grid/${m.cells}`), getBin(`grid/${m.horizon.file}`)]);
   if (c.status !== 'ok') return c;
   if (h.status !== 'ok') return h;
-  const cells = new Uint32Array(c.value);
-  const horizon = new Int16Array(h.value);
+  const ct = typed(c.value, Uint32Array, `grid/${m.cells}`);
+  if (ct.status !== 'ok') return ct;
+  const ht = typed(h.value, Int16Array, `grid/${m.horizon.file}`);
+  if (ht.status !== 'ok') return ht;
+  const cells = ct.value, horizon = ht.value;
   if (cells.length !== m.n_cells || horizon.length !== m.n_cells * m.horizon.n_az) return missing('grid: 길이가 manifest 와 다르다');
-  const le = checkEnvelope(await getJson<Envelope<LayerMeta[]>>('grid/layers.json'), 'luna.layers', 'grid/layers.json');
-  return ok({ env: env.value, cells, horizon, layersEnv: le.status === 'ok' ? le.value : null });
+  if (cells.some((cell) => cell >= m.nx * m.ny) || new Set(cells).size !== cells.length) return missing('grid: 셀 인덱스가 범위를 벗어나거나 중복된다');
+  if (horizon.some((h) => Math.abs(h * m.horizon.scale) > 90)) return missing('grid: 지평선 고도각이 범위를 벗어난다');
+  const le = checkEnvelope(await getJson<Envelope<LayerMeta[]>>('grid/layers.json'), 'luna.layers', 'grid/layers.json', layersCheck);
+  return ok({ env: env.value, cells, horizon, layersEnv: le.status === 'ok' ? le.value : null, ...(le.status === 'missing' ? { layersReason: le.reason } : {}) });
 }
 
 export async function loadLayer(meta: LayerMeta, n_cells: number): Promise<Loaded<Float32Array>> {
+  if (!object(meta) || layerCheck(meta) || !Number.isSafeInteger(n_cells) || n_cells < 1) return missing('레이어 메타 또는 칸 개수가 유효하지 않다');
+  // 레이어별 품질: 사용 금지 품질(VALIDATION_FAILED·NO_DATA)은 수치 계산에 넣지 않는다
+  if (BLOCKED.includes(meta.quality)) return missing(`${meta.file}: 품질 ${meta.quality}`);
   const b = await getBin(`grid/${meta.file}`);
   if (b.status !== 'ok') return b;
-  const a = new Float32Array(b.value);
-  if (a.length !== n_cells) return missing(`${meta.file}: 길이가 다르다`);
-  return ok(a);
+  const t = typed(b.value, Float32Array, meta.file);
+  if (t.status !== 'ok') return t;
+  if (t.value.length !== n_cells) return missing(`${meta.file}: 길이가 다르다`);
+  // 정적 레이어의 NaN은 정상적인 결측 표시지만 Infinity는 계산값으로 사용할 수 없다.
+  if (t.value.some((v) => !Number.isFinite(v) && !Number.isNaN(v))) return missing(`${meta.file}: 무한대 값이 있다`);
+  return t;
 }
 
-export async function loadLayers(metas: LayerMeta[], n_cells: number) {
+/** 레이어 묶음. 실패한 레이어의 사유는 reasons 로 돌려준다 */
+export async function loadLayers(metas: LayerMeta[], n_cells: number): Promise<{ layers: Partial<Record<StaticLayerName, Float32Array>>; reasons: Partial<Record<StaticLayerName, string>> }> {
   const out: Partial<Record<StaticLayerName, Float32Array>> = {};
+  const reasons: Partial<Record<StaticLayerName, string>> = {};
   await Promise.all(
     metas.map(async (m) => {
       const r = await loadLayer(m, n_cells);
       if (r.status === 'ok') out[m.name] = r.value;
+      else reasons[m.name] = r.reason;
     }),
   );
-  return out;
+  return { layers: out, reasons };
 }
 
 export interface TextureInfo {
@@ -163,7 +206,7 @@ export interface TextureInfo {
 }
 export type TextureSet = { hillshade?: TextureInfo; wac?: TextureInfo; globe_2k?: TextureInfo; globe_8k?: TextureInfo };
 export async function loadTextures() {
-  return checkEnvelope(await getJson<Envelope<TextureSet>>('textures/textures.json'), 'luna.textures', 'textures/textures.json');
+  return checkEnvelope(await getJson<Envelope<TextureSet>>('textures/textures.json'), 'luna.textures', 'textures/textures.json', texturesCheck);
 }
 export const textureUrl = (file: string) => urlOf(`textures/${file}`);
 
@@ -171,13 +214,21 @@ export const textureUrl = (file: string) => urlOf(`textures/${file}`);
 export interface LocalSiteTex { file: string; lat_deg: number; lon_deg: number; elev_center_m: number; elev_min_m: number; elev_max_m: number; dem: string; missing_frac: number }
 export interface LocalTerrain { half_km: number; size_px: number; m_per_px: number; frame: string; light: { az_deg: number; alt_deg: number; note: string }; sites: Record<string, LocalSiteTex> }
 export async function loadLocalTerrain() {
-  return checkEnvelope(await getJson<Envelope<LocalTerrain>>('local/local.json'), 'luna.local', 'local/local.json');
+  return checkEnvelope(await getJson<Envelope<LocalTerrain>>('local/local.json'), 'luna.local', 'local/local.json', localCheck);
 }
 export const localUrl = (file: string) => urlOf(`local/${file}`);
 
-export async function loadValidation(name: 'ephemeris' | 'masks' | 'illumination' | 'frames' | 'missions') {
+export async function loadValidation(name: 'ephemeris' | 'masks' | 'illumination' | 'frames' | 'missions' | 'mast' | 'wueller') {
   const path = `validation/${name}.json`;
-  return checkEnvelope(await getJson<Envelope<ValidationResult[]>>(path), `luna.validation.${name}`, path);
+  // 검증 실패 결과도 비교 화면에서는 읽어야 한다. 계산용 어댑터의 품질 차단과 구분한다.
+  return checkEnvelope(await getJson<Envelope<ValidationResult[]>>(path), `luna.validation.${name}`, path, validationRowsCheck, true);
+}
+
+/** 추가 검증 카드도 공통 스키마 검사와 manifest 버전 URL을 사용한다. */
+export async function loadValidationExtra<T>(name: ExtraValidationName): Promise<Loaded<Envelope<T>>> {
+  const path = `validation/${name}.json`;
+  const schema = name === 'layers_minerals' ? 'minerals' : name;
+  return checkEnvelope(await getJson<Envelope<T>>(path), `luna.validation.${schema}`, path, extraChecks[name], true);
 }
 
 // ───────── 착륙 오차 타원 국지 경사 패치 (s35) ─────────
@@ -199,7 +250,7 @@ export interface EllipseSiteInfo {
 }
 let ellipseIndex: Promise<Loaded<Envelope<{ half_km: number; sites: EllipseSiteInfo[] }>>> | null = null;
 export function loadEllipseIndex() {
-  ellipseIndex ??= getJson<Envelope<{ half_km: number; sites: EllipseSiteInfo[] }>>('ellipse/index.json').then((r) => checkEnvelope(r, 'luna.ellipse', 'ellipse/index.json'));
+  ellipseIndex ??= getJson<Envelope<{ half_km: number; sites: EllipseSiteInfo[] }>>('ellipse/index.json').then((r) => checkEnvelope(r, 'luna.ellipse', 'ellipse/index.json', ellipseCheck));
   return ellipseIndex;
 }
 const patchCache = new Map<string, Promise<Loaded<ArrayBuffer>>>();

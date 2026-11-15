@@ -307,7 +307,10 @@ body.present .hud-card,body.present .hud-top .tl,body.present .lbtns{display:non
 @media (max-width:1280px){.app{grid-template-columns:200px minmax(0,1fr) minmax(300px,28vw)}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:1050px){
   body{overflow:auto;height:auto} html{height:auto}
-  .app{grid-template-columns:1fr;grid-template-rows:auto}
+  /* 좁은 화면: 1fr 은 내용 최소 폭(단계 9개 × 120px)까지 늘어나 가로로 넘친다 → minmax(0,1fr) + min-width:0 */
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto}
+  .app>*{min-width:0}
+  .side,.rail,.pbody{min-width:0;max-width:100vw}
   .side .scroll{display:flex;overflow-x:auto;padding:0}
   .sgrp,.plan{display:none}
   .step{grid-template-columns:auto;min-width:120px;border-left:0;border-bottom:3px solid transparent}
@@ -315,7 +318,7 @@ body.present .hud-card,body.present .hud-top .tl,body.present .lbtns{display:non
   .step .dot{display:none}
   .rail{order:-1;grid-template-rows:420px auto;border-left:0}
   .pbody{overflow:visible}
-  .g2,.g21,.g3{grid-template-columns:1fr}
+  .g2,.g21,.g3,.g4,.gEG{grid-template-columns:minmax(0,1fr)}
 }
 
 /* ── React 틀 ── */

@@ -3,6 +3,7 @@ import { DARK_FRAC, DEG, HOUR_MS, R_MOON_KM, RAD } from './constants';
 import type { Ephemeris } from './ephemeris';
 import { diskFraction } from './horizon';
 import { fastFrame, fastTopo, type FastFrame } from './sky';
+import { intervalHours, sampleTimes } from './timeline';
 import type { Criterion, GridManifest, HardFilters, MapWeights, StaticLayerName, TimeMs, Vec3 } from './types';
 import { aeqdForward, aeqdInverse, clamp, greatCircleKm, localFrame } from './vec';
 
@@ -79,6 +80,8 @@ export interface DynamicLayers {
   lit_bits: Uint8Array;
   comm_bits: Uint8Array;
   n_samples: number;
+  /** 표본별 실제 적분 시간. 종료 표본은 0 h (릴레이에도 같은 기간 사용). */
+  sample_hours: Float64Array;
 }
 
 /** 임무 기간 동적 레이어 (최대 60일, 6 h 간격 기본) */
@@ -91,9 +94,15 @@ export function computeDynamic(
 ): DynamicLayers {
   const n = g.cells.length;
   const dur = Math.min(req.duration_h, 60 * 24);
-  const times: TimeMs[] = [];
-  for (let h = 0; h <= dur + 1e-9; h += req.step_h) times.push(req.start + h * HOUR_MS);
+  // 표본 시각과 적분 구간 분리: 표본 k 는 [t_k, t_{k+1}) 을 대표, 마지막(종료) 표본은 0 h
+  const times: TimeMs[] = sampleTimes(req.start, req.start + dur * HOUR_MS, req.step_h);
   const m = times.length;
+  const sampleHours = intervalHours(times);
+  const wt = sampleHours.slice();
+  let wTot = 0;
+  for (let k = 0; k < m; k++) wTot += wt[k];
+  const wNorm = wTot > 0 ? wTot : 1;
+  if (wTot === 0) wt[0] = 1;
   const bodies = times.map((t) => eph.bodyVectors(t));
   const sunDirs = bodies.map((b) => {
     const d = Math.hypot(b.sun[0], b.sun[1], b.sun[2]);
@@ -118,9 +127,9 @@ export function computeDynamic(
       if (az < 0) az += 360;
       const el = Math.asin(z) * RAD;
       const fr = diskFraction(el, cellHorizonAt(g, i, az), s.r);
-      fs += fr;
+      fs += fr * wt[k];
       if (fr <= DARK_FRAC) {
-        run++;
+        run += wt[k];
         if (run > best) best = run;
       } else {
         run = 0;
@@ -128,13 +137,13 @@ export function computeDynamic(
       }
       const [eaz, eel] = fastTopo(f, bodies[k].earth);
       if (eel > cellHorizonAt(g, i, eaz) + req.margin_deg) {
-        cv++;
+        cv += wt[k];
         commBits[i * m + k] = 1;
       }
     }
-    illum[i] = fs / m;
-    comm[i] = cv / m;
-    dark[i] = best * req.step_h;
+    illum[i] = fs / wNorm;
+    comm[i] = cv / wNorm;
+    dark[i] = wTot > 0 ? best : 0;
     {
       const x = nowDir[0] * f.ex + nowDir[1] * f.ey;
       const y = nowDir[0] * f.nx + nowDir[1] * f.ny + nowDir[2] * f.nz;
@@ -145,7 +154,7 @@ export function computeDynamic(
     }
     if (onProgress && i % 2000 === 0) onProgress(i / n);
   }
-  return { illum_mission: illum, comm_mission: comm, sun_now: sunNow, dark_h: dark, lit_bits: litBits, comm_bits: commBits, n_samples: m };
+  return { illum_mission: illum, comm_mission: comm, sun_now: sunNow, dark_h: dark, lit_bits: litBits, comm_bits: commBits, n_samples: m, sample_hours: sampleHours };
 }
 
 // ───────── 기준 정규화·종합 점수 ─────────
@@ -209,9 +218,9 @@ export function waterValues(st: StaticLayers, n: number): CriterionInfo {
 }
 
 export function metalValues(st: StaticLayers, n: number): CriterionInfo {
-  const fe = st.feo_wt, ti = st.tio2_wt;
+  const fe = st.feo_wt, ti = st.tio2_wt_lp; // JAXA MI 는 정량 미검증이라 점수에 쓰지 않는다
   const v = new Float32Array(n).fill(NaN);
-  const uses = [has(fe) ? 'feo_wt' : '', has(ti) ? 'tio2_wt' : ''].filter(Boolean);
+  const uses = [has(fe) ? 'feo_wt' : '', has(ti) ? 'tio2_wt_lp' : ''].filter(Boolean);
   for (let i = 0; i < n; i++) {
     const parts: number[] = [];
     if (fe && Number.isFinite(fe[i])) parts.push(clamp(fe[i] / FEO_REF_WT, 0, 1));
@@ -320,7 +329,7 @@ export function scoreGrid(inp: ScoreInput): ScoreResult {
     if (ok && on('max_slope_deg').active && !on('max_slope_deg').disabled) ok = st.slope_p90_deg![i] <= f.max_slope_deg!;
     if (ok && on('max_water_km').active && !on('max_water_km').disabled) ok = st.psr_dist_km![i] <= f.max_water_km!;
     if (ok && on('max_dark_h').active && !on('max_dark_h').disabled) ok = dyn!.dark_h[i] <= f.max_dark_h!;
-    if (ok && on('avoid_faults_km').active && !on('avoid_faults_km').disabled) ok = !(st.scarp_dist_km![i] < f.avoid_faults_km!);
+    if (ok && on('avoid_faults_km').active && !on('avoid_faults_km').disabled) ok = Number.isFinite(st.scarp_dist_km![i]) && st.scarp_dist_km![i] >= f.avoid_faults_km!;
     if (ok && on('artemis_only').active && !on('artemis_only').disabled)
       ok = inArtemis(i);
     pass[i] = ok ? 1 : 0;

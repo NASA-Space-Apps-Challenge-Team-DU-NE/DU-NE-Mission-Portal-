@@ -8,8 +8,10 @@ import { EN } from './i18n-en';
 export type Lang = 'en' | 'ko';
 const HANGUL = /[가-힣]/;
 const escRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-const KEYS = Object.keys(EN).sort((a, b) => b.length - a.length);
-const RE = new RegExp(KEYS.map(escRe).join('|'), 'g');
+// 문장 속 부분 바꾸기에는 한글 두 글자 이상인 키만 쓰고, 한글 낱말 중간에서 시작하지 않게 한다
+// (예: '일' 이 '일치' 안에서, '안' 이 '동안' 안에서 바뀌지 않게)
+const KEYS = Object.keys(EN).filter((k) => (k.match(/[가-힣]/g) ?? []).length >= 2).sort((a, b) => b.length - a.length);
+const RE = new RegExp(`(?<![가-힣])(?:${KEYS.map(escRe).join('|')})`, 'g');
 const PAREN = /^[^()]*[가-힣][^()]*\(([^()가-힣]+)\)$/;
 
 let cur: Lang = 'en';
@@ -24,7 +26,17 @@ export function tx(s: string): string {
   if (m && !HANGUL.test(m[1])) return s.replace(t, m[1].trim());
   // "한국어 (English)" 가 문장 안에 있거나 잘려 있으면: 괄호 안 영어만 남기거나, 잘린 괄호는 버린다
   const s2 = s.replace(/[가-힣][가-힣0-9 -]*?\s*\(([A-Za-z][^()가-힣]*)\)/g, '$1').replace(/([가-힣][가-힣0-9 -]*?)\s*\([A-Za-z][^()가-힣]*$/, '$1');
-  return s2.replace(RE, (k) => EN[k]);
+  // 숫자 뒤 단위 (예: 13.3일 → 13.3 d, 14개월 → 14 months, 130개 → 130)
+  const s3 = s2
+    .replace(/(\d)\s*개월(?![가-힣])/g, '$1 months')
+    .replace(/(\d)\s*일(?![가-힣])/g, '$1 d')
+    .replace(/(\d)\s*분(?![가-힣])/g, '$1 min')
+    .replace(/(\d)\s*년(?![가-힣])/g, '$1 yr')
+    .replace(/(\d)\s*곳(?![가-힣])/g, '$1 sites')
+    .replace(/(\d)\s*칸(?![가-힣])/g, '$1 cells')
+    .replace(/(\d)\s*개(?![가-힣])/g, '$1')
+    .replace(/\/일(?![가-힣])/g, '/day');
+  return s3.replace(RE, (k) => EN[k]);
 }
 
 // ── 화면 글자 바꾸기 ──

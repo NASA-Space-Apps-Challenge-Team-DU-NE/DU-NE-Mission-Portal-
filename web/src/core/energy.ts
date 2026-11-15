@@ -1,6 +1,7 @@
 // 에너지 수지 시뮬레이션 (묶음 E, CLAUDE.md 8.8). 타임랩스·임무 시뮬레이션 공용.
 import { DARK_FRAC } from './constants';
 import { mountIrradiance } from './horizon';
+import { intervalHours } from './timeline';
 import type { Lander, Requirements, TimeMs, TimelineSample } from './types';
 
 export const CHARGE_EFF = 0.9;
@@ -55,29 +56,62 @@ export interface SimResult {
   stop_cause: StopCause | null;
 }
 
-export function simulate(samples: TimelineSample[], step_h: number, sys: SimSystem, req: Pick<Requirements, 'min_ops_h' | 'data_mb'>): SimResult {
+const fin = (v: unknown, lo = 0) => (typeof v === 'number' && Number.isFinite(v) ? Math.max(lo, v) : lo);
+
+/** 유한값·허용범위 검사: 음수·NaN·빈 입력은 0, 비율은 0~1 */
+export function sanitizeSystem(sys: SimSystem): SimSystem {
+  return {
+    ...sys,
+    panel_area_m2: fin(sys.panel_area_m2),
+    efficiency: Math.min(1, fin(sys.efficiency)),
+    loss: Math.min(1, fin(sys.loss)),
+    battery_wh: fin(sys.battery_wh),
+    battery_min_fraction: Math.min(1, fin(sys.battery_min_fraction)),
+    load_active_w: fin(sys.load_active_w),
+    load_idle_w: fin(sys.load_idle_w),
+    load_survival_w: fin(sys.load_survival_w),
+    rate_kbps: fin(sys.rate_kbps),
+  };
+}
+
+/**
+ * 표본 i 의 상태로 구간 [t_i, t_{i+1}) 을 적분한다. soc[i] 는 t_i 시점(소비 전) 값.
+ * 운용은 (배터리 여유 + 발전)으로 부하를 감당할 수 있는 동안만 이어지고,
+ * 구간 중간에 하한에 닿으면 그 시각을 보간해 멈춘다. 0 Wh 배터리는 발전 ≥ 부하인 동안만 운용(태양광 직결).
+ */
+export function simulate(samples: TimelineSample[], _step_h: number, sysIn: SimSystem, req: Pick<Requirements, 'min_ops_h' | 'data_mb'>): SimResult {
+  const sys = sanitizeSystem(sysIn);
   const n = samples.length;
+  const w = intervalHours(samples);
   const soc = new Float32Array(n), gen = new Float32Array(n), load = new Float32Array(n), sent = new Float32Array(n), comm = new Uint8Array(n);
-  let E = START_SOC * sys.battery_wh;
-  const minE = sys.battery_min_fraction * sys.battery_wh;
+  const cap = sys.battery_wh;
+  let E = START_SOC * cap;
+  const minE = sys.battery_min_fraction * cap;
   let ops = 0, mb = 0;
-  let stopIdx: number | null = null;
+  let stopIdx: number | null = null, stopT: TimeMs | null = null;
+  const charge = (e: number, net: number, h: number) => Math.min(cap, Math.max(0, e + net * h * (net > 0 ? CHARGE_EFF : 1)));
   for (let i = 0; i < n; i++) {
     const s = samples[i];
+    const dt = w[i];
     const pg = mountIrradiance(s.sun, s.sun_frac, sys.mount, sys.panel_azimuth_deg) * sys.panel_area_m2 * sys.efficiency * (1 - sys.loss);
-    const survival = E < minE;
-    const active = !survival && s.earth_visible;
-    const pl = survival ? sys.load_survival_w : active ? sys.load_active_w : sys.load_idle_w;
-    const net = pg - pl;
-    E = Math.min(sys.battery_wh, Math.max(0, E + net * step_h * (net > 0 ? CHARGE_EFF : 1)));
-    if (!survival) ops += step_h;
-    if (active) mb += (sys.rate_kbps * 3600 * step_h) / 8000;
+    const pl = s.earth_visible ? sys.load_active_w : sys.load_idle_w;
+    soc[i] = cap > 0 ? E / cap : 0;
     gen[i] = pg;
-    load[i] = pl;
-    soc[i] = sys.battery_wh > 0 ? E / sys.battery_wh : 0;
-    sent[i] = mb;
     comm[i] = s.earth_visible ? 1 : 0;
-    if (stopIdx === null && E <= minE) stopIdx = i;
+    // 운용 가능한 시간 비율 f (0~1)
+    let f: number;
+    if (pg >= pl) f = 1;
+    else if (E <= minE) f = 0;
+    else f = dt > 0 ? Math.min(1, (E - minE) / (pl - pg) / dt) : 1;
+    load[i] = f * pl + (1 - f) * sys.load_survival_w;
+    if (dt > 0) {
+      E = charge(E, pg - pl, f * dt);
+      if (f < 1) E = charge(E, pg - sys.load_survival_w, (1 - f) * dt);
+      ops += f * dt;
+      if (s.earth_visible) mb += (sys.rate_kbps * 3600 * f * dt) / 8000;
+      if (stopIdx === null && f < 1) { stopIdx = i; stopT = s.t + f * dt * 3_600_000; }
+    }
+    sent[i] = mb;
   }
   const opsOk = ops >= req.min_ops_h, dataOk = mb >= req.data_mb;
   return {
@@ -86,9 +120,9 @@ export function simulate(samples: TimelineSample[], step_h: number, sys: SimSyst
     ops_h: ops,
     total_sent_mb: mb,
     verdict: opsOk && dataOk ? 'met' : opsOk || dataOk ? 'partial' : 'not_met',
-    stop_t: stopIdx === null ? null : samples[stopIdx].t,
+    stop_t: stopT,
     stop_index: stopIdx,
-    stop_cause: stopIdx === null ? null : stopCause(samples, stopIdx, step_h),
+    stop_cause: stopIdx === null ? null : stopCause(samples, stopIdx, w[0] > 0 ? w[0] : 1),
   };
 }
 
@@ -137,36 +171,58 @@ export interface BaseSimResult {
   events: BaseEvent[];
 }
 
-export function simulateBase(samples: TimelineSample[], step_h: number, loads: BaseLoads, sys: BaseSystem): BaseSimResult {
+/** 기지 입력은 잘못된 수치를 정상 결과로 바꾸지 않고 UI·Worker에서 같은 규칙으로 거부한다. */
+export function baseInputError(loads: BaseLoads, sys: BaseSystem): string | null {
+  const input = { ...loads, ...sys };
+  for (const key of ['habitat_kw', 'isru_kw', 'constant_kw', 'panel_area_m2', 'efficiency', 'loss', 'battery_kwh', 'isru_off_below', 'isru_on_above'] as const) {
+    const value = input[key];
+    if (!Number.isFinite(value) || value < 0) return `invalid base input: ${key} must be finite and non-negative`;
+  }
+  for (const key of ['efficiency', 'loss', 'isru_off_below', 'isru_on_above'] as const) {
+    if (sys[key] > 1) return `invalid base input: ${key} must be between 0 and 1`;
+  }
+  if (sys.isru_off_below > sys.isru_on_above) return 'invalid base input: ISRU off threshold must not exceed on threshold';
+  return null;
+}
+
+export function simulateBase(samples: TimelineSample[], _step_h: number, loads: BaseLoads, sys: BaseSystem): BaseSimResult {
+  const inputError = baseInputError(loads, sys);
+  if (inputError) throw new RangeError(inputError);
   const n = samples.length;
+  const w = intervalHours(samples);
   const soc = new Float32Array(n), gen = new Float32Array(n), load = new Float32Array(n);
   const cap = sys.battery_kwh;
   let E = START_SOC * cap;
   let isru = true, black = false, commOk = true;
   let upH = 0, blackH = 0, gapH = 0, isruH = 0;
   const events: BaseEvent[] = [];
+  let total = 0;
   for (let i = 0; i < n; i++) {
     const s = samples[i];
+    const step_h = w[i];
+    total += step_h;
     const pg = (s.irr_vertical_w_m2 * sys.panel_area_m2 * sys.efficiency * (1 - sys.loss)) / 1000;
     const frac = cap > 0 ? E / cap : 0;
+    soc[i] = frac; // t_i의 소비 전 값. 마지막 표본은 실제 종료 SOC다.
     if (isru && frac < sys.isru_off_below) { isru = false; events.push({ t: s.t, kind: 'isru_off' }); }
     else if (!isru && frac >= sys.isru_on_above) { isru = true; events.push({ t: s.t, kind: 'isru_on' }); }
     const pl = loads.habitat_kw + loads.constant_kw + (isru ? loads.isru_kw : 0);
     const net = pg - pl;
-    const next = E + net * step_h * (net > 0 ? CHARGE_EFF : 1);
-    const out = next < 0;
-    E = Math.min(cap, Math.max(0, next));
-    if (out && !black) { black = true; events.push({ t: s.t, kind: 'blackout_start' }); }
-    if (!out && black && net >= 0) { black = false; events.push({ t: s.t, kind: 'blackout_end' }); }
-    if (black) blackH += step_h; else upH += step_h;
-    if (isru && !black) isruH += step_h;
+    const up = net < 0 ? Math.min(step_h, E / -net) : step_h;
+    if (step_h > 0) {
+      if (black && up > 0) { black = false; events.push({ t: s.t, kind: 'blackout_end' }); }
+      if (up < step_h && !black) { black = true; events.push({ t: s.t + up * 3_600_000, kind: 'blackout_start' }); }
+      upH += up;
+      blackH += step_h - up;
+      if (isru) isruH += up;
+      E = Math.min(cap, Math.max(0, E + net * step_h * (net > 0 ? CHARGE_EFF : 1)));
+    }
     if (commOk && !s.earth_visible) { commOk = false; events.push({ t: s.t, kind: 'comm_lost' }); }
     if (!commOk && s.earth_visible) { commOk = true; events.push({ t: s.t, kind: 'comm_back' }); }
     if (!s.earth_visible) gapH += step_h;
-    soc[i] = cap > 0 ? E / cap : 0;
     gen[i] = pg;
     load[i] = pl;
   }
-  const total = n * step_h;
-  return { t: samples.map((s) => s.t), soc, gen_kw: gen, load_kw: load, uptime: upH / total, blackout_h: blackH, comm_gap_h: gapH, isru_uptime: isruH / total, events };
+  events.sort((a, b) => a.t - b.t); // 보간된 정전 시각과 표본 시각의 교신 이벤트를 시간순으로 병합
+  return { t: samples.map((s) => s.t), soc, gen_kw: gen, load_kw: load, uptime: total > 0 ? upH / total : 0, blackout_h: blackH, comm_gap_h: gapH, isru_uptime: total > 0 ? isruH / total : 0, events };
 }

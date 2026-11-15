@@ -1,4 +1,5 @@
 // 08 과거 미션: 재현(P1-25), 참고 사례(P1-26), 이 미션처럼 맞추기(P1-27). 결과 라벨·원인을 항상 함께 보여 준다.
+import { ephTableLabel } from '../strings';
 import { useEffect, useMemo, useState } from 'react';
 import { Card, Help, NoData, OutBadge, deg, hrs, toast, utc } from '../components/kit';
 import { DEFAULTS } from '../config';
@@ -16,9 +17,12 @@ const PART: Record<string, string> = { abs_lat: '위도', sun_el: '태양', eart
 const CAUSE_KO: Array<[RegExp, string]> = [[/navigation|항법|altitude|고도/i, '항법'], [/propulsion|engine|추진|엔진/i, '추진'], [/attitude|tip|tilt|자세|기울/i, '착지 자세'], [/power|전력/i, '전력'], [/comm|통신/i, '통신']];
 const causeOf = (m: Mission) => (m.outcome === 'success' ? '' : (CAUSE_KO.find(([r]) => r.test(m.outcome_reason))?.[1] ?? '기타'));
 // 조명 관련: 카탈로그에 lighting_related 필드가 없어 결과 설명에서 발전·일몰 언급으로 판단 (근사)
-const lightRel = (m: Mission) => /발전|일몰|전력|태양전지|power|sunset/i.test(m.outcome_reason);
+/** 조명 관련: 파이프라인이 근거 문장이 있을 때만 yes 로 싣는다. 필드가 없는 예전 데이터만 문구로 추정 */
+const lightRel = (m: Mission) => (m.lighting_related ? m.lighting_related === 'yes' : /발전|일몰|전력|태양전지|power|sunset/i.test(m.outcome_reason));
+const lightTitle = (m: Mission) => (m.lighting_evidence ? `${m.lighting_evidence.reason} — 근거: ${m.lighting_evidence.quote ?? ''}` : '');
 
 export default function Missions() {
+  const ephSource = useData((d) => d.ephMeta?.source);
   const app = useApp();
   const missions = useData((d) => d.missions);
   const eph = useData((d) => d.eph);
@@ -54,9 +58,9 @@ export default function Missions() {
               const tab = missionEph[m.id] && missionEph[m.id] !== 'missing';
               return (
                 <tr key={m.id}>
-                  <td><b>{m.name}</b><div>{tab ? <span className="badge ok">Horizons 표</span> : <span className="badge approx">근사 천체력</span>}{m.verified ? null : <> <span className="badge warn">미검증</span></>}</div></td>
-                  <td className="wrap"><OutBadge o={m.outcome} />{causeOf(m) ? <> <span className="badge">{causeOf(m)}</span></> : null}{lightRel(m) ? <> <span className="badge approx">조명 관련</span></> : null}<div className="small muted" style={{ marginTop: 3 }}>{m.outcome_reason || '—'}</div></td>
-                  <td className="mono small">{utc(Date.parse(m.landing_utc))}</td>
+                  <td><b>{m.name}</b><div>{tab ? <span className="badge ok">{ephTableLabel(ephSource)}</span> : <span className="badge approx">근사 천체력</span>}{m.verified ? null : <> <span className="badge warn">미검증</span></>}</div></td>
+                  <td className="wrap"><OutBadge o={m.outcome} />{causeOf(m) ? <> <span className="badge">{causeOf(m)}</span></> : null}{lightRel(m) ? <> <span className="badge approx" title={lightTitle(m)}>조명 관련</span></> : null}<div className="small muted" style={{ marginTop: 3 }}>{m.outcome_reason || '—'}</div></td>
+                  <td className="mono small">{m.landing_precision === 'date' ? <>{utc(Date.parse(m.landing_utc)).slice(0, 10)} <span className="badge warn" title="공식 기록으로 날짜만 확인. 시·분은 근거 없음">시각 미확인</span></> : utc(Date.parse(m.landing_utc))}</td>
                   <td className="mono small">{m.lat_deg.toFixed(3)}, {m.lon_deg.toFixed(3)}</td>
                   <td className="mono">{deg(f.sun_el)}</td>
                   <td className="mono">{f.since_sunrise_h == null ? '—' : hrs(f.since_sunrise_h)}</td>
