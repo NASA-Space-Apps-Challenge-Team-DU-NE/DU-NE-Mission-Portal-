@@ -38,3 +38,11 @@ JSON의 `remote_commit_or_push: false`와 최초 통합 기록의 원격 상태�
 루트 설치 스크립트가 포탈과 Orbit 의존성을 각각 잠금 파일로 설치한다. 루트 빌드는 Orbit 번들을 준비한 뒤 포탈을 빌드한다. `web/public/orbit`와 `web/dist`는 재생성되는 산출물이라 Git에 포함하지 않는다. 웹사이트 실행에는 Python/Node API 서버나 DB가 필요 없다.
 
 이번 요청은 저장소 업로드다. Cloudflare 계정의 실제 빌드 설정은 조회·변경하지 않았으며, main 병합/배포 시 위 설정을 확인해야 한다.
+
+## GitHub CI에서 추가 확인한 사항
+
+첫 업로드 `0a18a69`의 Ubuntu/Node 22 검사에서 포탈 170개와 기본 GRAIL 임무를 포함한 Orbit 75개 검사는 통과했다. 기존 LLO 회귀 검사 1개만 Windows 기준값과의 `strictEqual` 비교에서 실패했다. 착륙 잔차는 기준 `0.00002241408835785068 m`, Linux 계산 `0.000022414660923714336 m`로 차이는 약 `5.73e-10 m`였다.
+
+해당 테스트의 6개 요약 수치는 유한한 숫자임을 확인하고 `1e-8 + 1e-12 × max(|actual|, |expected|)` 범위에서 비교하도록 수정했다. 상태 비교는 여전히 완전 일치한다. 수치 모델·데이터·최적화·착륙 성공 제약은 변경하지 않았다. 이 수정은 회귀 테스트의 OS/Node 간 반올림 처리이며 비행 허용오차 변경이 아니다. 원래의 로컬 검증 기록과 구별한다.
+
+파이프라인과 Cloudflare Workers의 첫 브랜치 빌드 검사도 성공했다. Cloudflare 검사 통과는 미리보기 사이트에서 Orbit을 실제 실행했다는 검증과 구별하며, 최종 상태는 [PR #10](https://github.com/NASA-Space-Apps-Challenge-Team-DU-NE/DU-NE-Mission-Portal-/pull/10)의 검사를 따른다.
