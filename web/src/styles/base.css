@@ -581,3 +581,31 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 .unv-site:hover{text-decoration-color:#fff}
 .unv-n{display:block;color:#9a9a9a;margin-top:2px}
 .unv-f{margin-top:10px;padding-top:8px;border-top:1px solid #2c2c2e;color:#6b6b6b;font-size:11px}
+
+/* 계획 모드 세 칸 너비: 끌어서 조절 (--side-w, --rail-w) */
+.app.mode-plan{position:relative;grid-template-columns:var(--side-w,236px) minmax(0,1fr) var(--rail-w,max(360px,28vw))}
+@media (max-width:1280px){.app.mode-plan{grid-template-columns:var(--side-w,200px) minmax(0,1fr) var(--rail-w,max(300px,30vw))}}
+.app.resizing{transition:none;user-select:none;cursor:col-resize}
+.app.resizing *{pointer-events:none}
+.rsz{position:absolute;top:0;bottom:0;width:9px;z-index:30;cursor:col-resize;touch-action:none}
+.rsz::after{content:'';position:absolute;top:0;bottom:0;left:4px;width:1px;background:transparent;transition:background .15s}
+.rsz:hover::after,.app.resizing .rsz::after{background:#57575e}
+.rsz-side{left:calc(var(--side-w,236px) - 5px)}
+.rsz-rail{right:calc(var(--rail-w,max(360px,28vw)) - 4px)}
+@media (max-width:1280px){.rsz-side{left:calc(var(--side-w,200px) - 5px)}.rsz-rail{right:calc(var(--rail-w,max(300px,30vw)) - 4px)}}
+@media (max-width:760px){.rsz{display:none}}
+
+/* 단계 목록 접기: 번호만 남긴다 */
+.sidetog{display:block;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);color:#6b6b6b;font:500 10.5px 'JetBrains Mono',monospace;letter-spacing:.14em;text-transform:uppercase;padding:10px 14px;cursor:pointer}
+.sidetog:hover{color:#fff}
+.side.collapsed .sidetog{text-align:center;padding:10px 0;font-size:13px;letter-spacing:0}
+.side.collapsed .sgrp{font-size:0;padding:8px 0 2px;border-top:1px solid var(--line);margin:4px 10px 0}
+.side.collapsed .sgrp:first-child{border-top:0}
+.side.collapsed .step{grid-template-columns:1fr;justify-items:center;padding:8px 0;position:relative}
+.side.collapsed .step .t,.side.collapsed .step .s{display:none}
+.side.collapsed .step .n{width:34px}
+.side.collapsed .step .dot{position:absolute;top:6px;right:10px;margin:0}
+.side.collapsed .plan{display:none}
+@media (max-width:760px){.sidetog{display:none}}
+/* 마우스를 배지에서 창으로 옮기는 동안 닫히지 않게 사이 틈을 메운다 */
+.unv-pop::before{content:'';position:absolute;left:0;right:0;top:-12px;height:12px}

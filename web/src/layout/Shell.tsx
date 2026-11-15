@@ -32,24 +32,29 @@ function UnverifiedBadge() {
   const ephEnv = useData((d) => d.ephEnv);
   const app = useApp();
   const [open, setOpen] = useState(false);
+  const [pinned, setPinned] = useState(false);
   const box = useRef<HTMLDivElement>(null);
+  const timer = useRef<number | undefined>(undefined);
+  const enter = () => { window.clearTimeout(timer.current); setOpen(true); };
+  const leave = () => { if (pinned) return; window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(false), 200); };
+  const close = () => { setOpen(false); setPinned(false); };
   useEffect(() => {
     if (!open) return;
-    const off = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const off = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) close(); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
     document.addEventListener('mousedown', off);
     document.addEventListener('keydown', esc);
     return () => { document.removeEventListener('mousedown', off); document.removeEventListener('keydown', esc); };
-  }, [open]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
   const bad = sites.items.filter((x) => !x.verified);
   const files = [
     { name: '천체력 표', q: ephEnv?.quality ?? null, missing: !ephEnv },
     { name: '착륙지 카탈로그', q: sites.env?.quality ?? null, missing: !sites.env },
   ].filter((f) => f.missing || (f.q && f.q in QUALITY_KO));
-  const summary = `미검증 착륙지 좌표 ${bad.length}곳 · 검토 단계 자료 ${files.length}개 (눌러서 보기)`;
+  const summary = `미검증 착륙지 좌표 ${bad.length}곳 · 검토 단계 자료 ${files.length}개`;
   return (
-    <div className="unv" ref={box}>
-      <button type="button" className="badge warn" title={summary} aria-expanded={open} onClick={() => setOpen((v) => !v)}>일부 수치 미검증</button>
+    <div className="unv" ref={box} onMouseEnter={enter} onMouseLeave={leave}>
+      <button type="button" className="badge warn" aria-label={summary} aria-expanded={open} onClick={() => { if (pinned) close(); else { setPinned(true); setOpen(true); } }}>일부 수치 미검증</button>
       {open ? (
         <div className="unv-pop" role="dialog" aria-label="미검증 항목">
           <div className="unv-h">무엇이 미검증인가</div>
@@ -62,9 +67,9 @@ function UnverifiedBadge() {
           ) : null}
           {bad.length ? (
             <>
-              <div className="unv-k">좌표가 확인되지 않은 착륙지 ({bad.length}곳)</div>
+              <div className="unv-k">{`좌표가 확인되지 않은 착륙지 (${bad.length}곳)`}</div>
               <ul>{bad.map((x) => (
-                <li key={x.id}><button type="button" className="unv-site" onClick={() => { app.setSite({ kind: 'catalog', id: x.id }); setOpen(false); }}>{x.name}</button>{x.note ? <span className="unv-n">{x.note}</span> : null}</li>
+                <li key={x.id}><button type="button" className="unv-site" onClick={() => { app.setSite({ kind: 'catalog', id: x.id }); close(); }}>{x.name}</button>{x.note ? <span className="unv-n">{x.note}</span> : null}</li>
               ))}</ul>
             </>
           ) : null}
@@ -207,7 +212,10 @@ export function Sidebar() {
   };
   let g = '';
   return (
-    <nav className="side" aria-label="단계">
+    <nav className={`side${ui.sideCollapsed ? ' collapsed' : ''}`} aria-label="단계">
+      <button type="button" className="sidetog" aria-expanded={!ui.sideCollapsed} title={ui.sideCollapsed ? '단계 설명 펴기' : '단계 설명 접기'} onClick={() => ui.set({ sideCollapsed: !ui.sideCollapsed })}>
+        {ui.sideCollapsed ? '»' : '« 접기'}
+      </button>
       <div className="scroll">
         {STEPS.map((st) => {
           const head = st.g !== g ? <div className="sgrp" key={`g${st.g}`}>{st.g}</div> : null;
@@ -215,7 +223,7 @@ export function Sidebar() {
           const s = summary(st.id);
           return [
             head,
-            <button key={st.id} className={`step ${app.visited.includes(st.id) && st.id !== app.page ? 'done' : ''}`} aria-current={st.id === app.page} onClick={() => app.setPage(st.id)}>
+            <button key={st.id} className={`step ${app.visited.includes(st.id) && st.id !== app.page ? 'done' : ''}`} aria-current={st.id === app.page} title={ui.sideCollapsed ? `${st.n} ${st.t}` : undefined} onClick={() => app.setPage(st.id)}>
               <span className="n">{st.n}</span><span className="t">{st.t}</span><span className={`dot ${dot(st.id)}`} /><span className="s" title={s}>{s}</span>
             </button>,
           ];
@@ -230,6 +238,50 @@ export function Sidebar() {
         <span>점수</span><b>{ev ? `${Math.round(ev.score.total)}${ev.score.meets_requirements ? '' : ' · 요건 미달'}` : '—'}</b>
       </div>
     </nav>
+  );
+}
+
+/** 계획 모드 세 칸 사이 경계: 끌어서 너비 조절, 두 번 누르면 기본값 */
+export function Resizers() {
+  const mode = useUi((u) => u.mode);
+  const ui = useUi();
+  if (mode !== 'plan') return null;
+  const start = (which: 'side' | 'rail') => (e: React.PointerEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const app = (e.currentTarget.parentElement as HTMLElement);
+    const box = app.getBoundingClientRect();
+    const side = app.querySelector('.side') as HTMLElement | null;
+    const rail = app.querySelector('.rail') as HTMLElement | null;
+    app.classList.add('resizing');
+    const MID_MIN = 420;
+    const move = (ev: PointerEvent) => {
+      const st = useUi.getState();
+      if (which === 'side') {
+        const x = ev.clientX - box.left;
+        const railW = rail?.getBoundingClientRect().width ?? 360;
+        if (x < 120) { if (!st.sideCollapsed) st.set({ sideCollapsed: true }); return; }
+        const w = Math.round(Math.max(170, Math.min(420, x, box.width - railW - MID_MIN)));
+        st.set({ sideCollapsed: false, sideW: w });
+      } else {
+        const sideW = side?.getBoundingClientRect().width ?? 236;
+        const w = Math.round(Math.max(300, Math.min(box.right - ev.clientX, box.width - sideW - MID_MIN, box.width * 0.6)));
+        st.set({ railW: w });
+      }
+    };
+    const up = () => {
+      app.classList.remove('resizing');
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.dispatchEvent(new Event('resize')); // 캔버스·3D 크기 다시 맞춤
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <>
+      <div className="rsz rsz-side" role="separator" aria-orientation="vertical" aria-label="단계 목록 너비" title="끌어서 너비 조절 · 두 번 누르면 기본값" onPointerDown={start('side')} onDoubleClick={() => ui.set({ sideW: 0, sideCollapsed: false })} />
+      <div className="rsz rsz-rail" role="separator" aria-orientation="vertical" aria-label="달 영역 너비" title="끌어서 너비 조절 · 두 번 누르면 기본값" onPointerDown={start('rail')} onDoubleClick={() => ui.set({ railW: 0 })} />
+    </>
   );
 }
 

@@ -1,4 +1,4 @@
-// 화면 전용 상태 (계산 입력이지만 페이지 사이에서 공유되는 값). 저장하지 않는다.
+// 화면 전용 상태 (계산 입력이지만 페이지 사이에서 공유되는 값). 계산 값은 저장하지 않는다 (화면 배치만 기억).
 import { create } from 'zustand';
 
 export interface UiState {
@@ -19,6 +19,11 @@ export interface UiState {
   mode: 'explore' | 'plan';
   /** 달 화면: 3D 지구본 또는 2D 남극 지도 */
   dim: '3d' | '2d';
+  /** 계획 모드 왼쪽 단계 목록을 번호만 남기고 접기 */
+  sideCollapsed: boolean;
+  /** 계획 모드 왼쪽 단계 목록·오른쪽 달 영역 너비 (px). 0 이면 기본값 */
+  sideW: number;
+  railW: number;
   set(p: Partial<Omit<UiState, 'set'>>): void;
 }
 
@@ -33,9 +38,30 @@ export const useUi = create<UiState>((set) => ({
   periodFrom: '',
   periodTo: '',
   dim: '3d',
+  ...loadLayout(),
   mode: new URLSearchParams(window.location.search).get('p') ? 'plan' : 'explore',
-  set: (p) => set(p),
+  set: (p) => {
+    set(p);
+    if ('sideCollapsed' in p || 'sideW' in p || 'railW' in p) saveLayout();
+  },
 }));
+
+// 화면 배치(접기·너비)만 브라우저에 기억한다. 계산 값은 저장하지 않는다.
+const LAYOUT_KEY = 'dune.layout';
+function loadLayout(): { sideCollapsed: boolean; sideW: number; railW: number } {
+  const d = { sideCollapsed: false, sideW: 0, railW: 0 };
+  try {
+    const v = JSON.parse(localStorage.getItem(LAYOUT_KEY) ?? 'null');
+    if (v && typeof v === 'object') return { sideCollapsed: v.sideCollapsed === true, sideW: Number(v.sideW) || 0, railW: Number(v.railW) || 0 };
+  } catch { /* 저장소를 못 쓰면 기본값 */ }
+  return d;
+}
+function saveLayout() {
+  try {
+    const { sideCollapsed, sideW, railW } = useUi.getState();
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify({ sideCollapsed, sideW, railW }));
+  } catch { /* 무시 */ }
+}
 
 export const STEPS = [
   { id: 'cond', g: '1 · 준비', n: '01', t: '조건 정하기', d: '어떤 임무인지, 꼭 지켜야 할 조건과 중요하게 볼 것을 정합니다. 여기서 정한 값으로 지도 색과 후보 순위가 매겨집니다.' },

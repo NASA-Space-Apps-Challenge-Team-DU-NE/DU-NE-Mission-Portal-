@@ -1108,4 +1108,10 @@ export const EN: Record<string, string> = {
  "좌표 출처 없음 (2024 9지역 밖, 2022 지역 이름에도 없음). 대표 지점 근사값": "No coordinate source (outside the 9 regions of 2024 and not among the 2022 region names). Approximate representative point",
  "경계 안의 대표점 (좌표 자체는 출처 없음). 착륙점 아님": "representative point inside the boundary (the coordinate itself has no source). Not a landing point",
  "USGS 2024 Artemis III 후보 지역 공식 경계의 면적 중심. 지역 대표점이며 정밀 착륙점이 아님": "Centre of the official USGS 2024 Artemis III candidate region boundary. A region representative point, not a precise landing point",
+ "« 접기": "« Collapse",
+ "단계 설명 펴기": "Show step names",
+ "단계 설명 접기": "Collapse step names",
+ "단계 목록 너비": "Step list width",
+ "달 영역 너비": "Moon panel width",
+ "끌어서 너비 조절 · 두 번 누르면 기본값": "Drag to resize · double-click to reset",
 };
