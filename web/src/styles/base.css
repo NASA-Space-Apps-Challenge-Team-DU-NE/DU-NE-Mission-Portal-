@@ -568,19 +568,6 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 
 /* 지구 방향 표시: 형광 청록 대신 차분한 회청색 (어두운 배경에서 읽히되 튀지 않게) */
 .chipb.earth{color:#93A8B6}
-/* "일부 수치 미검증" 설명 창 */
-.unv{position:relative}
-.unv>button.badge{cursor:pointer;font:inherit}
-.unv-pop{position:absolute;right:0;top:calc(100% + 10px);z-index:60;width:420px;max-height:70vh;overflow:auto;background:#0d0d0d;border:1px solid #3d3d42;padding:14px 16px;color:#d8d8d8;font-size:12px;line-height:1.5;box-shadow:0 12px 32px rgba(0,0,0,.6)}
-.unv-h{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#fff;margin-bottom:6px}
-.unv-p{margin:0 0 10px;color:#9a9a9a}
-.unv-k{margin:10px 0 4px;font-size:11px;color:#9a9a9a;letter-spacing:.06em}
-.unv-pop ul{list-style:none;margin:0;padding:0}
-.unv-pop li{padding:6px 0;border-top:1px solid #2c2c2e}
-.unv-site{background:none;border:0;padding:0;color:#fff;font:inherit;font-weight:600;cursor:pointer;text-decoration:underline;text-decoration-color:#57575e;text-underline-offset:3px}
-.unv-site:hover{text-decoration-color:#fff}
-.unv-n{display:block;color:#9a9a9a;margin-top:2px}
-.unv-f{margin-top:10px;padding-top:8px;border-top:1px solid #2c2c2e;color:#6b6b6b;font-size:11px}
 
 /* 계획 모드 세 칸 너비: 끌어서 조절 (--side-w, --rail-w) */
 .app.mode-plan{position:relative;grid-template-columns:var(--side-w,236px) minmax(0,1fr) var(--rail-w,max(360px,28vw))}
@@ -607,14 +594,12 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 .side.collapsed .step .dot{position:absolute;top:6px;right:10px;margin:0}
 .side.collapsed .plan{display:none}
 @media (max-width:760px){.sidetog{display:none}}
-/* 마우스를 배지에서 창으로 옮기는 동안 닫히지 않게 사이 틈을 메운다 */
-.unv-pop::before{content:'';position:absolute;left:0;right:0;top:-12px;height:12px}
 
 /* 맨 위 띠가 좁아져도 EN/KR 이 밀려나지 않게: 언어 전환은 줄지 않고, 나머지가 차례로 줄어든다 */
 .mast{min-width:0;overflow:hidden}
 .mast .lang{flex:0 0 auto}
 .mnav,.macts{min-width:0;flex-shrink:1}
-.macts .btn,.macts .badge,.macts .unv{flex-shrink:0;white-space:nowrap}
+.macts .btn,.macts .badge{flex-shrink:0;white-space:nowrap}
 @media (max-width:1500px){.mast{gap:18px;padding-right:16px}.mnav{gap:20px}.macts{gap:6px;padding-left:14px}.mast .lang{padding-left:12px}}
 @media (max-width:1280px){.mast .logo img{height:60px}.mnav{gap:14px}.mnav button,.mnav a{letter-spacing:.08em}.mast{padding-left:12px}}
 @media (max-width:1120px){.macts .badge.ok{display:none}.mast .logo img{height:52px}.mast{gap:12px}}
@@ -631,3 +616,12 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 .egwrap .vtools .egfs{min-width:34px}
 /* 카드로 바로 내려갈 때 위의 고정 이동 막대(시뮬레이션 · 전력 · 통신)에 제목이 가리지 않게 */
 .pbody .card{scroll-margin-top:64px}
+
+/* "처음부터 다시" 확인 창 */
+.confirm-bg{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.6);display:grid;place-items:center}
+.confirm{width:min(440px,calc(100vw - 32px));background:#0d0d0d;border:1px solid #3d3d42;padding:20px 22px;color:#d8d8d8;box-shadow:0 16px 40px rgba(0,0,0,.7)}
+.confirm-h{font-size:16px;font-weight:600;color:#fff;margin-bottom:8px}
+.confirm p{margin:0 0 18px;font-size:13px;line-height:1.55;color:#9a9a9a}
+.confirm-b{display:flex;justify-content:flex-end;gap:8px}
+.btn.danger{background:#ef4444;border-color:#ef4444;color:#fff}
+.btn.danger:hover{background:#dc2626;border-color:#dc2626}

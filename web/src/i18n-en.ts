@@ -1118,4 +1118,8 @@ export const EN: Record<string, string> = {
  "지구로 가서 지상국 통신 창 보기": "Fly to Earth and open the ground station windows",
  "지상국 통신 창 · 지구": "Ground station windows · Earth",
  "전체화면 끄기 (Esc)": "Exit full screen (Esc)",
+ "처음부터 다시": "Start over",
+ "처음부터 다시 시작할까요?": "Start over?",
+ "정한 조건, 착륙지, 착륙 날짜, 기지 배치, 비교 목록, 추가한 지상국이 모두 지워지고 처음 화면으로 돌아갑니다. 되돌릴 수 없습니다.": "This clears your conditions, landing site, landing date, base layout, comparison list and added ground stations, and returns to the start screen. It can't be undone.",
+ "취소": "Cancel",
 };

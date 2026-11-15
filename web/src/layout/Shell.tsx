@@ -24,59 +24,34 @@ function download(name: string, text: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-const QUALITY_KO: Record<string, string> = { REVIEW_REQUIRED: '검토 필요', REFERENCE_ONLY: '참고용' };
-
-/** "일부 수치 미검증" 배지: 마우스를 올리면 요약, 누르면 무엇이 미검증인지 목록 */
-function UnverifiedBadge() {
-  const sites = useData((d) => d.sites);
-  const ephEnv = useData((d) => d.ephEnv);
-  const app = useApp();
-  const [open, setOpen] = useState(false);
-  const [pinned, setPinned] = useState(false);
-  const box = useRef<HTMLDivElement>(null);
-  const timer = useRef<number | undefined>(undefined);
-  const enter = () => { window.clearTimeout(timer.current); setOpen(true); };
-  const leave = () => { if (pinned) return; window.clearTimeout(timer.current); timer.current = window.setTimeout(() => setOpen(false), 200); };
-  const close = () => { setOpen(false); setPinned(false); };
+/** 처음부터 다시: 누르면 확인을 한 번 더 묻고, 확인하면 주소의 설정을 지우고 새로 연다.
+ *  (화면 언어와 칸 너비·접기는 그대로 둔다) */
+function StartOver() {
+  const [ask, setAsk] = useState(false);
+  const yes = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    if (!open) return;
-    const off = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) close(); };
-    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
-    document.addEventListener('mousedown', off);
-    document.addEventListener('keydown', esc);
-    return () => { document.removeEventListener('mousedown', off); document.removeEventListener('keydown', esc); };
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
-  const bad = sites.items.filter((x) => !x.verified);
-  const files = [
-    { name: '천체력 표', q: ephEnv?.quality ?? null, missing: !ephEnv },
-    { name: '착륙지 카탈로그', q: sites.env?.quality ?? null, missing: !sites.env },
-  ].filter((f) => f.missing || (f.q && f.q in QUALITY_KO));
-  const summary = `미검증 착륙지 좌표 ${bad.length}곳 · 검토 단계 자료 ${files.length}개`;
+    if (!ask) return;
+    yes.current?.focus();
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setAsk(false); } };
+    window.addEventListener('keydown', esc, true);
+    return () => window.removeEventListener('keydown', esc, true);
+  }, [ask]);
   return (
-    <div className="unv" ref={box} onMouseEnter={enter} onMouseLeave={leave}>
-      <button type="button" className="badge warn" aria-label={summary} aria-expanded={open} onClick={() => { if (pinned) close(); else { setPinned(true); setOpen(true); } }}>일부 수치 미검증</button>
-      {open ? (
-        <div className="unv-pop" role="dialog" aria-label="미검증 항목">
-          <div className="unv-h">무엇이 미검증인가</div>
-          <p className="unv-p">점수 계산은 그대로 하지만, 아래 값은 출처로 확인되지 않았거나 팀 검토 전입니다.</p>
-          {files.length ? (
-            <>
-              <div className="unv-k">자료 품질</div>
-              <ul>{files.map((f) => <li key={f.name}><b>{f.name}</b> · {f.missing ? '자료 없음' : QUALITY_KO[f.q as string]}</li>)}</ul>
-            </>
-          ) : null}
-          {bad.length ? (
-            <>
-              <div className="unv-k">{`좌표가 확인되지 않은 착륙지 (${bad.length}곳)`}</div>
-              <ul>{bad.map((x) => (
-                <li key={x.id}><button type="button" className="unv-site" onClick={() => { app.setSite({ kind: 'catalog', id: x.id }); close(); }}>{x.name}</button>{x.note ? <span className="unv-n">{x.note}</span> : null}</li>
-              ))}</ul>
-            </>
-          ) : null}
-          <div className="unv-f">자세한 대조 결과는 검증 → ④ 착륙지 좌표 대조</div>
+    <>
+      <button type="button" className="btn sm" onClick={() => setAsk(true)}>처음부터 다시</button>
+      {ask ? (
+        <div className="confirm-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) setAsk(false); }}>
+          <div className="confirm" role="alertdialog" aria-modal="true" aria-labelledby="so-h" aria-describedby="so-p">
+            <div className="confirm-h" id="so-h">처음부터 다시 시작할까요?</div>
+            <p id="so-p">정한 조건, 착륙지, 착륙 날짜, 기지 배치, 비교 목록, 추가한 지상국이 모두 지워지고 처음 화면으로 돌아갑니다. 되돌릴 수 없습니다.</p>
+            <div className="confirm-b">
+              <button type="button" className="btn" onClick={() => setAsk(false)}>취소</button>
+              <button type="button" className="btn danger" ref={yes} onClick={() => { window.location.href = window.location.pathname; }}>처음부터 다시</button>
+            </div>
+          </div>
         </div>
       ) : null}
-    </div>
+    </>
   );
 }
 
@@ -131,7 +106,7 @@ export function Masthead() {
       <div className="macts">
         {gridError ? <button className="btn" title={gridError} onClick={retryGrid}>{t('grid.retry')}</button> : null}
         <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? (gridApprox ? '데이터 일부 근사' : '데이터 준비됨') : status === 'loading' || status === 'idle' ? '불러오는 중' : status === 'degraded' ? `일부 자료 없음 (${reasons.length})` : status === 'failed' ? '불러오기 실패' : '자료 없음'}</span>
-        {unverified ? <UnverifiedBadge /> : null}
+        <StartOver />
         <button className="btn sm" onClick={report}>보고서 복사</button>
         <button className="btn sm mast-csv" onClick={csv} disabled={!res}>순위 CSV</button>
         <button className="ibtn" aria-label="도움말" onClick={() => ui.set({ help: true })}>?</button>
