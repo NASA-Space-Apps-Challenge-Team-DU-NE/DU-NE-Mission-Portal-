@@ -1,0 +1,204 @@
+{
+  "date": "2026-11-15",
+  "branch": "integration/orbit-local",
+  "scope": "Local review fixes, embedded Orbit language synchronization, report and ranking CSV integration",
+  "remote_commit_or_push": false,
+  "orbit_build_id": "c4e126c7b8150ebe690db22f74497d5b81db5130e7bd97fa101d34c2e7de83e0",
+  "data_sha256": {
+    "ephemeris/index.json": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+    "gravity/index.json": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "terrain/index.json": "1777283afdd014051c29842058429644ff5a5dd46040a50fb059ae34869f6691",
+    "manifest.json": "891d99ca2b81c4d59f67d3d554c155b6281ba5748802ab0a7c6c4f0fb6adb326"
+  },
+  "unit": {
+    "command": "npm test",
+    "portal_typecheck": "passed",
+    "portal_rules": "passed",
+    "portal_tests": 170,
+    "orbit_tests": 76,
+    "failures": 0
+  },
+  "browser": {
+    "channel": "chrome",
+    "tests": 11,
+    "passed": 11,
+    "specs": [
+      "orbit-integration.spec.ts",
+      "orbit-review-fixes.spec.ts",
+      "smoke.spec.ts"
+    ]
+  },
+  "final_language_browser": {
+    "channel": "chrome",
+    "tests": 3,
+    "passed": 3,
+    "cases": [
+      "real default, language flip during computation, English report and CSV, Korean restore",
+      "English failure guidance and language restore",
+      "nine existing tabs and playback"
+    ],
+    "reason": "After final portal translation precedence guard"
+  },
+  "build": {
+    "command": "npm run build",
+    "status": "passed",
+    "output": "web/dist",
+    "runtime_backend": false
+  },
+  "default_mission": {
+    "artifact": "orbit-review-fixes-browser-default.json",
+    "status": "VALIDATED",
+    "trajectory_samples": 6653,
+    "checks_passed": 20,
+    "checks_total": 20,
+    "summary": {
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "gravity_calls": 2858635,
+      "gravity_cpu_ms": 35216.20000045374,
+      "gravity_source": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml",
+      "gravity_static_tides_omitted": true,
+      "mission_elapsed_ms": 48140.89999999851,
+      "gravity_same_controls_status": "computed",
+      "gravity_same_controls_scope": "Same actual PDI state and inertial acceleration commands; compared at the GRAIL final epoch, not at a separately detected surface contact.",
+      "gravity_same_controls_baseline": "GL1800F GM degree 0 + same Earth/Sun",
+      "gravity_same_controls_baseline_gm_m3_s2": 4902800306330.2,
+      "gravity_same_controls_position_difference_m": 336.37001840511147,
+      "gravity_same_controls_velocity_difference_m_s": 0.6127539050628027,
+      "gravity_same_controls_mass_difference_kg": 4.9636810217634775e-09,
+      "gravity_same_controls_elapsed_ms": 25.700000002980232,
+      "gravity_same_controls_terrain_validated": false,
+      "landing_success": true,
+      "landing_position_error_m": 9.555790945986142e-06,
+      "touchdown_velocity_m_s": 0.49999998992326294,
+      "horizontal_touchdown_velocity_m_s": 1.747316032582309e-08,
+      "contact_clearance_m": 4.610862788467784e-06,
+      "touchdown_thrust_tilt_deg": 0.3479735723808353,
+      "vertical_touchdown_velocity_m_s": -0.49999998992326267,
+      "actual_latitude_deg": -89.44410000027312,
+      "actual_longitude_deg": -137.2910000000862,
+      "doi_delta_v_m_s": 19.455073826089574,
+      "powered_descent_delta_v_m_s": 2277.330539880166,
+      "total_delta_v_m_s": 3415.9927264522325,
+      "propellant_consumed_kg": 1421.3057228968937,
+      "remaining_propellant_kg": 71.49370953872551,
+      "initial_nrho_mass_kg": 2142.799432435619,
+      "llo_initial_mass_kg": 1500.0000000000036,
+      "final_mass_kg": 721.4937095387255,
+      "maximum_thrust_n": 12000.000000000002,
+      "flight_duration_s": 274471.8360739206,
+      "transfer_duration_s": 259200,
+      "parking_duration_s": 0,
+      "nrho_coast_duration_s": 10800,
+      "departure_delta_v_m_s": 176.2594523350177,
+      "insertion_delta_v_m_s": 942.9476604109594,
+      "departure_utc": "2026-11-12T22:45:28.163Z",
+      "llo_insertion_utc": "2026-11-15T22:45:28.163Z",
+      "landing_time_utc": "2026-11-16T00:00:00.000Z",
+      "global_optimality_proven": false,
+      "transfer_search_timed_out": false,
+      "joint_search_complete": true,
+      "joint_candidates_evaluated": 3,
+      "joint_candidates_validated": 3,
+      "selected_heading_deg": 180,
+      "propulsion_model": "finite_constant_thrust_v1",
+      "powered_descent_duration_s": 880,
+      "descent_guidance": "early_braking_quintic_seed_96_controls",
+      "departure_burn_duration_s": 30.6064707907193,
+      "insertion_burn_duration_s": 137.49243731847443,
+      "doi_burn_duration_s": 2.4243614525746917
+    }
+  },
+  "exports": {
+    "report_sha256": "e7e0c014363cb389192e54e072a2a3ba63f6bd9938d0db7b9e0d0887074f9dd9",
+    "ranking_sha256": "fd5b5cff99d785d5184734c2e249fb60291e73c810fd947446b6d8c3a385d1d2",
+    "ranking_rows": 16,
+    "status_counts": {
+      "NOT_CALCULATED": 15,
+      "VALIDATED": 1
+    },
+    "current_plan_unranked": true,
+    "other_candidates_not_calculated": true,
+    "source_input_json_preserved": true
+  },
+  "integrity": {
+    "baseline": "Working tree snapshot before this review-fix task",
+    "files": 510,
+    "changed": [],
+    "new": [],
+    "groups": {
+      "web/src/core/": {
+        "files": 38,
+        "aggregate_sha256": "61b6b4243c2f49a695bda13705290defc2f5a97c40db2c339c33ebe8cd686a91"
+      },
+      "web/src/workers/": {
+        "files": 8,
+        "aggregate_sha256": "25be8d1f2a53b8caffa223586a862e1c84363f0b7bdcfd858d6e80b94651e683"
+      },
+      "web/src/adapters/": {
+        "files": 3,
+        "aggregate_sha256": "a0826907cc53d8be389571a96a97e7756a8246c7eb1a513dd3a2d70c7a447e31"
+      },
+      "web/public/data/": {
+        "files": 225,
+        "aggregate_sha256": "a982db43acc36783390e3457cb1bd6c26445352b9441c432b7fae76bb3a59356"
+      },
+      "orbit/frontend/src/physics/": {
+        "files": 19,
+        "aggregate_sha256": "d1a89ad07304eae0e479f5f4ac44c37b4c892d1ea353bf4a0e663c72385b29df"
+      },
+      "orbit/frontend/src/workers/": {
+        "files": 1,
+        "aggregate_sha256": "5859498e8acfaac6d1596129918698562d3f1438bf555301f0ee0f312cb2575e"
+      },
+      "orbit/frontend/src/services/": {
+        "files": 3,
+        "aggregate_sha256": "4ba2328d2aa1fc108d943fb4bbdf28e1808e0729f29bf202d26f937ede17f31e"
+      },
+      "orbit/frontend/public/data/": {
+        "files": 213,
+        "aggregate_sha256": "af83a2cbd87c7d989a7ff7aeac6ea8eb1f77762978b511e9ebe1710737e774a3"
+      }
+    },
+    "aggregate_format": "UTF-8 sorted relative_path + NUL + sha256 + newline",
+    "original_separate_orbit_checkout": "Pre-existing data/config.json and two untracked recovery/integration docs unchanged"
+  },
+  "changed_source_sha256": {
+    "orbit/frontend/src/i18n/dom.ts": "86912139b7df6c082a033d4b1ee85119d1731a30e334375b39d1214e95ed225d",
+    "orbit/frontend/src/i18n/en.json": "c63d12b53fcc7b2e52264221b9aad73a3623b1d0b349391e71c24fbf1339a07b",
+    "orbit/frontend/src/i18n/translate.ts": "cc1a59ea26e546a44bc3832054682b2b49eed57b1d67fa4bd88953ae4fc633d6",
+    "orbit/frontend/src/integration/PortalEmbed.tsx": "f7f9207e01143141b044c0aac29ce7e8273a19823ef19cbb9ba8accf57348d0b",
+    "orbit/frontend/src/main.tsx": "bdc090e58dfe21d09f554f2e81d8beb8c4d1193a329d923c9fb0e6c69795326d",
+    "web/e2e/orbit-integration.spec.ts": "38ec6bafebbcd6ab29a9e022275e333e1068ecfe53c41b43085b7a63d34f2749",
+    "web/e2e/orbit-review-fixes.spec.ts": "231ebaf6ffcf5f2d535692b06002210006862a8395098299cd0d649db8ba7faa",
+    "web/src/App.tsx": "a2959f138ed936cb28171da9f6ddc34fb4f9eb721f1e2cc80bc88e8d29b0a64a",
+    "web/src/i18n.ts": "494117a511bd00f2d113f526413fd81c12ac3cc1876458946f2be003d7bbbbee",
+    "web/src/layout/Shell.tsx": "5918acf4da36f3a3b7b83e38d7c364e95a45cfa5296e9856dc1c352898fc2e4f",
+    "web/src/orbit/OrbitSettingsCard.tsx": "1afd735824cb0781078362f99845826c570c67e869b7ab04f70328fbbde00fcd",
+    "web/src/orbit/bridge.ts": "e8502e2e7ff76136074f17dec2fd1adab6f164934d2cf5cd8510356804ecc4f7",
+    "web/src/orbit/capabilities.test.ts": "ac2574e7fe4f64d5da5fec140d046d8256e2b35e53b5e8e3bd4c2e1a72510671",
+    "web/src/orbit/capabilities.ts": "2125248180aacaa319f48599fe7163933303ec84ef7452aa8af3f1aef64ce106",
+    "web/src/orbit/en.ts": "42ccf03eec5691dd6750ce95e1f762406f980d9a271076a8255338d16a0fe949",
+    "web/src/orbit/exports.test.ts": "fc33f2079c86ba93136458129e518f1311fcaaacae65e1620a458971ea74abec",
+    "web/src/orbit/exports.ts": "9109c196e45790caf11e85866a5a40877333d3cc68de54ca5100a1742323ebb8",
+    "web/src/orbit/hooks.ts": "7664023f36a865ce6445cb45888e7fde45c2a77eab0c1456b3e4cec5c3ee01c2",
+    "web/src/orbit/siteIdentity.test.ts": "79e887965b942ddddcb873d792af7182dabd632c3c20606f439699c464702c4c",
+    "web/src/orbit/siteIdentity.ts": "05062ea366aeced50d95a478cc6337fad79831a56927cf22094bc68cdd5ac182",
+    "web/src/orbit/translation.test.ts": "1b098d561e8f6e9fae4dac85e0808585c2596a4447591bfd1c380906d0cb471c",
+    "web/src/pages/Compare.tsx": "f1ab23e58071c7c2bd406c97a3658edf1db60d1e197a973b02d0d4eaad58bf50",
+    "web/src/pages/Orbit.tsx": "c92e713b812cd97d2740b478352527efea352f12ecaf9d113cc1c2599c6dded0",
+    "web/src/state/data.ts": "9b929714134d0c1c96ae10f48ec06d17f4da36b5516509de84fdfefdade8bc2a",
+    "web/src/state/store.ts": "3d43530d8195714401e8c396c3e79c24e01292f7236945ac9a2146cf4e28f648"
+  },
+  "development_server": {
+    "url": "http://127.0.0.1:5175/?p=orbit",
+    "http_status": 200,
+    "build_id_matches": true
+  },
+  "limits": [
+    "Integration and UI regression checks, not a new independent physics campaign.",
+    "Ranking scores unchanged; other candidates are not automatically calculated.",
+    "Raw diagnostic JSON is intentionally not translated.",
+    "No deployment or GitHub push performed."
+  ]
+}

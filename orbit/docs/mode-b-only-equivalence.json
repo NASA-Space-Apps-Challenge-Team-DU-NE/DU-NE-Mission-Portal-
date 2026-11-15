@@ -1,0 +1,62 @@
+{
+  "checked_at_utc": "2026-11-15T10:38:01.393Z",
+  "passed": true,
+  "default_status": "VALIDATED",
+  "default_checks": 20,
+  "numerical_arrays_identical": {
+    "trajectory": true,
+    "controls": true,
+    "finite_burns": true
+  },
+  "summary_differences": {
+    "total_delta_v_m_s": 0,
+    "propellant_consumed_kg": 0,
+    "final_mass_kg": 0,
+    "landing_position_error_m": 0,
+    "touchdown_velocity_m_s": 0
+  },
+  "baseline": "Previous 2026-11-16 expanded Mode B mission, before Mode A removal",
+  "baseline_sha256": "fb81e62a2e9ab616f941a57bdb4be9a584961f1eb21daaecb68cc3cf2bfd2da8",
+  "result_sha256": "2982a2bf90346953bbb103778f8d3f99ab3e621d1b53c6e3639a610b1b257e67",
+  "lambert_implementation_preserved_exactly": true,
+  "worker_source_inputs": [
+    "frontend/src/physics/math.ts",
+    "frontend/src/physics/data.ts",
+    "frontend/src/physics/simulator.ts",
+    "frontend/src/physics/ephemeris/settings.ts",
+    "frontend/src/physics/ephemeris/reference.ts",
+    "frontend/src/physics/ephemeris/data.ts",
+    "frontend/src/physics/gravity/types.ts",
+    "frontend/src/physics/gravity/harmonics.ts",
+    "frontend/src/physics/gravity/model.ts",
+    "frontend/src/physics/errors.ts",
+    "frontend/src/physics/ephemeris/dynamics.ts",
+    "frontend/src/physics/ephemeris/terminalDescent.ts",
+    "frontend/src/physics/ephemeris/finiteBurn.ts",
+    "frontend/src/physics/ephemeris/landing.ts",
+    "frontend/src/physics/lambert.ts",
+    "frontend/src/physics/ephemeris/transfer.ts",
+    "frontend/src/physics/ephemeris/jointSearch.ts",
+    "frontend/src/physics/gravity/comparison.ts",
+    "frontend/src/physics/ephemeris/mission.ts",
+    "frontend/src/workers/simulation.worker.ts"
+  ],
+  "removed_files": [
+    "frontend/src/physics/nrho/cr3bp.ts",
+    "frontend/src/physics/nrho/frames.ts",
+    "frontend/src/physics/nrho/mission.ts",
+    "frontend/src/physics/nrho/transfer.ts",
+    "frontend/src/physics/nrho/types.ts",
+    "frontend/public/data/nrho/reference.json",
+    "scripts/prepare_nrho.py",
+    "scripts/independent_verify_nrho.py",
+    "scripts/run-nrho-validation.mjs",
+    "tests/nrho-core.test.ts",
+    "tests/nrho-frames.test.ts",
+    "tests/nrho-mission.test.ts",
+    "tests/nrho-transfer.test.ts"
+  ],
+  "old_reference_asset_in_dist": false,
+  "worker_bytes": 92867,
+  "ephemeris_sha256": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d"
+}

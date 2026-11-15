@@ -26,3 +26,10 @@ Thumbs.db
 
 # 로컬 백업 (UI 작업 전 원본)
 .ui-backup-*/
+
+# Generated embedded Orbit output; reproducible via npm run prepare:orbit
+web/public/orbit/
+.cache/
+
+# Root npm workspace dependencies
+node_modules/

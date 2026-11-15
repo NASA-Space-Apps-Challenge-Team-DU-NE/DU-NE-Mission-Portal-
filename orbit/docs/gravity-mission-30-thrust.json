@@ -1,0 +1,615 @@
+{
+  "generated_at_utc": "2026-11-15T00:28:24.052Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics         ",
+  "logical_cpus": 12,
+  "elapsed_s": 7.2486781,
+  "memory_before": {
+    "rss": 49704960,
+    "heapTotal": 10944512,
+    "heapUsed": 6089112,
+    "external": 2376222,
+    "arrayBuffers": 135741
+  },
+  "memory_after": {
+    "rss": 78299136,
+    "heapTotal": 30081024,
+    "heapUsed": 18342872,
+    "external": 4517155,
+    "arrayBuffers": 693863
+  },
+  "benchmark_notes": "Single Node run per scenario; includes loading, optimizing and validating. Browser measurement is separate. Memory is process usage, not an isolated gravity allocation.",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 180
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 100,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "INFEASIBLE UNDER ASSUMPTIONS",
+  "message": "No Mode B landing candidate passed the configured engine, mass and shooting constraints.",
+  "summary": {
+    "gravity_model": "grail",
+    "gravity_degree": 30,
+    "gravity_calls": 994272,
+    "gravity_cpu_ms": 5439.655999999767,
+    "gravity_source": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml",
+    "gravity_static_tides_omitted": true,
+    "mission_elapsed_ms": 7149.520600000001
+  },
+  "validation": {},
+  "reference": {
+    "mode": "EPHEMERIS",
+    "mode_b_implemented": true,
+    "epoch_utc": "2026-11-01T00:00:00Z",
+    "gravity": {
+      "model": "grail",
+      "degree": 30,
+      "gm_m3_s2": 4902800306330.2,
+      "reference_radius_m": 1738000,
+      "frame": "MOON_PA_DE440",
+      "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml"
+    }
+  },
+  "transfer": {},
+  "landing_trials": [
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.51085635156439e-7,
+      "velocity_residual_m_s": 1.2084928710251725e-9,
+      "max_thrust_n": 9422.319651145028,
+      "min_thrust_n": 6572.9204504613035,
+      "final_mass_kg": 854.574012084521,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 2.847740374513312e-7,
+      "velocity_residual_m_s": 1.2345713545440524e-9,
+      "max_thrust_n": 12124.397824808808,
+      "min_thrust_n": 5171.121499540495,
+      "final_mass_kg": 851.6629803427043,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.3017129376717448e-7,
+      "velocity_residual_m_s": 1.2555186842145718e-9,
+      "max_thrust_n": 8347.765453781707,
+      "min_thrust_n": 6685.2447333904265,
+      "final_mass_kg": 856.2006049138,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.5542075862421716e-7,
+      "velocity_residual_m_s": 1.2442036580658247e-9,
+      "max_thrust_n": 9762.18693300607,
+      "min_thrust_n": 6343.125955291717,
+      "final_mass_kg": 854.867547775519,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 2.8504258277275013e-7,
+      "velocity_residual_m_s": 1.259228910329495e-9,
+      "max_thrust_n": 12473.829535952214,
+      "min_thrust_n": 4948.132855229907,
+      "final_mass_kg": 851.8399003798545,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.310633731003718e-7,
+      "velocity_residual_m_s": 1.3031940761872885e-9,
+      "max_thrust_n": 8128.896306259472,
+      "min_thrust_n": 6990.4075003316275,
+      "final_mass_kg": 856.6543377877708,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.51840239379047e-7,
+      "velocity_residual_m_s": 1.2144519191917678e-9,
+      "max_thrust_n": 9603.037096991677,
+      "min_thrust_n": 6450.23752525993,
+      "final_mass_kg": 854.7431773035642,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 2.9084938959557544e-7,
+      "velocity_residual_m_s": 1.2488733343444895e-9,
+      "max_thrust_n": 12308.849763793378,
+      "min_thrust_n": 5052.85395285492,
+      "final_mass_kg": 851.7693305802335,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.2739177128119248e-7,
+      "velocity_residual_m_s": 1.254716589688297e-9,
+      "max_thrust_n": 8228.899867849761,
+      "min_thrust_n": 6848.408860731584,
+      "final_mass_kg": 856.4598781611581,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 2.4335138207644287e-7,
+      "velocity_residual_m_s": 1.2419991599568078e-9,
+      "max_thrust_n": 9457.356677008214,
+      "min_thrust_n": 6549.181205650213,
+      "final_mass_kg": 854.5810553903799,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 2.7637807454654075e-7,
+      "velocity_residual_m_s": 1.2406331221779115e-9,
+      "max_thrust_n": 12164.803232816743,
+      "min_thrust_n": 5145.942013125605,
+      "final_mass_kg": 851.6557017972206,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.2603861658754008e-7,
+      "velocity_residual_m_s": 1.3206932735812882e-9,
+      "max_thrust_n": 8325.94924967814,
+      "min_thrust_n": 6713.150265678056,
+      "final_mass_kg": 856.2246413436194,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.4075903329281615e-7,
+      "velocity_residual_m_s": 9.061824627320834e-10,
+      "max_thrust_n": 7298.372108128242,
+      "min_thrust_n": 5055.927017569844,
+      "final_mass_kg": 851.0315655362408,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 2.7472453464798957e-7,
+      "velocity_residual_m_s": 9.297136539595645e-10,
+      "max_thrust_n": 9377.003169098303,
+      "min_thrust_n": 4017.870379728576,
+      "final_mass_kg": 846.9735492323642,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.1706293317439218e-7,
+      "velocity_residual_m_s": 9.32702941899733e-10,
+      "max_thrust_n": 6390.23875956984,
+      "min_thrust_n": 5181.975320545434,
+      "final_mass_kg": 853.6920755390588,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.521275713466636e-7,
+      "velocity_residual_m_s": 9.389896951313344e-10,
+      "max_thrust_n": 7515.470592330658,
+      "min_thrust_n": 4915.506247923489,
+      "final_mass_kg": 851.0640381776182,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 2.78558529236221e-7,
+      "velocity_residual_m_s": 9.5694560327214e-10,
+      "max_thrust_n": 9598.66042784572,
+      "min_thrust_n": 3883.390476128243,
+      "final_mass_kg": 846.9022264283255,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.2223806508839816e-7,
+      "velocity_residual_m_s": 9.584299420786283e-10,
+      "max_thrust_n": 6254.44529430341,
+      "min_thrust_n": 5379.3411344949955,
+      "final_mass_kg": 853.8449684320218,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.3619624742146012e-7,
+      "velocity_residual_m_s": 9.04142300712056e-10,
+      "max_thrust_n": 7417.077302324039,
+      "min_thrust_n": 4979.275322983309,
+      "final_mass_kg": 851.0545393267878,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 2.766195850419808e-7,
+      "velocity_residual_m_s": 9.334069640815107e-10,
+      "max_thrust_n": 9496.85665851538,
+      "min_thrust_n": 3945.2339710974547,
+      "final_mass_kg": 846.9407670192629,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.1463998995776332e-7,
+      "velocity_residual_m_s": 9.285613629860546e-10,
+      "max_thrust_n": 6314.386885637034,
+      "min_thrust_n": 5290.958397870081,
+      "final_mass_kg": 853.7826865643217,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 2.4200231754404504e-7,
+      "velocity_residual_m_s": 9.55872350235379e-10,
+      "max_thrust_n": 7314.904656217777,
+      "min_thrust_n": 5044.001637556322,
+      "final_mass_kg": 851.0175708218619,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 2.6875714737293877e-7,
+      "velocity_residual_m_s": 9.499285093357972e-10,
+      "max_thrust_n": 9395.954188152444,
+      "min_thrust_n": 4005.6089986835213,
+      "final_mass_kg": 846.9483530246808,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.2186183174321651e-7,
+      "velocity_residual_m_s": 1.0052524815356353e-9,
+      "max_thrust_n": 6378.776210432702,
+      "min_thrust_n": 5195.594587273995,
+      "final_mass_kg": 853.691248625694,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.8484482258135823e-7,
+      "velocity_residual_m_s": 8.684940045156025e-10,
+      "max_thrust_n": 5733.27408748917,
+      "min_thrust_n": 3994.74852620346,
+      "final_mass_kg": 844.1817955632781,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 3.2356763391291196e-7,
+      "velocity_residual_m_s": 8.953228753315379e-10,
+      "max_thrust_n": 7342.491606364949,
+      "min_thrust_n": 3235.0466164107197,
+      "final_mass_kg": 838.4698509404022,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.566871533643819e-7,
+      "velocity_residual_m_s": 8.859421732832647e-10,
+      "max_thrust_n": 4992.894022613533,
+      "min_thrust_n": 4090.286375458433,
+      "final_mass_kg": 848.2701941090663,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.9084033669825704e-7,
+      "velocity_residual_m_s": 8.652245702033611e-10,
+      "max_thrust_n": 5871.85139752631,
+      "min_thrust_n": 3909.2934230902847,
+      "final_mass_kg": 844.0165506785635,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 3.3667888122943035e-7,
+      "velocity_residual_m_s": 9.106174356063883e-10,
+      "max_thrust_n": 7484.731838312931,
+      "min_thrust_n": 3154.012348700894,
+      "final_mass_kg": 838.1972963247937,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.417095167390989e-7,
+      "velocity_residual_m_s": 8.596453079966389e-10,
+      "max_thrust_n": 4906.49970485254,
+      "min_thrust_n": 4214.608875405632,
+      "final_mass_kg": 848.2121314699452,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.802283655770088e-7,
+      "velocity_residual_m_s": 8.674460903924943e-10,
+      "max_thrust_n": 5811.197988911779,
+      "min_thrust_n": 3946.8345553241625,
+      "final_mass_kg": 844.088704905415,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 3.2019047606648207e-7,
+      "velocity_residual_m_s": 8.946859827701185e-10,
+      "max_thrust_n": 7421.484385812546,
+      "min_thrust_n": 3190.2437081835265,
+      "final_mass_kg": 838.3191497763844,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.569902841395435e-7,
+      "velocity_residual_m_s": 8.869396427388744e-10,
+      "max_thrust_n": 4943.621816841532,
+      "min_thrust_n": 4161.678126167454,
+      "final_mass_kg": 848.2372181721345,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 3.0935982536077744e-7,
+      "velocity_residual_m_s": 9.307686117671707e-10,
+      "max_thrust_n": 5743.406972565301,
+      "min_thrust_n": 3987.100933706061,
+      "final_mass_kg": 844.157037891392,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 3.400610075541346e-7,
+      "velocity_residual_m_s": 9.578477395785025e-10,
+      "max_thrust_n": 7352.467174403111,
+      "min_thrust_n": 3228.0440698853204,
+      "final_mass_kg": 838.4352446611546,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.6966767657643567e-7,
+      "velocity_residual_m_s": 9.279672237458986e-10,
+      "max_thrust_n": 4984.448594537,
+      "min_thrust_n": 4100.548985835638,
+      "final_mass_kg": 848.2583587851389,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 3.752139629355301e-7,
+      "velocity_residual_m_s": 9.591174806583994e-10,
+      "max_thrust_n": 4598.285793882206,
+      "min_thrust_n": 3261.7434912194312,
+      "final_mass_kg": 833.4429978100309,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 4.3488624000131514e-7,
+      "velocity_residual_m_s": 9.976329131996958e-10,
+      "max_thrust_n": 5862.284397571021,
+      "min_thrust_n": 2707.795799612706,
+      "final_mass_kg": 825.5645568492712,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 3.4022455375892867e-7,
+      "velocity_residual_m_s": 9.693659446632829e-10,
+      "max_thrust_n": 4014.0829643647785,
+      "min_thrust_n": 3290.647412797555,
+      "final_mass_kg": 839.4310002267578,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 3.506917154960187e-7,
+      "velocity_residual_m_s": 9.213405195669798e-10,
+      "max_thrust_n": 4686.535617472867,
+      "min_thrust_n": 3210.012349253493,
+      "final_mass_kg": 833.1282192452956,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 4.148404324662594e-7,
+      "velocity_residual_m_s": 9.53070947755384e-10,
+      "max_thrust_n": 5954.160716539331,
+      "min_thrust_n": 2659.2826839911463,
+      "final_mass_kg": 825.135454578092,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 3.237285809282697e-7,
+      "velocity_residual_m_s": 9.630495435548861e-10,
+      "max_thrust_n": 3958.881153786699,
+      "min_thrust_n": 3357.3186011317866,
+      "final_mass_kg": 839.2214963531214,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 3.8291395840553194e-7,
+      "velocity_residual_m_s": 9.749404533404685e-10,
+      "max_thrust_n": 4649.970705868491,
+      "min_thrust_n": 3231.4980689957856,
+      "final_mass_kg": 833.2542085150717,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 4.359201964217537e-7,
+      "velocity_residual_m_s": 1.0077639547723502e-9,
+      "max_thrust_n": 5914.685180155732,
+      "min_thrust_n": 2680.1784520620145,
+      "final_mass_kg": 825.3150368902617,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 3.420314993171896e-7,
+      "velocity_residual_m_s": 9.766895358493281e-10,
+      "max_thrust_n": 3980.5763228272817,
+      "min_thrust_n": 3331.1380267043555,
+      "final_mass_kg": 839.3006138948617,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 3.6609976624339383e-7,
+      "velocity_residual_m_s": 9.37037139805514e-10,
+      "max_thrust_n": 4609.676662951634,
+      "min_thrust_n": 3254.6527852972176,
+      "final_mass_kg": 833.399049326788,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 4.454188412110917e-7,
+      "velocity_residual_m_s": 1.0241350049927664e-9,
+      "max_thrust_n": 5871.155283547008,
+      "min_thrust_n": 2702.303093632453,
+      "final_mass_kg": 825.5143678170567,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 3.034808311154268e-7,
+      "velocity_residual_m_s": 9.173308564333916e-10,
+      "max_thrust_n": 4004.702676298068,
+      "min_thrust_n": 3301.2548734682064,
+      "final_mass_kg": 839.397652795041,
+      "engine_constraints_passed": false
+    }
+  ],
+  "gravity_stats": {
+    "calls": 994272,
+    "hessian_calls": 0,
+    "cpu_ms": 5439.655999999767
+  }
+}

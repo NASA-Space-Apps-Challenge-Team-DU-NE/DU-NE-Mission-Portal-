@@ -1,0 +1,29 @@
+{
+  "bytes": 197969644,
+  "sha256": "d2a552067a78bf1d2755807ae14ee1d6843a8f6a4228e01ce59a665516738fec",
+  "coefficient_rows": 1622700,
+  "gm_uncertainty_km3_s2": 6.3251e-06,
+  "all_indices_finite_values_checked": true,
+  "pa_to_me_rotation": [
+    0.9999998731138765,
+    -0.0003289586579141938,
+    0.00038152120821145725,
+    0.00032895919698748533,
+    0.9999999458920105,
+    -1.3502060036227025e-06,
+    -0.00038152074340615683,
+    1.4757107425872328e-06,
+    0.9999999272198697
+  ],
+  "pa_to_me_rotation_constancy_max": 0.0,
+  "output": {
+    "schema": "lunar.gravity.manifest.v1",
+    "schema_version": 1,
+    "file": "index.json",
+    "sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "bytes": 164088,
+    "model": "GL1800F",
+    "max_degree": 90,
+    "source_sha256": "d2a552067a78bf1d2755807ae14ee1d6843a8f6a4228e01ce59a665516738fec"
+  }
+}

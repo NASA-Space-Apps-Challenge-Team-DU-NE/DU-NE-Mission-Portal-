@@ -1,0 +1,48 @@
+{
+  "checked_at": "2026-11-15T09:43:12.370Z",
+  "checks": [
+    "Local fonts loaded",
+    "Portal dark background",
+    "No horizontal page overflow at 390",
+    "No horizontal page overflow at 768",
+    "No horizontal page overflow at 1080",
+    "No horizontal page overflow at 1440",
+    "Mode A relative time controls",
+    "Mode A hides absolute UTC input",
+    "LLO controls available",
+    "Invalid mass opens failure guidance",
+    "Default actual Worker result VALIDATED",
+    "Full mission checks passed",
+    "Computed trajectory populated",
+    "Chart selection works",
+    "Calculated mobile result fits page",
+    "Changed inputs mark previous result",
+    "Changed gravity clears results",
+    "Worker cancellation works",
+    "No browser exceptions",
+    "No external runtime requests"
+  ],
+  "errors": [],
+  "external": [],
+  "default_result": {
+    "status": "VALIDATED",
+    "validation_checks": 20,
+    "elapsed_s": 56.597,
+    "position_error_m": 0.0000013546282809141682,
+    "touchdown_speed_m_s": 0.5000000021816858,
+    "trajectory_samples": 6653,
+    "joint_candidates_evaluated": 2,
+    "joint_candidates_validated": 2
+  },
+  "reference_commit": "cd38551c38dc02ccb48bc166ff812753d0a0498f",
+  "build": "npm run build: passed",
+  "physics_and_default_unchanged": true,
+  "static_build": {
+    "production_subpath": "/orbit/",
+    "assets_ok": true,
+    "worker_loaded": true,
+    "local_fonts": true,
+    "console_errors": [],
+    "failed_responses": []
+  }
+}

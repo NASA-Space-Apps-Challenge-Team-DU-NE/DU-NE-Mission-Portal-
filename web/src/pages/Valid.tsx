@@ -1,3 +1,4 @@
+import OrbitValidationCard from '../orbit/OrbitValidationCard';
 // 09 검증 (P1-39): ① 천체력 ② 장기 일조율(PGDA69·WAC) ③ 과거 미션 재현 + 지평선 마스크·PA→ME. 값은 파이프라인 s80 결과.
 import { useEffect, useMemo, useState } from 'react';
 import { loadValidation } from '../adapters/data';
@@ -92,6 +93,7 @@ export default function Valid() {
   };
   return (
     <>
+      <OrbitValidationCard/>
       <div className="nodata" style={{ borderStyle: 'solid' }}>허용 오차는 팀이 정할 값이라 임시값 {DEFAULTS.ephemeris_tolerance_deg}°로 두었습니다. 천체력 줄은 아래 허용 오차로 최대 차이를 ✓·✗ 판정하고, 그 밖의 줄은 오차만 보여 줍니다.
         <div style={{ marginTop: 8 }}><label className="small">천체력 허용 오차 (°) <input className="field num" type="number" min={0.001} max={5} step={0.01} value={tol ?? ''} style={{ width: 90 }} onChange={(e) => setTol(e.target.value === '' ? null : Number(e.target.value))} /></label></div></div>
       <Card title="① 천체력 (Horizons·SPICE 기준 표)" np>{block('ephemeris', '°')}</Card>

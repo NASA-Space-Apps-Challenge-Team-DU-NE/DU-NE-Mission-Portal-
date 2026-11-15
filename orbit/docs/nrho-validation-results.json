@@ -1,0 +1,1792 @@
+{
+  "generated_at_utc": "2026-11-14T21:59:54.004Z",
+  "runtime": "v24.15.0",
+  "elapsed_s": 16.6929984,
+  "input": {
+    "initial_orbit": "nrho",
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "VALIDATED",
+  "message": "CR3BP reference transfer and continuously replayed lunar descent pass the stated piecewise-model checks. Mode B / real-date operational mission is not implemented.",
+  "summary": {
+    "landing_position_error_m": 0.00017953785398277527,
+    "touchdown_velocity_m_s": 0.500000399019371,
+    "horizontal_touchdown_velocity_m_s": 2.880784113583148e-7,
+    "vertical_touchdown_velocity_m_s": -0.500000399019288,
+    "doi_delta_v_m_s": 19.45507345242777,
+    "powered_descent_delta_v_m_s": 1737.9659824483351,
+    "total_delta_v_m_s": 2569.949176469094,
+    "propellant_consumed_kg": 1086.5030720170405,
+    "remaining_propellant_kg": 206.7946540481139,
+    "final_mass_kg": 856.7946540481139,
+    "flight_duration_s": 280106.9223870586,
+    "powered_descent_duration_s": 260,
+    "circular_speed_m_s": 1633.5041340503267,
+    "circular_period_s": 7067.459728299708,
+    "target_elevation_m": 1953.7251419525205,
+    "actual_latitude_deg": -89.4440999942314,
+    "actual_longitude_deg": -137.29099996226805,
+    "maximum_thrust_n": 7989.773894385362,
+    "candidates_attempted": 48,
+    "admissible_candidates": 44,
+    "terrain_checked_candidates": 1,
+    "approach_heading_deg": 0,
+    "phase_factor": 1.1,
+    "landing_success": true,
+    "doi_finite_burn_estimate_s": 2.424361406155605,
+    "global_optimality_proven": false,
+    "initial_nrho_mass_kg": 1943.2977260651544,
+    "llo_initial_mass_kg": 1500,
+    "nrho_coast_duration_s": 17055.086247608815,
+    "transfer_duration_s": 259200,
+    "parking_duration_s": 0,
+    "departure_delta_v_m_s": 134.09319463880442,
+    "insertion_delta_v_m_s": 678.4349259295268,
+    "landing_only_delta_v_m_s": 1757.421055900763,
+    "departure_phase_fraction": 0.08333333333333326,
+    "transfer_search_timed_out": false
+  },
+  "validation": {
+    "nrho_reference": {
+      "passed": true,
+      "closure_position_m": 0.00022393487032624563,
+      "closure_velocity_m_s": 1.7540687158604906e-9,
+      "jacobi_constant": 3.0485582675124885,
+      "jacobi_drift": 2.0339285811132868e-13
+    },
+    "nrho_coast": {
+      "passed": true,
+      "jacobi_drift": 8.881784197001252e-16,
+      "minimum_altitude_lola_km": 68362.73520771283
+    },
+    "transfer_coast": {
+      "passed": true,
+      "position_error_m": 0.000045194498016987256,
+      "post_insertion_velocity_error_m_s": 0,
+      "refined_position_difference_m": 0.00002615031257809375,
+      "jacobi_drift": 6.372680161348399e-13,
+      "minimum_moon_altitude_km": 100.29999999360848,
+      "actual_llo_altitude_lola_km": 99.99999999360625,
+      "target_llo_altitude_lola_km": 100.00000000000318,
+      "post_insertion_eccentricity": 9.467344824227511e-8,
+      "orbit_plane_error_rad": 6.941979596461216e-12,
+      "orbit_phase_error_rad": 2.4349355048083874e-11,
+      "minimum_earth_altitude_km": 383618.4158263592,
+      "collision_envelope_radius_km": 1749.4,
+      "collision_check": "Adaptive CR3BP accepted states; step length ≤3% lunar radius vector. 12km reference-radius margin, not local terrain certification.",
+      "accepted_steps": 562,
+      "rejected_steps": 0,
+      "impulse_model": "Two instantaneous vector impulses, all velocity differences explicitly costed.",
+      "target_time": "Arrival t=0 in autonomous CR3BP reference mission; no UTC ephemeris claim.",
+      "limit_total_delta_v_m_s": 2500,
+      "position_tolerance_m": 0.01
+    },
+    "llo_insertion": {
+      "passed": true,
+      "position_error_m": 0.000045194498016987256,
+      "velocity_error_m_s": 1.066811504221219e-10,
+      "altitude_m": 99999.99999360647,
+      "eccentricity": 2.3595855106548963e-11,
+      "plane_error_rad": 6.941948673295777e-12,
+      "target_state_nd": [
+        0.9885911757146348,
+        0.001474509727156016,
+        0.0044165149948296985,
+        -1.059234860700182,
+        -1.0788965322710462,
+        0.5381036602807336
+      ],
+      "actual_post_insertion_state_nd": [
+        0.988591175714729,
+        0.0014745097272028031,
+        0.004416514994780742,
+        -1.059234860700182,
+        -1.0788965322710462,
+        0.5381036602807336
+      ],
+      "position_was_reset": false
+    },
+    "total_fuel": {
+      "passed": true,
+      "basis": "llo",
+      "initial_nrho_mass_kg": 1943.2977260651544,
+      "after_departure_mass_kg": 1862.0091162761794,
+      "after_insertion_mass_kg": 1500,
+      "final_mass_kg": 856.7946540481139,
+      "departure_propellant_kg": 81.28860978897501,
+      "insertion_propellant_kg": 362.0091162761794,
+      "landing_propellant_kg": 643.2053459518861,
+      "mass_continuity_error_kg": 0
+    },
+    "contact": {
+      "passed": true,
+      "final_dem_clearance_m": -0.00003516510173540155,
+      "vertical_speed_m_s": -0.500000399019288,
+      "clearance_tolerance_m": 0.02
+    },
+    "position": {
+      "passed": true,
+      "actual_m": 0.00017953785398277527,
+      "limit_m": 100
+    },
+    "speed": {
+      "passed": true,
+      "actual_m_s": 0.500000399019371,
+      "limit_m_s": 2
+    },
+    "horizontal_speed": {
+      "passed": true,
+      "actual_m_s": 2.880784113583148e-7
+    },
+    "mass": {
+      "passed": true,
+      "final_kg": 856.7946540481139,
+      "dry_kg": 650
+    },
+    "thrust": {
+      "passed": true,
+      "maximum_n": 7989.773894385362,
+      "minimum_n": 7231.806724455831
+    },
+    "terrain": {
+      "passed": true,
+      "unavailable_samples": 0,
+      "collision_samples": 0,
+      "low_resolution_below_12km": 0,
+      "checked_samples": 3882,
+      "minimum_prelanding_clearance_m": 0.23509522630752144
+    },
+    "continuity": {
+      "passed": true,
+      "landing_start_position_error_m": 0.00004520997646931377,
+      "landing_start_velocity_error_m_s": 1.0657502855179459e-10,
+      "method": "Actual transfer endpoint -> insertion velocity impulse -> parking -> DOI -> powered controls. No position resets."
+    }
+  },
+  "nrho": {
+    "mode": "CR3BP_REFERENCE",
+    "mass_basis": "llo",
+    "source": {
+      "reference_id": "jpl-earth-moon-l2-southern-halo-row-42",
+      "label": "JPL Earth–Moon L2 Southern NRHO Reference",
+      "api_url": "https://ssd-api.jpl.nasa.gov/periodic_orbits.api?sys=earth-moon&family=halo&libr=2&branch=S&periodmin=6&periodmax=7&periodunits=d",
+      "signature_version": "1.0",
+      "period_s": 568502.8749202938,
+      "perilune_altitude_m": 1244031.5894083937,
+      "apolune_altitude_m": 69774396.03431532,
+      "mass_ratio": 0.01215058560962404,
+      "lunit_km": 389703.264829278,
+      "tunit_s": 382981.289129055,
+      "secondary_radius_km": 1737.1
+    },
+    "system": {
+      "earth_position_fixed_m": [
+        388511988.8389527,
+        -27018994.615529805,
+        14037203.31710552
+      ],
+      "earth_radius_m": 6378136.6,
+      "l1_position_fixed_m": [
+        58639780.65497903,
+        -4078092.7314690743,
+        2118695.296853817
+      ],
+      "l2_position_fixed_m": [
+        -65205035.90449816,
+        4534672.197051196,
+        -2355902.4498212277
+      ]
+    },
+    "transfer": {
+      "status": "TRANSFER VALIDATED",
+      "departure_time_s": 17055.086247608815,
+      "arrival_time_s": 276255.0862476088,
+      "duration_s": 259200,
+      "departure_delta_v_m_s": 134.09319463880442,
+      "insertion_delta_v_m_s": 678.4349259295268,
+      "position_error_m": 0.000045194498016987256,
+      "velocity_error_m_s": 1.066811504221219e-10,
+      "parking_duration_s": 0
+    }
+  },
+  "events": [
+    {
+      "name": "NRHO_DEPARTURE",
+      "phase": "TRANSFER",
+      "time_s": 17055.086247608815,
+      "fixed_position_m": [
+        -9831269.809772715,
+        -2165154.741127426,
+        -69373533.8224459
+      ],
+      "delta_v_m_s": 134.09319463880442,
+      "delta_v_fixed_m_s": [
+        28.862783974177447,
+        -123.35809277446273,
+        -43.93979399982772
+      ],
+      "propellant_kg": 81.28860978897501
+    },
+    {
+      "name": "LLO_INSERTION",
+      "phase": "CIRCULAR",
+      "time_s": 276255.0862476088,
+      "fixed_position_m": [
+        -378499.5340796175,
+        -357797.2063627451,
+        1762032.3554909653
+      ],
+      "delta_v_m_s": 678.4349259295268,
+      "delta_v_fixed_m_s": [
+        -550.5845202381348,
+        -396.3074876194004,
+        8.426746225207857
+      ],
+      "propellant_kg": 362.0091162761794
+    },
+    {
+      "name": "DOI",
+      "phase": "COAST",
+      "time_s": 276435.0862476088,
+      "fixed_position_m": [
+        -169404.48925299203,
+        -160714.78481277206,
+        1822501.4778909234
+      ],
+      "delta_v_m_s": 19.45507345242777,
+      "delta_v_vector_m_s": [
+        13.31708917037491,
+        13.735537196092848,
+        -3.5341246444336027
+      ],
+      "propellant_kg": 9.270602369905646
+    },
+    {
+      "name": "PDI",
+      "phase": "POWERED_DESCENT",
+      "time_s": 279846.9223870586,
+      "fixed_position_m": [
+        164645.30308012315,
+        152272.25621316602,
+        -1737990.4614579293
+      ]
+    },
+    {
+      "name": "TOUCHDOWN",
+      "phase": "POWERED_DESCENT",
+      "time_s": 280106.9223870586,
+      "fixed_position_m": [
+        -12400.210448324593,
+        -11446.19181426143,
+        -1739271.8592867262
+      ]
+    }
+  ],
+  "transfer": {
+    "target_state_nd": [
+      0.9885911757146348,
+      0.001474509727156016,
+      0.0044165149948296985,
+      -1.059234860700182,
+      -1.0788965322710462,
+      0.5381036602807336
+    ],
+    "candidates": [
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.00018244266506261568,
+        "departure_delta_v_m_s": 2204.724381994062,
+        "insertion_delta_v_m_s": 2802.9629733865036,
+        "total_delta_v_m_s": 5007.687355380565,
+        "min_altitude_km": 100.30000018064084,
+        "jacobi_drift": 2.9474200857748656e-12
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.00043736976350020035,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 6.477487574050786e-7,
+        "departure_delta_v_m_s": 1466.3879503514768,
+        "insertion_delta_v_m_s": 1161.9995847794617,
+        "total_delta_v_m_s": 2628.3875351309384,
+        "min_altitude_km": 100.30000000020641,
+        "jacobi_drift": 6.492584248007915e-13
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 3.9143541804193064e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 4.4885464944769665e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 7.90795068102683e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 2.6683619448554346e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.000041697877892963387,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 1.8591492949781899e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 9.563286351065405e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 9.922634756423987e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.0005855820202964856,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 2.9888960666792613e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.0008091291464729883,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 2.3585534234750806e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 2.0812493725792895e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 5.030624609671565e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 7.863083816174264e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.0000011482818984060397,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 8.053937543837676e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 7.494295501562332e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 8.52807667698987e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 6.746283523352891e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 5.775283404120623e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 10,
+        "position_error_m": 0.003448278916617834,
+        "departure_delta_v_m_s": 2334.427387682788,
+        "insertion_delta_v_m_s": 2889.2737213759237,
+        "total_delta_v_m_s": 5223.701109058711,
+        "min_altitude_km": 100.30000342395647,
+        "jacobi_drift": 3.7556624477019795e-12
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 14,
+        "position_error_m": 0.000003059604800326845,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 7,
+        "position_error_m": 0.0001904008787578286,
+        "departure_delta_v_m_s": 544.1479121356288,
+        "insertion_delta_v_m_s": 1135.4807138356668,
+        "total_delta_v_m_s": 1679.6286259712956,
+        "min_altitude_km": 100.29999981231117,
+        "jacobi_drift": 4.987121826616203e-13
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 9.826494896321077e-8,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.000010558489706732248,
+        "departure_delta_v_m_s": 398.78112544824484,
+        "insertion_delta_v_m_s": 3028.813137883736,
+        "total_delta_v_m_s": 3427.594263331981,
+        "min_altitude_km": 100.3000000011823,
+        "jacobi_drift": 4.640732242933154e-13
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.000014693489542884637,
+        "departure_delta_v_m_s": 471.8660310081584,
+        "insertion_delta_v_m_s": 2554.5344830837494,
+        "total_delta_v_m_s": 3026.400514091908,
+        "min_altitude_km": 59.249953430809455,
+        "jacobi_drift": 1.0325074129013956e-12
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 7,
+        "position_error_m": 0.00023027448738746476,
+        "departure_delta_v_m_s": 648.1578676923299,
+        "insertion_delta_v_m_s": 868.0892018248832,
+        "total_delta_v_m_s": 1516.247069517213,
+        "min_altitude_km": 100.29999977597936,
+        "jacobi_drift": 4.3920422854171193e-13
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.000008474112747054457,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 5,
+        "position_error_m": 0.00003231484905245813,
+        "departure_delta_v_m_s": 145.36400960742728,
+        "insertion_delta_v_m_s": 1920.7414081845511,
+        "total_delta_v_m_s": 2066.105417791978,
+        "min_altitude_km": 95.80309027869384,
+        "jacobi_drift": 1.0293987884324451e-12
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.000001137765593906879,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 8,
+        "position_error_m": 0.000002533353000963943,
+        "departure_delta_v_m_s": 345.04841283500656,
+        "insertion_delta_v_m_s": 1305.2379569108234,
+        "total_delta_v_m_s": 1650.28636974583,
+        "min_altitude_km": 83.1233617450514,
+        "jacobi_drift": 7.895906151134113e-13
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.000002319108037211556,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 8,
+        "position_error_m": 9.988722120731903e-7,
+        "departure_delta_v_m_s": 722.5027459870302,
+        "insertion_delta_v_m_s": 764.6676570368849,
+        "total_delta_v_m_s": 1487.170403023915,
+        "min_altitude_km": 100.30000000052291,
+        "jacobi_drift": 4.445332990599127e-13
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 1.6252662652544167e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 7,
+        "position_error_m": 0.0000010733682025381565,
+        "departure_delta_v_m_s": 514.7820519342716,
+        "insertion_delta_v_m_s": 1028.4921650966555,
+        "total_delta_v_m_s": 1543.274217030927,
+        "min_altitude_km": 77.55322242293641,
+        "jacobi_drift": 7.44737604918555e-13
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 0.00014899425005993237,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 0,
+        "position_error_m": 1225527.580814362
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 9,
+        "position_error_m": 0.000003032686024395428,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 6,
+        "position_error_m": 0.0000021699583107669715,
+        "departure_delta_v_m_s": 635.6140741044377,
+        "insertion_delta_v_m_s": 889.5288989483535,
+        "total_delta_v_m_s": 1525.1429730527911,
+        "min_altitude_km": 79.32255907369108,
+        "jacobi_drift": 5.018208071305708e-13
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 9,
+        "position_error_m": 9.044865167524665e-7,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 7,
+        "position_error_m": 0.0000056356980699163336,
+        "departure_delta_v_m_s": 754.2493134096704,
+        "insertion_delta_v_m_s": 761.4924022369775,
+        "total_delta_v_m_s": 1515.741715646648,
+        "min_altitude_km": 95.40586405144268,
+        "jacobi_drift": 7.767120280277595e-13
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 982266.4573303276
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 6,
+        "position_error_m": 0.00008250543008140189,
+        "departure_delta_v_m_s": 714.1646579153581,
+        "insertion_delta_v_m_s": 809.9083031644707,
+        "total_delta_v_m_s": 1524.072961079829,
+        "min_altitude_km": 86.41247280433345,
+        "jacobi_drift": 7.140954494389007e-13
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 2,
+        "position_error_m": 879035.6179656377
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 0.003597795603507104
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 2754369.9974449216
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.00006282399742647794,
+        "departure_delta_v_m_s": 385.3833449390036,
+        "insertion_delta_v_m_s": 1181.4518015959313,
+        "total_delta_v_m_s": 1566.835146534935,
+        "min_altitude_km": 100.30000002865472,
+        "jacobi_drift": 7.118750033896504e-13
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 0.0000011607486988367354,
+        "error": "Integrated trajectory intersects the Moon collision envelope."
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 9,
+        "position_error_m": 0.00006387710153377195,
+        "departure_delta_v_m_s": 592.4876225961425,
+        "insertion_delta_v_m_s": 3379.43212269065,
+        "total_delta_v_m_s": 3971.9197452867925,
+        "min_altitude_km": 100.30000001003918,
+        "jacobi_drift": 1.887379141862766e-13
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 10,
+        "position_error_m": 0.0009228874326831263,
+        "departure_delta_v_m_s": 651.1410737577506,
+        "insertion_delta_v_m_s": 2231.3239083103786,
+        "total_delta_v_m_s": 2882.4649820681293,
+        "min_altitude_km": 96.84075206787247,
+        "jacobi_drift": 6.328271240363392e-13
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 8,
+        "position_error_m": 0.000013398520071413258,
+        "departure_delta_v_m_s": 388.06948831345824,
+        "insertion_delta_v_m_s": 914.081851687795,
+        "total_delta_v_m_s": 1302.1513400012532,
+        "min_altitude_km": 100.30000000386008,
+        "jacobi_drift": 3.637090628672013e-13
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 1809455.8877356406
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 9,
+        "position_error_m": 0.000024686269577641077,
+        "departure_delta_v_m_s": 260.14959716169164,
+        "insertion_delta_v_m_s": 2031.1060260986324,
+        "total_delta_v_m_s": 2291.255623260324,
+        "min_altitude_km": 100.30000000182349,
+        "jacobi_drift": 7.176481631177012e-13
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 0.0000016647583907107608,
+        "departure_delta_v_m_s": 266.01362099574953,
+        "insertion_delta_v_m_s": 3408.8376301778135,
+        "total_delta_v_m_s": 3674.851251173563,
+        "min_altitude_km": 69.65776417100551,
+        "jacobi_drift": 2.877698079828406e-13
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.00001063829305971713,
+        "departure_delta_v_m_s": 131.8542279034943,
+        "insertion_delta_v_m_s": 1211.8038058927355,
+        "total_delta_v_m_s": 1343.6580337962298,
+        "min_altitude_km": 100.29999999980396,
+        "jacobi_drift": 2.76667577736589e-13
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 12,
+        "position_error_m": 610870.4115803256
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 1035212.1232319162
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1780886.2472125413
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.00003885005043247341,
+        "departure_delta_v_m_s": 179.9392651910908,
+        "insertion_delta_v_m_s": 913.0353793803557,
+        "total_delta_v_m_s": 1092.9746445714466,
+        "min_altitude_km": 100.30000000679206,
+        "jacobi_drift": 3.2729374765949615e-13
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 749833.3464247233
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.0002984444985209709,
+        "departure_delta_v_m_s": 399.67187753296486,
+        "insertion_delta_v_m_s": 715.0231895656751,
+        "total_delta_v_m_s": 1114.69506709864,
+        "min_altitude_km": 100.29999980613024,
+        "jacobi_drift": 5.053735208093713e-13
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1765426.888700275
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.000003470019788741094,
+        "departure_delta_v_m_s": 263.62556291915297,
+        "insertion_delta_v_m_s": 778.4270266476184,
+        "total_delta_v_m_s": 1042.0525895667713,
+        "min_altitude_km": 100.30000000065729,
+        "jacobi_drift": 3.743672039036028e-13
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 1686228.1790248987
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.00048125096719663774,
+        "departure_delta_v_m_s": 375.8837406041308,
+        "insertion_delta_v_m_s": 695.3279169444701,
+        "total_delta_v_m_s": 1071.211657548601,
+        "min_altitude_km": 100.30000005596617,
+        "jacobi_drift": 7.456257833382551e-13
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1744411.2300408205
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.0000013306191304414602,
+        "departure_delta_v_m_s": 330.5604692557448,
+        "insertion_delta_v_m_s": 714.8759104881434,
+        "total_delta_v_m_s": 1045.4363797438882,
+        "min_altitude_km": 100.30000000120867,
+        "jacobi_drift": 5.018208071305708e-13
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1742445.1800847352
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 10,
+        "position_error_m": 0.001987844989639786
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 4776266.347749567
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 19,
+        "position_error_m": 0.00013685079502393212,
+        "departure_delta_v_m_s": 327.6930577438109,
+        "insertion_delta_v_m_s": 1197.9672024496565,
+        "total_delta_v_m_s": 1525.6602601934674,
+        "min_altitude_km": 100.30000006534851,
+        "jacobi_drift": 7.51843032276156e-13
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": true,
+        "valid": true,
+        "iterations": 19,
+        "position_error_m": 0.00013953665495641698,
+        "departure_delta_v_m_s": 327.6930577438067,
+        "insertion_delta_v_m_s": 1197.967202448148,
+        "total_delta_v_m_s": 1525.6602601919549,
+        "min_altitude_km": 100.30000006657383,
+        "jacobi_drift": 7.718270467194088e-13
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 19,
+        "position_error_m": 0.00011863986862860067,
+        "departure_delta_v_m_s": 683.7389649934244,
+        "insertion_delta_v_m_s": 3660.4358877980776,
+        "total_delta_v_m_s": 4344.174852791502,
+        "min_altitude_km": 100.3000000204338,
+        "jacobi_drift": 4.813927034774679e-13
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 388993.64659866196
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 9,
+        "position_error_m": 0.00007286168309911858,
+        "departure_delta_v_m_s": 281.66155498965225,
+        "insertion_delta_v_m_s": 944.4690520587516,
+        "total_delta_v_m_s": 1226.1306070484038,
+        "min_altitude_km": 100.2999999655658,
+        "jacobi_drift": 4.338751580235112e-13
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1326959.2423607178
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 10,
+        "position_error_m": 0.00007912002895382613,
+        "departure_delta_v_m_s": 376.48288385209764,
+        "insertion_delta_v_m_s": 2220.172111104364,
+        "total_delta_v_m_s": 2596.6549949564615,
+        "min_altitude_km": 100.30000000344194,
+        "jacobi_drift": 5.093703236980218e-13
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 0.0006752837378335651,
+        "departure_delta_v_m_s": 379.59712244311237,
+        "insertion_delta_v_m_s": 3371.953728071469,
+        "total_delta_v_m_s": 3751.5508505145813,
+        "min_altitude_km": 92.90299590576228,
+        "jacobi_drift": 2.4069635173873394e-13
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 16,
+        "position_error_m": 0.000035874362752641174,
+        "departure_delta_v_m_s": 216.94993027049523,
+        "insertion_delta_v_m_s": 1012.5503053478136,
+        "total_delta_v_m_s": 1229.5002356183088,
+        "min_altitude_km": 100.3000000022098,
+        "jacobi_drift": 3.7703173916270316e-13
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 14,
+        "position_error_m": 0.000011663912802783915,
+        "departure_delta_v_m_s": 186.72583135643185,
+        "insertion_delta_v_m_s": 3754.056673146037,
+        "total_delta_v_m_s": 3940.7825045024692,
+        "min_altitude_km": 67.9625046187216,
+        "jacobi_drift": 5.591083152012288e-13
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.00007715704542229504,
+        "departure_delta_v_m_s": 267.99630193688637,
+        "insertion_delta_v_m_s": 814.8700247891239,
+        "total_delta_v_m_s": 1082.8663267260104,
+        "min_altitude_km": 100.29999992962348,
+        "jacobi_drift": 3.3084646133829665e-13
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 1287456.0617939562
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 13,
+        "position_error_m": 0.00006114839512316375,
+        "departure_delta_v_m_s": 133.15104269383644,
+        "insertion_delta_v_m_s": 800.2576746082848,
+        "total_delta_v_m_s": 933.4087173021212,
+        "min_altitude_km": 100.30000000867108,
+        "jacobi_drift": 5.782041512247815e-13
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 439314.9128266423
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 12,
+        "position_error_m": 0.000012668859950574485,
+        "departure_delta_v_m_s": 248.71493955286687,
+        "insertion_delta_v_m_s": 742.4219693696772,
+        "total_delta_v_m_s": 991.1369089225441,
+        "min_altitude_km": 100.3000000027348,
+        "jacobi_drift": 5.151434834260726e-13
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 6,
+        "position_error_m": 1851210.7593344366
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.0006011161497343607,
+        "departure_delta_v_m_s": 135.70403737599344,
+        "insertion_delta_v_m_s": 726.3544513688691,
+        "total_delta_v_m_s": 862.0584887448626,
+        "min_altitude_km": 100.30000011164952,
+        "jacobi_drift": 6.439293542825908e-13
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": true,
+        "valid": true,
+        "iterations": 17,
+        "position_error_m": 0.000010938692909779034,
+        "departure_delta_v_m_s": 135.7040373773241,
+        "insertion_delta_v_m_s": 726.3544514354156,
+        "total_delta_v_m_s": 862.0584888127397,
+        "min_altitude_km": 100.30000000225891,
+        "jacobi_drift": 6.45705711121991e-13
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 13,
+        "position_error_m": 0.000015899732059900307,
+        "departure_delta_v_m_s": 218.2127312734186,
+        "insertion_delta_v_m_s": 707.1080560984661,
+        "total_delta_v_m_s": 925.3207873718848,
+        "min_altitude_km": 100.30000000296104,
+        "jacobi_drift": 4.587441537751147e-13
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 1908829.9245862346
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 12,
+        "position_error_m": 0.00008670552817980954,
+        "departure_delta_v_m_s": 177.28729746409027,
+        "insertion_delta_v_m_s": 701.3715193793307,
+        "total_delta_v_m_s": 878.6588168434209,
+        "min_altitude_km": 100.30000001934741,
+        "jacobi_drift": 6.123990203832363e-13
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 0.0013792424609259774
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 10,
+        "position_error_m": 0.012965329764778183
+      },
+      {
+        "phase_fraction": 0.5,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 2,
+        "position_error_m": 1396862.1409340536
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 16,
+        "position_error_m": 0.0003898209117589922,
+        "departure_delta_v_m_s": 300.990722919682,
+        "insertion_delta_v_m_s": 1202.2984299814214,
+        "total_delta_v_m_s": 1503.2891529011033,
+        "min_altitude_km": 100.30000018895612,
+        "jacobi_drift": 7.793765632868599e-13
+      },
+      {
+        "phase_fraction": 0.5833333333333335,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 5,
+        "position_error_m": 1703789.3616868416
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 1745311.1498705808
+      },
+      {
+        "phase_fraction": 0.41666666666666674,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 17,
+        "position_error_m": 121928.14233777812
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 13,
+        "position_error_m": 0.0001910666377477005,
+        "departure_delta_v_m_s": 228.28693885022741,
+        "insertion_delta_v_m_s": 960.0633877141757,
+        "total_delta_v_m_s": 1188.350326564403,
+        "min_altitude_km": 100.30000006707678,
+        "jacobi_drift": 4.654054919228656e-13
+      },
+      {
+        "phase_fraction": 0.6666666666666665,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 1529552.7950528015
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 107202.92764209566
+      },
+      {
+        "phase_fraction": 0.33333333333333326,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 9,
+        "position_error_m": 193344.09300712444
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 72.63861378593312
+      },
+      {
+        "phase_fraction": 0.25,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 329810.628153132
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 11,
+        "position_error_m": 0.00005551881864261366,
+        "departure_delta_v_m_s": 199.11465218431462,
+        "insertion_delta_v_m_s": 835.878841898135,
+        "total_delta_v_m_s": 1034.9934940824496,
+        "min_altitude_km": 100.30000001470853,
+        "jacobi_drift": 3.3306690738754696e-13
+      },
+      {
+        "phase_fraction": 0.75,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 6,
+        "position_error_m": 890893.1770891533
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 2,
+        "position_error_m": 661902.8348282272
+      },
+      {
+        "phase_fraction": 0.16666666666666674,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 705935.5216932071
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 14,
+        "position_error_m": 0.00003806925380973072,
+        "departure_delta_v_m_s": 173.22959232811655,
+        "insertion_delta_v_m_s": 761.9847534109184,
+        "total_delta_v_m_s": 935.214345739035,
+        "min_altitude_km": 100.30000000702353,
+        "jacobi_drift": 4.907185768843192e-13
+      },
+      {
+        "phase_fraction": 0.8333333333333335,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 1270034.904261578
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 14,
+        "position_error_m": 0.000045194498016987256,
+        "departure_delta_v_m_s": 134.09319463880442,
+        "insertion_delta_v_m_s": 678.4349259295268,
+        "total_delta_v_m_s": 812.5281205683312,
+        "min_altitude_km": 100.29999999360848,
+        "jacobi_drift": 6.372680161348399e-13
+      },
+      {
+        "phase_fraction": 0.08333333333333326,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 890585.4758212648
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 15,
+        "position_error_m": 0.000020396237672096233,
+        "departure_delta_v_m_s": 146.05102631822564,
+        "insertion_delta_v_m_s": 717.2328226386032,
+        "total_delta_v_m_s": 863.2838489568289,
+        "min_altitude_km": 100.30000000342898,
+        "jacobi_drift": 5.613287612504791e-13
+      },
+      {
+        "phase_fraction": 0.9166666666666665,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 1703576.9505032366
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 13,
+        "position_error_m": 0.0004230072445429486,
+        "departure_delta_v_m_s": 125.4804886847139,
+        "insertion_delta_v_m_s": 691.38736188884,
+        "total_delta_v_m_s": 816.8678505735539,
+        "min_altitude_km": 100.29999967853473,
+        "jacobi_drift": 7.362999099314038e-13
+      },
+      {
+        "phase_fraction": 0,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 1023974.152990251
+      }
+    ],
+    "elapsed_ms": 16179.1821,
+    "timed_out": false,
+    "status": "TRANSFER VALIDATED",
+    "message": "Two-impulse reference transfer matches the requested LLO state within the documented CR3BP model.",
+    "departure_phase_fraction": 0.08333333333333326,
+    "tof_s": 259200,
+    "departure_state_nd": [
+      1.019026861223277,
+      -0.012084460582248114,
+      -0.17674567882918757,
+      -0.01568681324208847,
+      -0.0954454669532726,
+      0.0635825769290116
+    ],
+    "post_departure_state_nd": [
+      1.019026861223277,
+      -0.012084460582248114,
+      -0.17674567882918757,
+      -0.05081478071395601,
+      0.01795519853232862,
+      0.006378179443956191
+    ],
+    "pre_insertion_state_nd": [
+      0.988591175714729,
+      0.0014745097272028031,
+      0.004416514994780742,
+      -1.5713671013758952,
+      -1.5053410228339736,
+      0.5580551990698951
+    ],
+    "departure_dv_m_s": [
+      -35.74452329442771,
+      115.3910408366186,
+      -58.208432357659504
+    ],
+    "insertion_dv_m_s": [
+      521.1210361465093,
+      433.9293196771039,
+      -20.30172236922039
+    ],
+    "total_delta_v_m_s": 812.5281205683312,
+    "validation": {
+      "position_error_m": 0.000045194498016987256,
+      "post_insertion_velocity_error_m_s": 0,
+      "refined_position_difference_m": 0.00002615031257809375,
+      "jacobi_drift": 6.372680161348399e-13,
+      "minimum_moon_altitude_km": 100.29999999360848,
+      "actual_llo_altitude_lola_km": 99.99999999360625,
+      "target_llo_altitude_lola_km": 100.00000000000318,
+      "post_insertion_eccentricity": 9.467344824227511e-8,
+      "orbit_plane_error_rad": 6.941979596461216e-12,
+      "orbit_phase_error_rad": 2.4349355048083874e-11,
+      "minimum_earth_altitude_km": 383618.4158263592,
+      "collision_envelope_radius_km": 1749.4,
+      "collision_check": "Adaptive CR3BP accepted states; step length ≤3% lunar radius vector. 12km reference-radius margin, not local terrain certification.",
+      "accepted_steps": 562,
+      "rejected_steps": 0,
+      "impulse_model": "Two instantaneous vector impulses, all velocity differences explicitly costed.",
+      "target_time": "Arrival t=0 in autonomous CR3BP reference mission; no UTC ephemeris claim.",
+      "limit_total_delta_v_m_s": 2500,
+      "position_tolerance_m": 0.01
+    }
+  },
+  "reference": {
+    "mode": "CR3BP_REFERENCE",
+    "time": "Relative mission seconds only. Landing reference t=0 internally; UTC input is ignored in Mode A.",
+    "inertial_frame": "MOON_CENTERED_CR3BP_REFERENCE",
+    "surface_frame": "MOON_ME_REFERENCE",
+    "units": "metres, seconds, kilograms, newtons",
+    "dynamics": "Earth-Moon CR3BP through LLO insertion; lunar two-body gravity + controlled thrust thereafter. Explicit model transition with continuous position/velocity/mass.",
+    "lunar_gm_m3_s2": 4902800118000,
+    "cr3bp_lunar_gm_m3_s2": 4902800582147.768,
+    "lola_reference_radius_m": 1737400,
+    "jpl_secondary_radius_m": 1737100,
+    "moon_fixed_to_synodic": [
+      -0.9969431203229797,
+      0.06933222544944896,
+      -0.036020235353314174,
+      -0.07288697356594581,
+      -0.9913491051850193,
+      0.1091532900707031,
+      -0.02814078757033073,
+      0.11144502753864224,
+      0.9933720863361487
+    ],
+    "mode_b_implemented": false,
+    "controls_time_origin": "LLO landing segment start, after optional parking",
+    "actual_latitude_deg": -89.4440999942314,
+    "actual_longitude_deg": -137.29099996226805
+  },
+  "replay_initial": {
+    "post_insertion_state_m_m_s_kg": [
+      294831.3484767082,
+      571684.9507079605,
+      1721130.3126335167,
+      -1090.3057265849325,
+      -1086.1675926496246,
+      547.5482985209827,
+      1500
+    ],
+    "arrival_reference_time_s": -3851.8361394498033,
+    "parking_duration_s": 0,
+    "landing_initial_state_m_m_s_kg": [
+      294831.3484767082,
+      571684.9507079605,
+      1721130.3126335167,
+      -1090.3057265849325,
+      -1086.1675926496246,
+      547.5482985209827,
+      1500
+    ],
+    "final_state_m_m_s_kg": [
+      74217.69626051452,
+      -177596.25994453172,
+      -1728670.7850393066,
+      0.4423854021861453,
+      0.24484155076605862,
+      0.4969294591755265,
+      856.7946540481139
+    ],
+    "landing_duration_s": 3851.8361394498033,
+    "doi_time_s": 180
+  }
+}

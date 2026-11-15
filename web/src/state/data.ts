@@ -10,7 +10,8 @@ import { locateTerrainCell, type TerrainGrid } from '../core/terrainGrids';
 import { DEG, R_MOON_KM } from '../core/constants';
 import { sphereDipDeg } from '../core/horizon';
 import { DEFAULTS } from '../config';
-import { setCellResolver } from './store';
+import { setCellResolver, setOrbitSiteResolver } from './store';
+import { resolveOrbitSite } from '../orbit/siteIdentity';
 import type {
   Envelope, GridManifest, HorizonMask, LayerMeta, Lander, Mission, PowerRef, QualityEntry, Quality, Site, SourceEntry, Station,
 } from '../core/types';
@@ -318,6 +319,12 @@ export const useData = create<DataState>((set, get) => ({
     return tb;
   },
 }));
+
+// Orbit restores the same portal site identity; use the south grid independently of the visible map.
+setOrbitSiteResolver((target, current, preferred) => {
+  const { sites, southGrid } = useData.getState();
+  return resolveOrbitSite(target, current, sites.items, southGrid, preferred);
+});
 
 // 북극·전역 지도에서 고른 칸 → 그 칸 중심 좌표 (지평선은 useResolvedSite 가 북극·전역 격자에서 찾는다)
 setCellResolver((cell) => {

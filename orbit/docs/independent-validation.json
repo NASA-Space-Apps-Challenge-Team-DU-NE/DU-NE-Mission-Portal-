@@ -1,0 +1,16 @@
+{
+  "method": "Independent SciPy DOP853 full seven-state ODE + original NAIF sxform",
+  "nfev": 23956,
+  "pdi_position_difference_m": 1.5697678970718617e-06,
+  "pdi_velocity_difference_m_s": 1.537573494587977e-09,
+  "final_position_vs_typescript_m": 1.8541710444920401e-06,
+  "final_velocity_vs_typescript_m_s": 1.7021664437327768e-09,
+  "final_mass_vs_typescript_kg": 4.092726157978177e-12,
+  "actual_spice_fixed_target_error_m": 2.3758576218144632e-05,
+  "actual_spice_surface_speed_m_s": 0.5000002520601283,
+  "actual_spice_horizontal_speed_m_s": 2.6949826842403686e-07,
+  "actual_spice_vertical_speed_m_s": -0.5000002520600557,
+  "final_mass_kg": 856.6867788284956,
+  "source": "docs/default-trajectory.json, original locally reused NAIF kernels",
+  "passed": true
+}

@@ -1,0 +1,37 @@
+
+> lunar-landing-orbit-simulator-workspace@1.0.0 test
+> node scripts/run-tests.mjs
+
+✔ Missing native LOLA tile rejects and never substitutes global terrain (55.8721ms)
+✔ Transient missing tile can be retried after the static host recovers (19.8092ms)
+✔ Truncated tile is explicitly unavailable rather than accepted as science data (14.1585ms)
+✔ Same-length corrupted tile fails the prepared SHA-256 check (18.1818ms)
+✔ Landing terrain mesh does not mislabel out-of-cap coarse samples as240m (23.6237ms)
+✔ Corrupt global coarse grid cannot contribute to validated terrain (39.937ms)
+✔ C/E: interpolated SPICE states match independent sxform references including velocity (14.2606ms)
+✔ G: lazy LOLA tiles reproduce independent native PDS samples with correct polar registration (63.5907ms)
+✔ LLO regression: both pre-NRHO landing cases preserve numerical results exactly (1070.9107ms)
+✔ NRHO1/2: actual JPL initial state closes a period and conserves Jacobi with adaptive DOPRI (17.6249ms)
+✔ NRHO1: adaptive browser orbit matches independent SciPy DOP853 intermediate states (23.4926ms)
+✔ NRHO3: JPL LU/TU conversions round-trip km and km/s; backward propagation is supported (2.6077ms)
+✔ NRHO shooting state-transition variational matrix matches numerical dynamics derivatives (2.0622ms)
+✔ NRHO frame round trips include rotation velocity and JPL LU/TU scaling (17.6136ms)
+✔ NRHO7/9: full continuous reference mission propagates actual LLO arrival to validated touchdown and accounts for every burn (1726.7646ms)
+✔ NRHO7: a specified NRHO departure mass is reduced before descent; dry mass failure produces no mission path (4070.3385ms)
+✔ NRHO parking: coast states remain continuous through a full parking revolution (1258.7833ms)
+✔ NRHO5/6: two actual CR3BP impulses join the existing validated landing LLO state (2164.0083ms)
+✔ NRHO failure honesty: excessive delta-V, exhausted time budget and cancellation produce no valid path (1324.3561ms)
+✔ A: 100 km circular orbit returns after one analytic period, conserving energy and plane (19.1405ms)
+✔ B: impulsive DOI vis-viva solution and integrated ellipse agree at 15 km periapsis (10.1856ms)
+✔ F: RK4 seven-state dynamics consume propellant according to T=m|a| and Isp*g0 (7.6701ms)
+✔ D/E/F/G/H: complete browser engine validates two 3D landings against NASA terrain (1087.3683ms)
+✔ Failure honesty: inadequate thrust and missing DEM cannot produce a validated landing (340.0978ms)
+✔ Malformed physical inputs are rejected before optimization (0.51ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 15056.9899

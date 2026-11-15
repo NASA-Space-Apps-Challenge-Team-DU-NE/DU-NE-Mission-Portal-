@@ -1,0 +1,295 @@
+{
+  "schema": "lunar.gravity.reference-window.v1",
+  "passed": true,
+  "checks": {
+    "original_seed_matches": true,
+    "six_golden_states": true,
+    "position_step_refinement": true,
+    "velocity_step_refinement": true,
+    "sampled_moon_clearance": true,
+    "sampled_earth_clearance": true
+  },
+  "limits": {
+    "position_refinement_m": 0.1,
+    "velocity_refinement_m_s": 0.00001,
+    "min_moon_altitude_m": 12000,
+    "min_earth_clearance_m": 0
+  },
+  "model": "GL1800F",
+  "degree": 30,
+  "gravity_asset_sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+  "ephemeris_sha256": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+  "method": "Independent SciPy DOP853 with complex angular harmonics and direct SPICE PA rotation/Earth/Sun at every RHS. Original source SPK seed only; no intermediate resets. 300s vs150s step caps at rtol2e-13.",
+  "epoch_et": 845380869.1823691,
+  "epoch_utc": "2026-10-16T00:00:00Z",
+  "coverage_utc": [
+    "2026-11-05T00:00:00.000111Z",
+    "2026-11-18T23:59:59.999869Z"
+  ],
+  "coverage_s": [
+    1728000.0003073215,
+    2937600.0003073215
+  ],
+  "seed_t_s": 2332800.0003073215,
+  "seed_utc": "2026-11-12T00:00:00Z",
+  "seed_state": [
+    -15396776.335926581,
+    14980114.0322024,
+    -34298811.812279515,
+    -4.990768684717262,
+    -134.12768567411848,
+    331.95071867967533
+  ],
+  "golden_states": [
+    {
+      "t_s": 2246400.0003073215,
+      "duration_s": -86400,
+      "state": [
+        -12283667.391404295,
+        22609483.66500489,
+        -55400823.07744405,
+        -54.31089104866476,
+        -48.85886952294453,
+        173.75950680335046
+      ]
+    },
+    {
+      "t_s": 2073600.0003073215,
+      "duration_s": -259200,
+      "state": [
+        -2269111.462656344,
+        19983979.863207236,
+        -67162854.48011559,
+        -49.64103899745834,
+        72.8922079903816,
+        -33.50031244229788
+      ]
+    },
+    {
+      "t_s": 1728000.0003073215,
+      "duration_s": -604800,
+      "state": [
+        -4183624.1123962947,
+        35360823.03774965,
+        -33568862.89991185,
+        12.161393623356913,
+        -112.92767753774413,
+        265.35194801464826
+      ]
+    },
+    {
+      "t_s": 2419200.0003073215,
+      "duration_s": 86400,
+      "state": [
+        10560820.113413874,
+        1448434.1408019685,
+        -4630047.2073651785,
+        435.79094365979415,
+        268.6955204754761,
+        -689.8974610280969
+      ]
+    },
+    {
+      "t_s": 2592000.0003073215,
+      "duration_s": 259200,
+      "state": [
+        17292268.59414053,
+        21774918.395058177,
+        -58495875.980458595,
+        -43.57067347830901,
+        35.166847814024166,
+        -147.01361913728635
+      ]
+    },
+    {
+      "t_s": 2937600.0003073215,
+      "duration_s": 604800,
+      "state": [
+        174254.7118812646,
+        -2466469.726988965,
+        -32413026.94056559,
+        -39.18377268335612,
+        -136.02579128059259,
+        415.7419983642085
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "direction": -1,
+      "end_t_s": 1728000.0003073215,
+      "end_utc": "2026-11-05T00:00:00.000111Z",
+      "duration_tdb_days": -7,
+      "min_sampled_moon_altitude_m": 1715002.301404484,
+      "max_sampled_moon_altitude_m": 69581311.6291812,
+      "min_sampled_earth_clearance_m": 381077868.52589846,
+      "moon_samples": 20001,
+      "earth_samples": 1001,
+      "max_step_refinement_position_m": 0.00003663600554712358,
+      "max_step_refinement_velocity_m_s": 1.7202037124825914e-9,
+      "coarse_evaluations": 30392,
+      "fine_evaluations": 60542
+    },
+    {
+      "direction": 1,
+      "end_t_s": 2937600.0003073215,
+      "end_utc": "2026-11-18T23:59:59.999869Z",
+      "duration_tdb_days": 7,
+      "min_sampled_moon_altitude_m": 1723735.081997672,
+      "max_sampled_moon_altitude_m": 70036816.71097639,
+      "min_sampled_earth_clearance_m": 388485001.1066592,
+      "moon_samples": 20001,
+      "earth_samples": 1001,
+      "max_step_refinement_position_m": 0.00023999283130350627,
+      "max_step_refinement_velocity_m_s": 2.51906109131417e-9,
+      "coarse_evaluations": 30404,
+      "fine_evaluations": 60542
+    }
+  ],
+  "evaluations": 181880,
+  "elapsed_s": 114.18645149999975,
+  "scope": "Numerical propagation of this single NASA seed in the selected model for +/-7 TDB days; clearance is sampled, not interval-certified. Does not prove periodicity, operational stationkeeping, or landing feasibility for every date/site.",
+  "other_degrees": "This report validates only its named degree; other degree windows require their own execution or browser/reference checks.",
+  "browser_comparison": {
+    "passed": true,
+    "method": "Production TypeScript DOPRI5/4 + GL1800F + static ephemeris versus independent direct-SPICE/SciPy DOP853 golden states. Original seed is propagated separately to each requested epoch.",
+    "production_options": {
+      "rtol": 2e-12,
+      "atol_position_m": 0.00001,
+      "atol_velocity_m_s": 1e-8,
+      "max_step_s": 300,
+      "collect_samples": false
+    },
+    "limits": {
+      "position_m": 0.1,
+      "velocity_m_s": 0.00001
+    },
+    "cases": [
+      {
+        "duration_days": -1,
+        "position_difference_m": 2.1149841500951719e-7,
+        "velocity_difference_m_s": 3.4845438839202392e-12,
+        "final_state": [
+          -12283667.391404185,
+          22609483.665004916,
+          -55400823.07744387,
+          -54.31089104866751,
+          -48.8588695229457,
+          173.75950680334867
+        ],
+        "stats": {
+          "steps": 288,
+          "rejected": 0,
+          "evaluations": 2016,
+          "min_moon_distance_m": 40470644.04837784,
+          "min_earth_distance_m": 411804059.5731599
+        }
+      },
+      {
+        "duration_days": -3,
+        "position_difference_m": 0.0000013900457419551449,
+        "velocity_difference_m_s": 9.906851502552513e-12,
+        "final_state": [
+          -2269111.4626551904,
+          19983979.8632072,
+          -67162854.48011482,
+          -49.64103899746705,
+          72.89220799038445,
+          -33.50031244230165
+        ],
+        "stats": {
+          "steps": 864,
+          "rejected": 0,
+          "evaluations": 6048,
+          "min_moon_distance_m": 40470644.04837784,
+          "min_earth_distance_m": 411804059.5731599
+        }
+      },
+      {
+        "duration_days": -7,
+        "position_difference_m": 0.0005122179065583283,
+        "velocity_difference_m_s": 7.032879530965249e-9,
+        "final_state": [
+          -4183624.1124824765,
+          35360823.03824562,
+          -33568862.90000647,
+          12.16139362441138,
+          -112.9276775441147,
+          265.3519480174349
+        ],
+        "stats": {
+          "steps": 2209,
+          "rejected": 0,
+          "evaluations": 15463,
+          "min_moon_distance_m": 3452438.1923889904,
+          "min_earth_distance_m": 387455878.15835047
+        }
+      },
+      {
+        "duration_days": 1,
+        "position_difference_m": 0.000025633477416473454,
+        "velocity_difference_m_s": 3.1360924770139495e-9,
+        "final_state": [
+          10560820.11343881,
+          1448434.1408016467,
+          -4630047.207371112,
+          435.7909436628977,
+          268.6955204754073,
+          -689.8974610285424
+        ],
+        "stats": {
+          "steps": 474,
+          "rejected": 0,
+          "evaluations": 3318,
+          "min_moon_distance_m": 3461129.6597160497,
+          "min_earth_distance_m": 404899454.886513
+        }
+      },
+      {
+        "duration_days": 3,
+        "position_difference_m": 0.0012111863710640243,
+        "velocity_difference_m_s": 9.791352321305833e-9,
+        "final_state": [
+          17292268.59499083,
+          21774918.39531898,
+          -58495875.98128075,
+          -43.57067347320021,
+          35.16684781642734,
+          -147.01361914528607
+        ],
+        "stats": {
+          "steps": 1053,
+          "rejected": 0,
+          "evaluations": 7371,
+          "min_moon_distance_m": 3461129.6597160497,
+          "min_earth_distance_m": 404899454.886513
+        }
+      },
+      {
+        "duration_days": 7,
+        "position_difference_m": 0.009931271002841427,
+        "velocity_difference_m_s": 1.027027709952562e-7,
+        "final_state": [
+          174254.71456059883,
+          -2466469.7257448626,
+          -32413026.950047337,
+          -39.18377268326012,
+          -136.0257912833693,
+          415.7419982615433
+        ],
+        "stats": {
+          "steps": 2205,
+          "rejected": 0,
+          "evaluations": 15435,
+          "min_moon_distance_m": 3461129.6597160497,
+          "min_earth_distance_m": 394863137.71044666
+        }
+      }
+    ],
+    "maximum_position_difference_m": 0.009931271002841427,
+    "maximum_velocity_difference_m_s": 1.027027709952562e-7,
+    "elapsed_s": 1.3127443,
+    "runtime": "v24.15.0",
+    "checked_at_utc": "2026-11-15T10:23:33.895Z"
+  }
+}

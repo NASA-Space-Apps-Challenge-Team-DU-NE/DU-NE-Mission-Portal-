@@ -1,0 +1,14 @@
+{
+  "name": "dune-mission-portal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "postinstall": "npm --prefix web ci && npm --prefix orbit/frontend ci",
+    "prepare:orbit": "node scripts/prepare-orbit.mjs",
+    "dev": "npm run prepare:orbit && npm --prefix web run dev -- --host 127.0.0.1 --port 5175 --strictPort",
+    "build": "npm run prepare:orbit && npm --prefix web run build",
+    "preview": "npm --prefix web run preview -- --host 127.0.0.1 --port 5175 --strictPort",
+    "test": "npm --prefix web run check && npm --prefix orbit test",
+    "test:e2e": "npm --prefix web run e2e"
+  }
+}

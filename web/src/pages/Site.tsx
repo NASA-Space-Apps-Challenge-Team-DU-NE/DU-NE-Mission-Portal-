@@ -1,3 +1,4 @@
+import { OrbitCoverage } from '../orbit/OrbitSettingsCard';
 // 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침).
 // 순서: ① 착륙 날짜(시각·기간, 착륙지 × 시작일 점수표, 검토 중인 조합) → ② 착륙지(지도·순위·목록·좌표)
 //       → ③ 지금 계획 카드 [착륙지 요약 | 점수 근거 | 착륙 윈도] 탭 → 상위 6곳 비교·역방향 탐색
@@ -165,7 +166,7 @@ export default function Site() {
   return (
     <>
       <h2 className="sechead first"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>
-      <LandingDate part="top" />
+      <LandingDate part="top" /><OrbitCoverage/>
       <h2 className="sechead"><span>착륙지</span><small>지도·추천 순위·목록·좌표 중 편한 방법으로 고릅니다</small></h2>
       <div className="g21">
         <MapCard where="site" />

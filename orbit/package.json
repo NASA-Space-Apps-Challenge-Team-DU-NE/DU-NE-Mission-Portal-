@@ -1,0 +1,14 @@
+{
+  "name": "lunar-landing-orbit-simulator-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser-only NASA-data lunar landing trajectory simulator",
+  "scripts": {
+    "postinstall": "npm --prefix frontend install",
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "preview": "npm --prefix frontend run preview",
+    "test": "node scripts/run-tests.mjs"
+  }
+}

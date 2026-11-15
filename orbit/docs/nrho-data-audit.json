@@ -1,0 +1,168 @@
+{
+  "local_source_recheck": [
+    {
+      "file": "ldem_75s_240m.img",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\LOLA_DEM\\ldem_75s_240m.img",
+      "bytes": 29062688,
+      "sha256": "d031efe2611b17dfbf3c158f5e15dc04cd5719349dcbf6384bb21fd97697c490",
+      "baseline_sha256": "d031efe2611b17dfbf3c158f5e15dc04cd5719349dcbf6384bb21fd97697c490",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "ldem_75s_240m.lbl",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\LOLA_DEM\\ldem_75s_240m.lbl",
+      "bytes": 4990,
+      "sha256": "ec07239f41d8abc1a3681495b5799b770c7206b5268b76721d69180df0422e02",
+      "baseline_sha256": "ec07239f41d8abc1a3681495b5799b770c7206b5268b76721d69180df0422e02",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "de440s.bsp",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\SPICE_Kernels\\de440s.bsp",
+      "bytes": 32726016,
+      "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+      "baseline_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "moon_pa_de440_200625.bpc",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\SPICE_Kernels\\moon_pa_de440_200625.bpc",
+      "bytes": 12863488,
+      "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+      "baseline_sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "moon_de440_250416.tf",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\SPICE_Kernels\\moon_de440_250416.tf",
+      "bytes": 19478,
+      "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+      "baseline_sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "naif0012.tls",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\SPICE_Kernels\\naif0012.tls",
+      "bytes": 5257,
+      "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+      "baseline_sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "pck00011.tpc",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\SPICE_Kernels\\pck00011.tpc",
+      "bytes": 131226,
+      "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+      "baseline_sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "sites.json",
+      "path": "C:\\Users\\hach0\\OneDrive\\Documents\\ChatGPT\\스페이스앱\\Lunar-Landing-Orbit-Simulator\\data\\catalogs\\sites.json",
+      "bytes": 15036,
+      "sha256": "d880a9f9ecae26cc3fd0569819a55ade16c2676385067c2fef3b01b98e1d170d",
+      "baseline_sha256": "d880a9f9ecae26cc3fd0569819a55ade16c2676385067c2fef3b01b98e1d170d",
+      "matches_baseline": true,
+      "status": "REFRESHED_PROJECT_COPY"
+    },
+    {
+      "file": "landers.json",
+      "path": "C:\\Users\\hach0\\OneDrive\\Documents\\ChatGPT\\스페이스앱\\Lunar-Landing-Orbit-Simulator\\data\\catalogs\\landers.json",
+      "bytes": 1969,
+      "sha256": "d18ab88f3bac0112b23e1165aeb026eb62f13ffdc5b327822280739d98f7e3aa",
+      "baseline_sha256": "d18ab88f3bac0112b23e1165aeb026eb62f13ffdc5b327822280739d98f7e3aa",
+      "matches_baseline": true,
+      "status": "REFRESHED_PROJECT_COPY"
+    },
+    {
+      "file": "data_manifest.json",
+      "path": "C:\\Users\\hach0\\OneDrive\\Documents\\ChatGPT\\스페이스앱\\Lunar-Landing-Orbit-Simulator\\data\\catalogs\\data_manifest.json",
+      "bytes": 226930,
+      "sha256": "09c877ec91ad049456ff775a3fa8b32bac422efe79b7b4673d662816d0d22daa",
+      "baseline_sha256": "09c877ec91ad049456ff775a3fa8b32bac422efe79b7b4673d662816d0d22daa",
+      "matches_baseline": true,
+      "status": "REUSED_CONTENT_PROJECT_SNAPSHOT"
+    },
+    {
+      "file": "terrain_sources.json",
+      "path": "C:\\Users\\hach0\\OneDrive\\Documents\\ChatGPT\\스페이스앱\\Lunar-Landing-Orbit-Simulator\\data\\catalogs\\terrain_sources.json",
+      "bytes": 13329,
+      "sha256": "a7e3ca153b1c4459eaf43ab9797c880f987f0ddc3ae4bf7d51056d2af92bc21a",
+      "baseline_sha256": "a7e3ca153b1c4459eaf43ab9797c880f987f0ddc3ae4bf7d51056d2af92bc21a",
+      "matches_baseline": true,
+      "status": "REUSED_CONTENT_PROJECT_SNAPSHOT"
+    },
+    {
+      "file": "ldem_4_uint.tif",
+      "path": "C:\\Users\\hach0\\OneDrive\\Documents\\ChatGPT\\스페이스앱\\outputs\\global_data_2026-11-14\\data\\LOLA_DEM_Global\\ldem_4_uint.tif",
+      "bytes": 2076866,
+      "sha256": "e6668bec27fc9b8fbb02d198c7ddfb08eedeeb790167b494f95e6b34201da05e",
+      "baseline_sha256": "e6668bec27fc9b8fbb02d198c7ddfb08eedeeb790167b494f95e6b34201da05e",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "globe_gray_2k.jpg",
+      "path": "C:\\Users\\hach0\\Downloads\\Lunar-Landing-Site-Navigator-main\\Lunar-Landing-Site-Navigator-main\\web\\public\\data\\textures\\globe_gray_2k.jpg",
+      "bytes": 431652,
+      "sha256": "c328d67aca25f5cf711eef13d05b2f7fdc93c4f8e34d640776c093015bd5462f",
+      "baseline_sha256": "c328d67aca25f5cf711eef13d05b2f7fdc93c4f8e34d640776c093015bd5462f",
+      "matches_baseline": true,
+      "status": "REUSED"
+    },
+    {
+      "file": "ldem_80s_80m.img",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\LOLA_DEM\\ldem_80s_80m.img",
+      "bytes": 115520000,
+      "sha256": "e6591eeea35402ca5e124ca00f5bf0774381a2d4fa919144b455d82b8ff65fdc",
+      "baseline_sha256": "e6591eeea35402ca5e124ca00f5bf0774381a2d4fa919144b455d82b8ff65fdc",
+      "matches_baseline": true,
+      "status": "SKIPPED"
+    },
+    {
+      "file": "ldem_80s_80m.lbl",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\LOLA_DEM\\ldem_80s_80m.lbl",
+      "bytes": 4986,
+      "sha256": "107c7558cbf8832e4119d3c8c2b1b272623344275c85378a9b0e03c22876eb33",
+      "baseline_sha256": "107c7558cbf8832e4119d3c8c2b1b272623344275c85378a9b0e03c22876eb33",
+      "matches_baseline": true,
+      "status": "SKIPPED"
+    },
+    {
+      "file": "ldem_128.img",
+      "path": "C:\\Users\\hach0\\Downloads\\DU_NE Data\\Raw_Data\\LOLA_DEM_Global\\ldem_128.img",
+      "bytes": 63225856,
+      "sha256": "fb12d0141c853160c65d2b4afb7e7e071e7b9bfdf9d71308b98b2631d62f92c5",
+      "baseline_sha256": "fb12d0141c853160c65d2b4afb7e7e071e7b9bfdf9d71308b98b2631d62f92c5",
+      "matches_baseline": true,
+      "status": "SKIPPED_INVALID"
+    }
+  ],
+  "new_source_files": [
+    {
+      "file": "data\\nrho\\jpl-earth-moon-l2-southern-halo-6-7days.json",
+      "bytes": 22919,
+      "sha256": "de4a61474cacc2b3ee10670ad5ef081db4a8cb6130c34248caf8c3c60a945f6d"
+    },
+    {
+      "file": "data\\nrho\\reference-documents\\HLS_Targeting_Logic_AAS_2024_Paper.pdf",
+      "bytes": 2865463,
+      "sha256": "2c2477b7d477e2b3266d337bf09950cdcd9d569f15482006210e011254515b38"
+    },
+    {
+      "file": "data\\nrho\\reference-documents\\lunar-relay-services-requirements-document-srd.pdf",
+      "bytes": 1619912,
+      "sha256": "4779d15380ae16bd8fc40588ca1dafc938730bec4871dcbb76c49e116e9e8c75"
+    }
+  ],
+  "source_mutations": false,
+  "downloads_path": "C:/Users/hach0/Downloads",
+  "mode": "read-only data audit"
+}

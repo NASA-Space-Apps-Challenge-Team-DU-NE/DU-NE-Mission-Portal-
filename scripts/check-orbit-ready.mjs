@@ -1,0 +1,15 @@
+import { chromium } from '../web/node_modules/playwright/index.mjs';
+import { mkdir, writeFile } from 'node:fs/promises';
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+await page.addInitScript(()=>localStorage.setItem('dune.lang','ko'));
+const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+await page.goto('http://127.0.0.1:5175/?p=orbit',{waitUntil:'domcontentloaded'});
+await page.getByTestId('orbit-run').waitFor({timeout:30000});
+await page.waitForFunction(()=>!document.querySelector('[data-testid="orbit-run"]')?.disabled,{timeout:30000});
+console.log('READY',await page.getByTestId('orbit-status').innerText());
+await mkdir('docs/ui',{recursive:true});await page.screenshot({path:'docs/ui/orbit-integrated-ready.png',fullPage:true});
+console.log('IFRAMES',page.frames().map(f=>f.url()));
+console.log('ERRORS',errors);
+await writeFile('.cache/browser-ready.json',JSON.stringify({errors,status:await page.getByTestId('orbit-status').innerText()},null,2));
+await browser.close();

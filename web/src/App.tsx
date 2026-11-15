@@ -1,3 +1,4 @@
+import { useOrbitInvalidation } from './orbit/hooks';
 // 앱 틀: 검은 띠 | 지도 모드(달 전체) ↔ 계획 모드(왼쪽 단계 01→09 | 가운데 단계 화면 | 오른쪽 3D 달 + 현장 뷰)
 import { lazy, Suspense, useEffect } from 'react';
 import { Masthead, Overlays, PageFrame, Resizers, Sidebar } from './layout/Shell';
@@ -29,6 +30,7 @@ function useShortcuts() {
       const tag = (e.target as HTMLElement)?.tagName;
       if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
       const s = useApp.getState();
+      if (s.page === 'orbit' && useUi.getState().mode === 'plan' && e.key !== 'Escape') return;
       const step = e.shiftKey ? 24 * HOUR_MS : HOUR_MS;
       if (e.code === 'Space') { e.preventDefault(); s.togglePlay(); }
       else if (e.key === 'ArrowRight') s.setT(s.t + step);
@@ -45,19 +47,14 @@ function useShortcuts() {
 /** 데이터가 준비되면: 첫 착륙지·시각 기본값 (URL 로 정하지 않았을 때만) */
 function useDefaults() {
   const sites = useData((d) => d.sites.items);
-  const ephMeta = useData((d) => d.ephMeta);
   useEffect(() => {
     const s = useApp.getState();
     if (!s.siteRef && sites.length) {
       const first = sites.find((x) => x.id === DEFAULT_SITE_ID) ?? sites.find((x) => x.terrain === 'site') ?? sites[0];
       s.setSite({ kind: 'catalog', id: first.id });
     }
-    if (ephMeta && !new URLSearchParams(window.location.search).get('t')) {
-      const start = Date.parse(ephMeta.start_utc);
-      const end = start + (ephMeta.count - 1) * ephMeta.step_h * HOUR_MS;
-      if (s.landing < start || s.landing > end) { s.setLanding(start); s.setT(start); }
-    }
-  }, [sites, ephMeta]);
+
+  }, [sites]);
 }
 
 export default function App() {
@@ -72,6 +69,8 @@ export default function App() {
     ...(sideCollapsed ? { '--side-w': '64px' } : sideW ? { '--side-w': `${sideW}px` } : {}),
     ...(railW ? { '--rail-w': `${railW}px` } : {}),
   } as React.CSSProperties;
+  useOrbitInvalidation();
+  const orbitPage = mode === 'plan' && page === 'orbit';
   useShortcuts();
   useDefaults();
   useGridRunner();
@@ -79,15 +78,14 @@ export default function App() {
   return (
     <>
       <Masthead />
-      <div className={`app mode-${mode}${sideCollapsed ? ' side-collapsed' : ''}`} key={lang} style={layoutVars}>
+      <div className={`app mode-${mode}${sideCollapsed ? ' side-collapsed' : ''}${orbitPage ? ' orbit-page' : ''}`} key={page === 'orbit' ? 'orbit' : lang} style={layoutVars}>
         <Sidebar />
         <PageFrame>
           <Suspense fallback={<div className="muted">불러오는 중…</div>}>
             <P />
           </Suspense>
         </PageFrame>
-        <Rail />
-        <Resizers />
+        {!orbitPage && <><Rail /><Resizers /></>}
       </div>
       <Overlays />
     </>

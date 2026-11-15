@@ -1,0 +1,410 @@
+{
+  "generated_at_utc": "2026-11-15T00:21:08.579Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics",
+  "logical_cpus": 12,
+  "scope": "One common-initial-state 100 km osculating polar LLO coast; no optimization, impulses, thrust, or state resets.",
+  "source": {
+    "model": "GL1800F",
+    "gravity_asset_sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "ephemeris": "DE440 static dataset via integrity-checked loader",
+    "lunar_gm_m3_s2": 4902800306330.2,
+    "earth_gm_m3_s2": 398600435507022.6,
+    "sun_gm_m3_s2": 132712440041279390000,
+    "frames": "MOON_PA_DE440 -> MOON_ME_DE440_ME421 -> J2000, evaluated at each integrator stage",
+    "third_bodies": "Earth and Sun, direct minus lunar-origin acceleration in every run"
+  },
+  "initial": {
+    "utc": "2026-11-16T00:00:00Z",
+    "elapsed_tdb_from_ephemeris_epoch_s": 1296000.0002380372,
+    "terrain_reference_radius_m": 1737400,
+    "altitude_m": 100000,
+    "state_j2000_m_m_s": [
+      -1202580.1582686394,
+      1279947.6047824803,
+      539975.7882999622,
+      24.5987224197845,
+      -615.195901555432,
+      1513.0316467352648
+    ],
+    "construction": "PA-axis position [R_LOLA+100km,0,0] and inertial velocity [0,0,sqrt(GM/r)] rotated at the initial epoch; 90-degree instantaneous PA inclination. Same six-state for every degree."
+  },
+  "duration_s": 7067.459592559311,
+  "duration_definition": "One Kepler period based on the same GL1800F GM, not a claim that perturbed trajectories close.",
+  "integration_method": "Dormand-Prince 5(4) adaptive integration, browser TypeScript implementation",
+  "settings": {
+    "common": {
+      "collect_samples": false,
+      "with_stm": false,
+      "collision_radius_m": 1737400,
+      "max_steps": 100000
+    },
+    "nominal": {
+      "rtol": 2e-11,
+      "atol_position_m": 0.0001,
+      "atol_velocity_m_s": 1e-7,
+      "max_step_s": 20
+    },
+    "refined": {
+      "rtol": 2e-12,
+      "atol_position_m": 0.00001,
+      "atol_velocity_m_s": 1e-8,
+      "max_step_s": 10
+    }
+  },
+  "numerical_acceptance_limits": {
+    "refinement_position_m": 0.05,
+    "refinement_velocity_m_s": 0.00005
+  },
+  "rows": [
+    {
+      "degree": 0,
+      "nominal": {
+        "final_state_j2000": [
+          -1202578.8033487748,
+          1279904.359432146,
+          540081.2573561395,
+          24.670398105130378,
+          -615.2616818677877,
+          1513.0037853932486
+        ],
+        "elapsed_s": 0.032147400000000007,
+        "integration": {
+          "steps": 354,
+          "rejected": 0,
+          "evaluations": 2478,
+          "min_moon_distance_m": 1837343.0703570484,
+          "min_earth_distance_m": 400683981.06173366
+        },
+        "gravity": {
+          "calls": 2478,
+          "hessian_calls": 0,
+          "cpu_ms": 10.404799999999454
+        }
+      },
+      "refined": {
+        "final_state_j2000": [
+          -1202578.8033409722,
+          1279904.3594086377,
+          540081.2573919769,
+          24.670398129739674,
+          -615.2616818957385,
+          1513.0037853867518
+        ],
+        "elapsed_s": 0.030912800000000004,
+        "integration": {
+          "steps": 707,
+          "rejected": 0,
+          "evaluations": 4949,
+          "min_moon_distance_m": 1837343.0673118057,
+          "min_earth_distance_m": 400683981.0617432
+        },
+        "gravity": {
+          "calls": 4949,
+          "hessian_calls": 0,
+          "cpu_ms": 7.25980000000294
+        }
+      },
+      "numerical_refinement_difference": {
+        "position_m": 0.00004356416864464545,
+        "velocity_m_s": 3.7803087689583514e-8
+      },
+      "degree_difference_from_refined_N90": {
+        "position_m": 2651.6249390161915,
+        "velocity_m_s": 2.3819210311511236
+      },
+      "change_from_previous_degree": null
+    },
+    {
+      "degree": 20,
+      "nominal": {
+        "final_state_j2000": [
+          -1203024.637723743,
+          1278515.0166003525,
+          542330.9997937719,
+          26.101281495005043,
+          -617.0130596536486,
+          1512.2792492848598
+        ],
+        "elapsed_s": 0.03194929999999999,
+        "integration": {
+          "steps": 354,
+          "rejected": 0,
+          "evaluations": 2478,
+          "min_moon_distance_m": 1836685.6925558955,
+          "min_earth_distance_m": 400683940.3864921
+        },
+        "gravity": {
+          "calls": 2478,
+          "hessian_calls": 0,
+          "cpu_ms": 17.710400000000618
+        }
+      },
+      "refined": {
+        "final_state_j2000": [
+          -1203024.637715895,
+          1278515.0165767383,
+          542330.999829678,
+          26.101281519715634,
+          -617.0130596816882,
+          1512.2792492782944
+        ],
+        "elapsed_s": 0.03383330000000001,
+        "integration": {
+          "steps": 707,
+          "rejected": 0,
+          "evaluations": 4949,
+          "min_moon_distance_m": 1836685.68196024,
+          "min_earth_distance_m": 400683940.3865016
+        },
+        "gravity": {
+          "calls": 4949,
+          "hessian_calls": 0,
+          "cpu_ms": 17.368100000002244
+        }
+      },
+      "numerical_refinement_difference": {
+        "position_m": 0.00004368600589653358,
+        "velocity_m_s": 3.7946509596201254e-8
+      },
+      "degree_difference_from_refined_N90": {
+        "position_m": 55.31689563842979,
+        "velocity_m_s": 0.061735266092499345
+      },
+      "change_from_previous_degree": {
+        "from_degree": 0,
+        "position_m": 2681.488920433258,
+        "velocity_m_s": 2.3748060967762576
+      }
+    },
+    {
+      "degree": 30,
+      "nominal": {
+        "final_state_j2000": [
+          -1202967.41776177,
+          1278451.2516855213,
+          542337.9250060742,
+          26.073362248182974,
+          -617.0935125673158,
+          1512.3229094409319
+        ],
+        "elapsed_s": 0.02844240000000002,
+        "integration": {
+          "steps": 354,
+          "rejected": 0,
+          "evaluations": 2478,
+          "min_moon_distance_m": 1836698.426520898,
+          "min_earth_distance_m": 400684018.6599329
+        },
+        "gravity": {
+          "calls": 2478,
+          "hessian_calls": 0,
+          "cpu_ms": 18.548999999998557
+        }
+      },
+      "refined": {
+        "final_state_j2000": [
+          -1202967.4177539363,
+          1278451.2516618087,
+          542337.9250422447,
+          26.073362273054812,
+          -617.0935125955385,
+          1512.3229094342812
+        ],
+        "elapsed_s": 0.04595820000000003,
+        "integration": {
+          "steps": 707,
+          "rejected": 0,
+          "evaluations": 4949,
+          "min_moon_distance_m": 1836698.4080553509,
+          "min_earth_distance_m": 400684018.6599424
+        },
+        "gravity": {
+          "calls": 4949,
+          "hessian_calls": 0,
+          "cpu_ms": 32.3876999999992
+        }
+      },
+      "numerical_refinement_difference": {
+        "position_m": 0.0000439540785647494,
+        "velocity_m_s": 3.820162175995916e-8
+      },
+      "degree_difference_from_refined_N90": {
+        "position_m": 74.66018749412156,
+        "velocity_m_s": 0.04064299088094519
+      },
+      "change_from_previous_degree": {
+        "from_degree": 20,
+        "position_m": 85.95374914239397,
+        "velocity_m_s": 0.09569934640270361
+      }
+    },
+    {
+      "degree": 60,
+      "nominal": {
+        "final_state_j2000": [
+          -1202996.6142639122,
+          1278492.2524104086,
+          542282.9488897938,
+          26.068297229925484,
+          -617.0581962528667,
+          1512.3068292540288
+        ],
+        "elapsed_s": 0.05283670000000001,
+        "integration": {
+          "steps": 354,
+          "rejected": 0,
+          "evaluations": 2478,
+          "min_moon_distance_m": 1836695.7698549943,
+          "min_earth_distance_m": 400683990.0566699
+        },
+        "gravity": {
+          "calls": 2478,
+          "hessian_calls": 0,
+          "cpu_ms": 43.4912000000013
+        }
+      },
+      "refined": {
+        "final_state_j2000": [
+          -1202996.6142560367,
+          1278492.2523859702,
+          542282.9489276563,
+          26.068297255784785,
+          -617.05819628224,
+          1512.3068292470246
+        ],
+        "elapsed_s": 0.11110580000000005,
+        "integration": {
+          "steps": 707,
+          "rejected": 0,
+          "evaluations": 4949,
+          "min_moon_distance_m": 1836695.7674240079,
+          "min_earth_distance_m": 400683990.05667937
+        },
+        "gravity": {
+          "calls": 4949,
+          "hessian_calls": 0,
+          "cpu_ms": 92.90639999999519
+        }
+      },
+      "numerical_refinement_difference": {
+        "position_m": 0.00004574737990315817,
+        "velocity_m_s": 3.975623789301679e-8
+      },
+      "degree_difference_from_refined_N90": {
+        "position_m": 5.484532631226655,
+        "velocity_m_s": 0.004774109349926865
+      },
+      "change_from_previous_degree": {
+        "from_degree": 30,
+        "position_m": 74.5376971197173,
+        "velocity_m_s": 0.03913398532160976
+      }
+    },
+    {
+      "degree": 90,
+      "nominal": {
+        "final_state_j2000": [
+          -1203001.0837867172,
+          1278493.05103983,
+          542286.0255194479,
+          26.067141074147393,
+          -617.0590530297357,
+          1512.3022771824942
+        ],
+        "elapsed_s": 0.10466449999999998,
+        "integration": {
+          "steps": 354,
+          "rejected": 0,
+          "evaluations": 2478,
+          "min_moon_distance_m": 1836693.3616156548,
+          "min_earth_distance_m": 400683985.70833755
+        },
+        "gravity": {
+          "calls": 2478,
+          "hessian_calls": 0,
+          "cpu_ms": 97.47649999999965
+        }
+      },
+      "refined": {
+        "final_state_j2000": [
+          -1203001.083778825,
+          1278493.0510150024,
+          542286.0255582642,
+          26.067141100596373,
+          -617.0590530597377,
+          1512.3022771752342
+        ],
+        "elapsed_s": 0.19165,
+        "integration": {
+          "steps": 707,
+          "rejected": 0,
+          "evaluations": 4949,
+          "min_moon_distance_m": 1836693.3242186147,
+          "min_earth_distance_m": 400683985.70834696
+        },
+        "gravity": {
+          "calls": 4949,
+          "hessian_calls": 0,
+          "cpu_ms": 178.63600000000076
+        }
+      },
+      "numerical_refinement_difference": {
+        "position_m": 0.00004674837407165291,
+        "velocity_m_s": 4.064948896884678e-8
+      },
+      "degree_difference_from_refined_N90": {
+        "position_m": 0,
+        "velocity_m_s": 0
+      },
+      "change_from_previous_degree": {
+        "from_degree": 60,
+        "position_m": 5.484532631226655,
+        "velocity_m_s": 0.004774109349926865
+      }
+    }
+  ],
+  "checks": [
+    {
+      "degree": 0,
+      "pass": true
+    },
+    {
+      "degree": 20,
+      "pass": true
+    },
+    {
+      "degree": 30,
+      "pass": true
+    },
+    {
+      "degree": 60,
+      "pass": true
+    },
+    {
+      "degree": 90,
+      "pass": true
+    }
+  ],
+  "passed": true,
+  "degree_monotonicity": {
+    "position_difference_increases": [
+      {
+        "from_degree": 20,
+        "to_degree": 30,
+        "previous_difference": 55.31689563842979,
+        "new_difference": 74.66018749412156
+      }
+    ],
+    "velocity_difference_increases": [],
+    "interpretation": "Differences are measured against finite N90, not physical truth. Degree convergence need not be monotonic: harmonic contributions can reinforce or cancel. This single phase/orbit cannot certify a default degree for all missions."
+  },
+  "limitations": [
+    "Both numerical-refinement trajectories use the same integrator and model implementation; independent acceleration verification is documented separately.",
+    "No landing, low-altitude descent, fuel or optimal-control comparison is performed by this short coast report.",
+    "Step refinement error is separate from harmonic truncation and physical/model uncertainties.",
+    "Node elapsed time is not a browser performance guarantee; other concurrent tasks can influence timing."
+  ],
+  "total_elapsed_s": 0.7012244000000001
+}

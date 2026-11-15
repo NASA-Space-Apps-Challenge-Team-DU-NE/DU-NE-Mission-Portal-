@@ -679,3 +679,12 @@ body.fs .rsz{display:none}
 /* 단계 목록 경고: 빨간 점 대신 경고 삼각형(느낌표) */
 .step .dot.warn{width:15px;height:13px;margin-top:3px;border-radius:0;background:none;color:var(--warn);display:inline-flex;line-height:0}
 .side.collapsed .step .dot.warn{top:4px;right:6px}
+
+/* Embedded Orbit owns its own Three renderer and CSS document. */
+.app.mode-plan.orbit-page{grid-template-columns:var(--side-w,236px) minmax(0,1fr)}
+.orbit-fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:14px;margin:14px 0}
+.orbit-fields label{display:flex;flex-direction:column;gap:6px}.orbit-fields .field{width:100%;min-width:0}
+.orbit-warning{padding:10px 12px;background:var(--amber-bg,#fff3da);border:1px solid var(--amber,#a97625);border-radius:8px;font-size:13px}
+.orbit-coverage{margin:12px 0}.orbit-frame{border:0;width:100%;min-height:1100px;display:block;background:#fff;border-radius:10px}
+.orbit-summary{display:flex;gap:10px 20px;flex-wrap:wrap}.orbit-summary span{font-size:13px}.orbit-actions{margin:12px 0;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:960px){.app.mode-plan.orbit-page{grid-template-columns:minmax(0,1fr)}.orbit-frame{min-height:1550px}.orbit-fields{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}}

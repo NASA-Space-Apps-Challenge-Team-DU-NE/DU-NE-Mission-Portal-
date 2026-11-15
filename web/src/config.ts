@@ -1,3 +1,4 @@
+import { ORBIT_DEFAULT, defaultPropulsion } from './orbit/model';
 // 설정값 한 곳 (CLAUDE.md 1.1). 팀이 확정하지 않은 값은 PROVISIONAL — 화면에서 바꿀 수 있게 한다.
 import type { HardFilters, MapWeights, Requirements, ScenarioWeights } from './core/types';
 
@@ -28,7 +29,7 @@ export const DEFAULT_MAP_WEIGHTS: MapWeights = { power: 40, comm: 25, water: 20,
 /** PROVISIONAL: UI 예시 기본값 (일조 ≥ 60%, 경사 90분위 ≤ 15°) */
 export const DEFAULT_FILTERS: HardFilters = { min_illum_frac: 0.6, max_slope_deg: 15 };
 /** UI 예시 기본 착륙 시각 (천체력 표 범위 안) · 기본 착륙지 */
-export const DEFAULT_LANDING_UTC = '2026-12-02T00:00:00Z';
+export const DEFAULT_LANDING_UTC = ORBIT_DEFAULT.target.landing_time_utc;
 export const DEFAULT_SITE_ID = 'connecting_ridge';
 
 
@@ -73,5 +74,5 @@ export const POWER_KINDS: Record<PowerKind, { name: string; desc: string; needsS
 export const DEFAULT_POWER_SOURCE: PowerSource = { kind: 'solar', output_w: 300, fuel_wh: 50000 };
 
 /** 착륙선 질량·추진 (01 착륙선 정보, 궤도 분석에서 쓸 예정). 공개 근거 없음 → 모두 PROVISIONAL */
-export interface LanderExtra { dry_mass_kg: number; prop_mass_kg: number; thrust_n: number; isp_s: number }
-export const DEFAULT_LANDER_EXTRA: LanderExtra = { dry_mass_kg: 700, prop_mass_kg: 1300, thrust_n: 4400, isp_s: 320 };
+export interface LanderExtra { dry_mass_kg: number; prop_mass_kg: number; thrust_n: number; min_thrust_n: number; isp_s: number }
+export const DEFAULT_LANDER_EXTRA: LanderExtra = defaultPropulsion();

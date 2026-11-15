@@ -1,0 +1,1440 @@
+{
+  "generated_at_utc": "2026-11-15T07:55:36.390Z",
+  "runtime": "v24.15.0",
+  "elapsed_s": 27.0858211,
+  "trajectory_sample_count": 0,
+  "full_result_sha256": "232f2a369846027fc58c9f13ca9a8092da7658ce8fda746c9486bb4404b5c9c4",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 30,
+      "max_iterations": 1
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "TRANSFER NOT CONVERGED",
+  "message": "Time budget reached. No complete finite-burn mission passed the checks in the attempted candidate set. This is not proof of physical impossibility.",
+  "summary": {
+    "gravity_model": "grail",
+    "gravity_degree": 30,
+    "gravity_calls": 2641162,
+    "gravity_cpu_ms": 19483.93249999932,
+    "gravity_source": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml",
+    "gravity_static_tides_omitted": true,
+    "mission_elapsed_ms": 27000.491599999998
+  },
+  "validation": {},
+  "reference": {
+    "mode": "EPHEMERIS",
+    "mode_b_implemented": true,
+    "epoch_utc": "2026-11-01T00:00:00Z",
+    "gravity": {
+      "model": "grail",
+      "degree": 30,
+      "gm_m3_s2": 4902800306330.2,
+      "reference_radius_m": 1738000,
+      "frame": "MOON_PA_DE440",
+      "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml"
+    }
+  },
+  "joint_search": {
+    "objective": "delta_v",
+    "score_definition": "All-burn characteristic delta-V",
+    "transfer_grid_days": [
+      0.3,
+      0.6375,
+      0.9750000000000001,
+      1.3125000000000002,
+      1.6500000000000001,
+      1.9875,
+      2.325,
+      2.6625,
+      3
+    ],
+    "search_order": "All headings, coarse flight-time grid first; remaining grid times second; remaining converged seeds last",
+    "landing_candidates": 44,
+    "landing_candidates_screened": 20,
+    "seed_batches_evaluated": 20,
+    "finite_candidates_attempted": 0,
+    "validated_candidates": 0,
+    "search_complete": false,
+    "search_timed_out": true,
+    "global_optimality_proven": false,
+    "candidates": [],
+    "seed_screening": [
+      {
+        "round": 0,
+        "heading_deg": 90,
+        "phase_factor": 1.1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 97995.95178531826
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6846343.428052186
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4175817.2384498985
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 10680322.832365304
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 180,
+        "phase_factor": 1.1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 3509798.6862196256
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 5079291.132485124
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6001355.205774979
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 14960523.164656019
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16403936.61807373
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 270,
+        "phase_factor": 1.1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 93630.82125063213
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1546380.76279524
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7526517.448628999
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 12862038.131929757
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 18027552.305996604
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 0,
+        "phase_factor": 1.1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 76952.01525079415
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4115962.339835225
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6695513.522677992
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16288066.449075406
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 90,
+        "phase_factor": 1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "position_error_m": 104372.64669615387
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6775443.433082752
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4269824.520091291
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 11033892.246768545
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 180,
+        "phase_factor": 1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1616301.4796029616
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4865868.748313004
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6170548.718997571
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16408821.748946473
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 270,
+        "phase_factor": 1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 93363.57942609498
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1576964.9982678187
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7417751.436382527
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 13102490.262713527
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 18029230.30919313
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 0,
+        "phase_factor": 1,
+        "powered_duration_s": 260,
+        "candidates": [
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 76707.70808887994
+          },
+          {
+            "departure_time_s": 1266228.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4107435.5953386985
+          },
+          {
+            "departure_time_s": 1149588.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6697334.460048418
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032948.1641641164,
+            "arrival_time_s": 1292148.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16296451.463323226
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 90,
+        "phase_factor": 1.1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 134778.76649362105
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7061557.295878173
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 3876865.329228434
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 9344893.867513869
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 180,
+        "phase_factor": 1.1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6614632.944171243
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4394509.293551472
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16374598.405731888
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 270,
+        "phase_factor": 1.1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 93455.60606418455
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 5218447.054081006
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1472008.188484855
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7508284.624859804
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 12221547.784534948
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 17972333.874238733
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 0,
+        "phase_factor": 1.1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 77644.98714348346
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4148029.3587697623
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6690368.659741493
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16240647.48104698
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 90,
+        "phase_factor": 1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 122619.78689552932
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6982835.112465248
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 3988906.5456378963
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 9867830.153809087
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 180,
+        "phase_factor": 1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 5806096.6779472865
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 5338536.601084822
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16382777.737282027
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 270,
+        "phase_factor": 1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 93795.15150866006
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4624714.541532465
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1496321.051369322
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7819706.429190636
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 12404315.086133314
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 17998967.028263714
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 0,
+        "phase_factor": 1,
+        "powered_duration_s": 340,
+        "candidates": [
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 77390.4907160095
+          },
+          {
+            "departure_time_s": 1266148.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4136026.775779313
+          },
+          {
+            "departure_time_s": 1149508.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6691732.5884312475
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032868.1641641164,
+            "arrival_time_s": 1292068.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16255938.61658881
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 90,
+        "phase_factor": 1.1,
+        "powered_duration_s": 440,
+        "candidates": [
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 125551.28490863812
+          },
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7283504.690975519
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 3544772.49093809
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7390168.520002635
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 180,
+        "phase_factor": 1.1,
+        "powered_duration_s": 440,
+        "candidates": [
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 3289112.5120898723
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 8341913.104905807
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1240162.3419142999
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 16330830.341312198
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 270,
+        "phase_factor": 1.1,
+        "powered_duration_s": 440,
+        "candidates": [
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 91380.6368030938
+          },
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 1423490.8104897523
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 7405755.790852448
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 17810288.32407108
+          }
+        ]
+      },
+      {
+        "round": 0,
+        "heading_deg": 0,
+        "phase_factor": 1.1,
+        "powered_duration_s": 440,
+        "candidates": [
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 78402.89735821028
+          },
+          {
+            "departure_time_s": 1266048.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 0.3,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 0,
+            "error": "Mode B adaptive integration minimum step reached."
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 4191036.649610224
+          },
+          {
+            "departure_time_s": 1149408.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 1.6500000000000001,
+            "branch": "long",
+            "converged": false,
+            "valid": false,
+            "iterations": 1,
+            "position_error_m": 6680997.334556241
+          },
+          {
+            "departure_time_s": 1032768.1641641164,
+            "arrival_time_s": 1291968.1641641164,
+            "tof_days": 3,
+            "branch": "short",
+            "converged": false,
+            "valid": false,
+            "iterations": 0
+          }
+        ]
+      }
+    ]
+  }
+}

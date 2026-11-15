@@ -1,0 +1,10 @@
+import React from 'react';
+import { startOrbitI18n } from './i18n/dom';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import PortalEmbed from './integration/PortalEmbed';
+import './integration/embedded.css';
+import './styles.css';
+import './portal-theme.css';
+if (new URLSearchParams(window.location.search).get('embed') === 'portal') startOrbitI18n();
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode>{new URLSearchParams(window.location.search).get('embed') === 'portal' ? <PortalEmbed /> : <App />}</React.StrictMode>);

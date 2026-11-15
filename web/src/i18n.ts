@@ -4,6 +4,7 @@
 // - 표에 없는 문구는 한국어로 남는다. "한국어 (English)" 꼴 이름은 괄호 안 영어를 쓴다.
 import { create } from 'zustand';
 import { EN } from './i18n-en';
+import { translateOrbit } from '../../orbit/frontend/src/i18n/translate';
 
 export type Lang = 'en' | 'ko';
 const HANGUL = /[가-힣]/;
@@ -20,6 +21,11 @@ try { const v = localStorage.getItem('dune.lang'); if (v === 'ko' || v === 'en')
 /** 한 문자열을 지금 언어로 */
 export function tx(s: string): string {
   if (cur !== 'en' || !s || !HANGUL.test(s)) return s;
+  const original = s.trim();
+  if (EN[original] !== undefined) return s.replace(original, EN[original]);
+  const orbitText = translateOrbit(s, 'en');
+  // Incomplete Orbit substitutions must not split an existing portal phrase.
+  if (orbitText !== s && !HANGUL.test(orbitText)) return orbitText;
   const t = s.trim();
   if (EN[t] !== undefined) return s.replace(t, EN[t]);
   const m = t.match(PAREN);

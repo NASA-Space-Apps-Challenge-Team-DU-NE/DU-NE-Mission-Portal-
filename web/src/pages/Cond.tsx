@@ -1,3 +1,4 @@
+import OrbitSettingsCard from '../orbit/OrbitSettingsCard';
 // 01 임무 설정: [임무 프로파일] 미션 프로파일(P2-03), 필수 조건·가중치(P1-18), 임무 기간·통신 여유각(P1-16)
 //              [착륙선 정보] 착륙선 프리셋(P1-29), 발전 방식, 전력·통신, 질량·추력(궤도 분석용)
 import { Card, Help, Seg, pct } from '../components/kit';
@@ -105,7 +106,7 @@ function ProfileTab() {
 }
 
 const EXTRA: Array<[keyof LanderExtra, string, number]> = [
-  ['dry_mass_kg', '건조 질량 (kg)', 10], ['prop_mass_kg', '추진제 질량 (kg)', 10], ['thrust_n', '주 엔진 추력 (N)', 10], ['isp_s', '비추력 Isp (s)', 1],
+  ['dry_mass_kg', '건조 질량 (kg)', 10], ['prop_mass_kg', '추진제 질량 (kg)', 10], ['thrust_n', '최대 엔진 추력 (N)', 10], ['min_thrust_n', '최소 엔진 추력 (N)', 10], ['isp_s', '비추력 Isp (s)', 1],
 ];
 const num = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? v : '');
 const PRESET_HELP = '태양전지 착륙선 대표 유형 4종입니다. 고르면 발전 방식(태양전지), 패널 면적·효율, 배터리, 소비 전력, 전송 속도가 그 유형의 근사값으로 바뀝니다. 질량·추진과 기지 필요 전력은 유형별 예시 자료가 없어 프리셋과 상관없이 따로 정합니다. 숫자를 바꾸면 04 임무 분석의 타임랩스가 바로 다시 계산됩니다.';
@@ -179,7 +180,7 @@ export default function Cond() {
       <div className="tabs pagetabs" role="tablist">
         {([['profile', '임무 프로파일'], ['lander', '착륙선 정보']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={ui.condTab === k} onClick={() => ui.set({ condTab: k })}>{l}</button>)}
       </div>
-      {ui.condTab === 'profile' ? <ProfileTab /> : <LanderTab />}
+      {ui.condTab === 'profile' ? <ProfileTab /> : <><LanderTab /><OrbitSettingsCard /></>}
     </>
   );
 }

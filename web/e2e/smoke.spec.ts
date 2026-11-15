@@ -5,7 +5,8 @@ test('9개 단계와 기본 조작', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   page.on('console', (m) => m.type() === 'error' && !m.text().includes('404') && errors.push(m.text()));
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
+  await page.addInitScript(() => localStorage.setItem('dune.lang', 'ko'));
+  await page.goto('/?p=cond', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('button', { name: '순위 CSV', exact: true })).toBeEnabled();
   const steps = page.locator('nav.side .step');
   await expect(steps).toHaveCount(9);

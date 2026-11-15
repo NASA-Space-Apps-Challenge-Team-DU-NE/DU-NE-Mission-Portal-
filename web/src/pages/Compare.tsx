@@ -1,6 +1,7 @@
+import { parseConfig } from '../orbit/model';
 // 07 후보 비교: 비교 보드(P1-37), 시나리오 A/B(P1-38), 빛 쌍둥이(P3-04), 과학·공학 균형(P3-06)
 import { useEffect, useMemo, useState } from 'react';
-import { Card, Help, NoData, ScoreChip, hrs, km, pct, utc, Empty } from '../components/kit';
+import { Card, Help, NoData, ScoreChip, hrs, km, pct, utc, Empty, toast } from '../components/kit';
 import { BandChart, Scatter } from '../components/viz';
 import { FEATURES } from '../config';
 import { rankCells, scoreGrid, type DynamicLayers } from '../core/gridScore';
@@ -51,7 +52,8 @@ function Col({ sc, best, onScore }: { sc: Scenario; best: boolean; onScore(id: s
       ) : <NoData what="계산 중" />}
       <div style={{ padding: 8 }}>
         {band ? <BandChart h={40} times={band.map((p) => p.t)} rows={[{ label: '햇빛', values: band.map((p) => p.sun_frac), color: '--sun', grad: true }, { label: '지구', values: band.map((p) => (p.earth_visible ? 1 : 0)), color: '--earth' }]} /> : null}
-        <button className="btn sm" style={{ marginTop: 6, width: '100%', justifyContent: 'center' }} onClick={() => { app.setSite(ref); app.setLanding(landing); app.setT(landing); app.setDuration(sc.duration_h); app.setMargin(margin); }}>이 안으로 바꾸기</button>
+        <p className="tiny muted">{sc.orbit_input ? '추진·궤도 입력 스냅샷 포함 · 궤도 결과는 재계산' : '궤도 입력 없음 · 표면 운용 비교'}</p>
+        <button className="btn sm" style={{ marginTop: 6, width: '100%', justifyContent: 'center' }} onClick={() => { try { if (sc.orbit_input) app.applyOrbitConfig(parseConfig(sc.orbit_input), ref); else { app.setSite(ref); app.setLanding(landing); app.setT(landing); toast('저장된 궤도 입력이 없습니다. 01에서 추진·궤도 조건을 확인하세요.'); } app.setDuration(sc.duration_h); app.setMargin(margin); } catch (e) { toast(String(e)); } }}>이 안으로 바꾸기</button>
       </div>
     </div>
   );

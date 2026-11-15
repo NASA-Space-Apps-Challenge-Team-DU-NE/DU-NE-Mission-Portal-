@@ -289,6 +289,8 @@ export interface ScenarioWeights {
 
 export type ScenarioOrigin = 'user' | 'alternative' | 'template' | 'mission' | 'search';
 export interface Scenario {
+  /** Versioned Orbit Config snapshot. Validated by the integration boundary before use. */
+  orbit_input?: unknown;
   id: string;
   name: string;
   site: Site;

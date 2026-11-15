@@ -1,0 +1,32 @@
+{
+  "generated_at_utc": "2026-11-15T10:23:29.639518+00:00",
+  "regression_passed": true,
+  "fixture_sha256": "ea03822772b6a939ba7986d7b7cc7443812adf7453df45d63b644bcc249da63a",
+  "initial_state_scope": "Saved historical PDI state only; no full NRHO-chain revalidation",
+  "method": "Independent SciPy DOP853, angular GRAIL evaluator, direct SPICE, native LOLA",
+  "audit": {
+    "passed": false,
+    "checks": {
+      "finite_terrain_samples": true,
+      "native_terrain_below_12km": true,
+      "dense_inspection": true,
+      "terminal_duration_and_direction": true,
+      "low_altitude_speed": false,
+      "thrust_tilt": false,
+      "contact": false
+    },
+    "samples": 2112,
+    "policy": "demo-terminal-v1",
+    "speed_violation_count": 296,
+    "tilt_violation_count": 348,
+    "premature_contact_samples": 10,
+    "penetration_samples": 11,
+    "final_thrust_tilt_deg": 70.80452366643101,
+    "final_contact_clearance_m": -2.0000002255062554,
+    "terminal_duration_s": 28.515325670596212,
+    "coarse_terrain_samples_above_12km": 0,
+    "coarse_terrain_samples_below_12km": 0,
+    "global_terrain_sha256": "bd8384500762d3686c9297e67ec7be92e129b8cf2c19f2e72abbd5471db64647",
+    "scope": "Dense DOP853 states, direct SPICE frame and original 240m LOLA below 12km and integrity-checked conservative global DEM above; radial 2m support-point proxy only."
+  }
+}
