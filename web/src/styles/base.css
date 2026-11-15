@@ -658,3 +658,9 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 .combo-k small{font-size:11px;color:var(--muted)}
 .view .axl{position:absolute;left:0;top:0;pointer-events:none;font:600 10.5px var(--f-mono);color:#d8d8d8;background:rgba(0,0,0,.7);padding:1px 5px;border:1px solid #3d3d42;white-space:nowrap}
 body.fs .rsz{display:none}
+/* 3D 캔버스가 자기 크기로 칸을 키우지 않게 (좁은 화면에서 높이가 끝없이 늘던 문제) */
+#gl{position:absolute;inset:0}
+@media (max-width:1050px){
+  .app.mode-explore .rail{height:calc(100vh - 96px)}
+  .app.mode-plan .rail{grid-template-rows:440px auto}
+}

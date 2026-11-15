@@ -386,6 +386,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       // 화면에서 달이 작아지면(멀리서 볼 때) 표지가 달을 덮으므로 숨긴다. 기준은 화면 위 달 반지름(px)
       const cd = cam.position.length(), moonPx = (H / 2) / Math.tan((cam.fov / 2) * D2R) / Math.sqrt(Math.max(1e-6, cd * cd - 1));
       const far = moonPx < 70;
+      // 멀리서 볼 때는 자전축 선도 숨긴다 (다음 화면부터 반영)
+      if (axis.visible === far) { axis.visible = !far; g.dirty = true; }
       vw.closest('.moon')?.classList.toggle('far', far); // 멀리서 볼 때는 위쪽 단추 줄만 남긴다 (CSS)
       let html = '';
       for (const it of items) {
@@ -419,9 +421,9 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       };
       if (!far) body(sd, g.dS, 'sun', '☀ 태양', now ? `고도 ${now.sun.el_deg.toFixed(1)}°` : '');
       // 자전축 끝 표시 (N·S)
-      if (!far) for (const [y, lb] of [[1.36, 'N 북극'], [-1.36, 'S 남극']] as Array<[number, string]>) {
+      if (!far) for (const [y, lb] of [[1.36, 'N'], [-1.36, 'S']] as Array<[number, string]>) {
         const p = proj(new THREE.Vector3(0, y, 0));
-        if (p.z < 1 && p.x > 0 && p.x < W && p.y > 0 && p.y < H) html += `<div class="axl" style="transform:translate(${(p.x - 18).toFixed(0)}px,${(p.y - 9).toFixed(0)}px)">${lb}</div>`;
+        if (p.z < 1 && p.x > 0 && p.x < W && p.y > 0 && p.y < H) html += `<div class="axl" style="transform:translate(${(p.x - 7).toFixed(0)}px,${(p.y - 9).toFixed(0)}px)">${lb}</div>`;
       }
       if (!far) body(ed, g.dE, 'earth act', '◉ 지구', now ? `고도 ${now.earth.el_deg.toFixed(1)}°` : '');
       o.innerHTML = html;
