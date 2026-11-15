@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { moonEcef } from '../core/stations';
 import type { Station } from '../core/types';
 import { useApp } from '../state/store';
+import { playClock } from '../state/playClock';
 import { useUi } from '../state/ui';
 import { toast } from './kit';
 
@@ -117,10 +118,11 @@ export function EarthGlobe({ stations }: { stations: Array<Station & { custom?: 
     const loop = () => {
       raf = requestAnimationFrame(loop);
       if (EGV.target) { const T = EGV.target, dl = wrap180(T.lon - EGV.lon); EGV.lat += (T.lat - EGV.lat) * 0.12; EGV.lon += dl * 0.12; EGV.dist += (T.dist - EGV.dist) * 0.12; if (Math.abs(T.lat - EGV.lat) < 0.05 && Math.abs(dl) < 0.05) EGV.target = null; EGV.dirty = true; }
+      if (playClock.playing) EGV.dirty = true;
       if (!EGV.dirty) return;
       EGV.dirty = false;
       cam.position.copy(v3(EGV.lat, EGV.lon, EGV.dist)); cam.lookAt(0, 0, 0);
-      const tt = live.current.t, d = new Date(tt), doy = (tt - Date.UTC(d.getUTCFullYear(), 0, 1)) / DAY, h0 = d.getUTCHours() + d.getUTCMinutes() / 60;
+      const tt = playClock.playing ? playClock.t : live.current.t, d = new Date(tt), doy = (tt - Date.UTC(d.getUTCFullYear(), 0, 1)) / DAY, h0 = d.getUTCHours() + d.getUTCMinutes() / 60;
       (uni.sunDir.value as THREE.Vector3).copy(v3(23.44 * Math.sin((2 * Math.PI * (doy - 80)) / 365.25), -(h0 - 12) * 15, 1)); // 태양 직하점 근사 (조명 표현용)
       renderer.render(scene, cam);
       const o = ovl.current;

@@ -8,6 +8,7 @@ import { useSiteWarnings, useEval, usePower, useSim } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite } from '../state/hooks';
 import { useApp, type PageId } from '../state/store';
+import { playClock } from '../state/playClock';
 import { PROFILE_UI, STEPS, useUi } from '../state/ui';
 import { HOMEPAGE_URL, POWER_KINDS } from '../config';
 import { useLang } from '../i18n';
@@ -127,11 +128,21 @@ export function TimeBar() {
   const span = Math.max(720, app.duration_h);
   const rel = (app.t - app.landing) / HOUR_MS;
 
-  // 재생 (220 ms 마다 speed 시간씩, 끝나면 착륙 시각으로)
+  // 재생: 3D 화면은 매 프레임 부드럽게(playClock), 계산용 시각(store t)은 220 ms 마다 그 값으로 맞춘다.
+  // 빠르기는 예전과 같다 (220 ms 에 speed 시간). 끝나면 착륙 시각으로 돌아간다.
   useEffect(() => {
-    if (!app.playing) return;
-    const id = setInterval(() => useApp.setState((st) => { let t = st.t + st.speed_h * HOUR_MS; if (t > st.landing + Math.max(720, st.duration_h) * HOUR_MS) t = st.landing; return { t }; }), 220);
-    return () => clearInterval(id);
+    if (!app.playing) { playClock.playing = false; return; }
+    playClock.t = useApp.getState().t; playClock.playing = true;
+    let raf = 0, last = performance.now(), sync = last;
+    const tick = (now: number) => {
+      const st = useApp.getState();
+      playClock.t += ((now - last) / 220) * st.speed_h * HOUR_MS; last = now;
+      if (playClock.t > st.landing + Math.max(720, st.duration_h) * HOUR_MS) playClock.t = st.landing;
+      if (now - sync >= 220) { sync = now; useApp.setState({ t: Math.round(playClock.t / 60000) * 60000 }); }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => { cancelAnimationFrame(raf); playClock.playing = false; };
   }, [app.playing]);
 
   return (

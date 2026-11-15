@@ -15,6 +15,7 @@ import { useResolvedSite, useSiteCtx } from '../state/hooks';
 import { useNormLayer } from '../state/layerNorm';
 import { LAYER_UI } from '../state/layerUi';
 import { useApp } from '../state/store';
+import { playClock } from '../state/playClock';
 import { useUi } from '../state/ui';
 import { rampRGB } from './kit';
 import { useArtemisVintage } from '../state/artemis';
@@ -332,12 +333,13 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         const camOk = !T || (g.pos.angleTo(v3(T.lat, T.lon)) < 0.02 && Math.abs(T.dist - g.dist) < 0.04 * T.dist);
         if (near && camOk) { const f = g.onArrive; g.onArrive = null; g.k = 0.14; f(); }
       }
+      if (playClock.playing) g.dirty = true; // 재생 중에는 매 프레임 그린다
       if (!g.dirty) return;
       g.dirty = false;
       cam.position.copy(g.pos).multiplyScalar(g.dist).add(g.look);
       cam.up.copy(g.up);
       cam.lookAt(g.look);
-      const L = live.current, b = L.eph.bodyVectors(L.t), sd = meToThree(b.sun), ed = meToThree(b.earth);
+      const L = live.current, T0 = playClock.playing ? playClock.t : L.t, b = L.eph.bodyVectors(T0), sd = meToThree(b.sun), ed = meToThree(b.earth);
       (uni.sunDir.value as THREE.Vector3).copy(sd);
       const kmE = Math.hypot(...b.earth), kmS = Math.hypot(...b.sun);
       const dE = view.real ? kmE / R_MOON_KM : COMPACT.earth, rE = view.real ? R_EARTH_KM / R_MOON_KM : COMPACT.earth * (R_EARTH_KM / kmE);
@@ -346,8 +348,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       sunDisc.position.copy(sd).multiplyScalar(dS); sunDisc.scale.set(2 * rS, 2 * rS, 1);
       sunGlow.position.copy(sd).multiplyScalar(dS * 1.0001); sunGlow.scale.set(2 * rS * 9, 2 * rS * 9, 1);
       // 지구 자전: 극 = J2000 z축, 본초자오선 = 그리니치 평균 항성시(GMST) 방향을 달 고정 좌표로 옮김
-      { const jd = L.t / 86400000 + 2440587.5, gm = (280.46061837 + 360.98564736629 * (jd - 2451545)) * D2R;
-        const P = meRaw(j2000ToMoonFixed(L.t, [0, 0, 1])).normalize(), M = meRaw(j2000ToMoonFixed(L.t, [Math.cos(gm), Math.sin(gm), 0]));
+      { const jd = T0 / 86400000 + 2440587.5, gm = (280.46061837 + 360.98564736629 * (jd - 2451545)) * D2R;
+        const P = meRaw(j2000ToMoonFixed(T0, [0, 0, 1])).normalize(), M = meRaw(j2000ToMoonFixed(T0, [Math.cos(gm), Math.sin(gm), 0]));
         M.sub(P.clone().multiplyScalar(M.dot(P))).normalize();
         const E = new THREE.Vector3().crossVectors(P, M);
         earth.matrix.makeBasis(M.multiplyScalar(rE), P.multiplyScalar(rE), E.multiplyScalar(-rE)).setPosition(ed.clone().multiplyScalar(dE));
@@ -407,7 +409,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         const act = cls.includes(' act') ? ' data-act="earth" title="지구로 가서 지상국 통신 창 보기"' : '';
         html += `<div class="chipb ${cls.replace(' act', '')}${act ? ' go' : ''}" style="transform:translate(${x.toFixed(0)}px,${y.toFixed(0)}px)"${act}>${inner}</div>`;
       };
-      const now = L.ctx ? skyState(L.ctx.frame, L.ctx.mask, L.ctx.eph, L.t, L.ctx.margin_deg) : null;
+      const now = L.ctx ? skyState(L.ctx.frame, L.ctx.mask, L.ctx.eph, playClock.playing ? playClock.t : L.t, L.ctx.margin_deg) : null;
       const body = (dir: THREE.Vector3, dist: number, cls: string, name: string, el: string) => {
         const p = proj(dir.clone().multiplyScalar(dist));
         const inside = p.z < 1 && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30;
