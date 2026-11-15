@@ -565,3 +565,6 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 /* 달이 화면에서 아주 작아지면(멀리서 볼 때) 위쪽 단추 줄만 남기고 나머지를 숨긴다 */
 .moon .pick,.moon .vleg,.moon .scale-note,.moon .mctl,.moon .timebar{transition:opacity .3s}
 .moon.far .pick,.moon.far .vleg,.moon.far .scale-note,.moon.far .mctl,.moon.far .timebar,.moon.far .hint{opacity:0;pointer-events:none}
+
+/* 지구 방향 표시: 형광 청록 대신 차분한 회청색 (어두운 배경에서 읽히되 튀지 않게) */
+.chipb.earth{color:#93A8B6}
