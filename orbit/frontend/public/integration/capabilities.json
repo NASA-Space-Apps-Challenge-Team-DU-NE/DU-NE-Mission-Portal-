@@ -1,6 +1,6 @@
 {
   "protocol": "dune-orbit-bridge.v1",
-  "buildId": "c4e126c7b8150ebe690db22f74497d5b81db5130e7bd97fa101d34c2e7de83e0",
+  "buildId": "1a4bd5e8ae858f5e4b0b978808643c0fe81ffd5761e6a197a69d637b781b932e",
   "upstream": "7d69425493ede243ddd79ab2c87a6169e52c07bf",
   "landing_coverage_utc": [
     "2026-11-01T00:00:00Z",

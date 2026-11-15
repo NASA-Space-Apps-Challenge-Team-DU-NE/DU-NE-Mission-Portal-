@@ -4,3 +4,6 @@
 .orbit-embedded .visual-panel{min-width:0}.orbit-embedded .viewport{min-height:420px}
 .orbit-embedded .footer{margin:12px 0 0;padding:10px;font-size:10px}
 @media(max-width:850px){.orbit-embedded .workspace{grid-template-columns:minmax(0,1fr)}.orbit-embedded .results-panel{max-height:none}.orbit-embedded .viewport{min-height:350px}.orbit-embedded .footer{flex-wrap:wrap;gap:8px}}
+/* 포탈 05 화면(오른쪽 3D 달 패널이 함께 있는 좁은 폭, 851–1280 px)에서도 비행 데이터는 3D 궤도 오른쪽 칸에 둔다.
+   portal-theme.css 의 1280 px 이하 규칙은 비행 데이터를 아래 줄로 내려 오른쪽 칸이 비어 보였다 */
+@media(min-width:851px) and (max-width:1280px){.orbit-embedded .telemetry-panel{grid-column:auto;border-top:1px solid var(--line)}.orbit-embedded .telemetry-scroll,.orbit-embedded .telemetry-scroll:has(.nrho-results){display:block;max-height:1000px;overflow:auto}}

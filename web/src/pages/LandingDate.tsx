@@ -1,7 +1,8 @@
 // 02 착륙지·날짜 고르기의 날짜 부분 (옛 04 착륙 날짜 정하기를 합침). 화면 안 위치에 따라 세 부분으로 나눠 그린다:
 //  part="top"     페이지 맨 위: 착륙 시각 또는 착륙 기간 → (기간이면) 후보 착륙지 × 시작일 점수표 → 검토 중인 조합 → 계획에 적용
 //  part="windows" 지금 계획 카드의 '착륙 윈도' 탭 (P1-21)
-//  part="rest"    맨 아래: 상위 6곳 비교, 역방향 탐색(P2-04)
+//  part="top6"    지금 계획 카드 바로 아래: 상위 6곳 비교
+//  part="reverse" 맨 아래: 역방향 탐색(P2-04)
 import { useEffect, useMemo, useState } from 'react';
 import { Card, Help, NoData, Progress, ScoreChip, Seg, deg, toast, utc, Empty } from '../components/kit';
 import { BandChart } from '../components/viz';
@@ -42,7 +43,7 @@ function longestRun(ok: boolean[]): { len: number; from: number } {
   return best;
 }
 
-export default function LandingDate({ part }: { part: 'top' | 'windows' | 'rest' }) {
+export default function LandingDate({ part }: { part: 'top' | 'windows' | 'top6' | 'reverse' }) {
   const app = useApp();
   const rs = useResolvedSite();
   const ctx = useSiteCtx(rs);
@@ -72,7 +73,7 @@ export default function LandingDate({ part }: { part: 'top' | 'windows' | 'rest'
       .map((w) => ({ ...w, minEl: Math.min(...tl.slice(w.start_index, w.end_index).map((x) => x.sun.el_deg)) }));
   }, [tl, minH]);
   const top6 = useMemo(() => {
-    if (part !== 'rest' || !grid || !res) return [];
+    if (part !== 'top6' || !grid || !res) return [];
     return res.top.slice(0, 6).map((c, i) => {
       const site = { id: `cell_${c.cell}`, name: `#${i + 1}`, category: 'cell' as const, lat_deg: c.lat_deg, lon_deg: c.lon_deg, terrain: 'grid' as const, source_keys: [], verified: true };
       const cx = siteContext(site, cellMask(grid, c.cell), eph, app.margin_deg, grid.manifest.observer_height_m);
@@ -184,13 +185,14 @@ export default function LandingDate({ part }: { part: 'top' | 'windows' | 'rest'
         ) : <Empty>조건에 맞는 윈도가 없습니다. 최소 시간을 줄이거나 기간을 늘려 보세요.</Empty>}
       </div>
   );
-  if (part === 'rest') return (
-    <>
+  if (part === 'top6') return (
       <Card title="상위 6곳 비교" sub="격자 상위 칸">
         <Help>추천 순위 상위 6칸에서 착륙 윈도(초록)가 언제 열리는지 나란히 봅니다.</Help>
         {top6.length ? <BandChart h={170} pick times={top6[0].s.map((x) => x.t)} rows={top6.map((r) => ({ label: r.label, values: r.s.map((p) => (p.sun_frac >= 0.5 && p.earth_visible ? 1 : 0)), color: '--accent' }))} /> : <NoData what="격자 상위 칸" why="01 조건을 만족하는 칸이 없거나 격자 계산 중입니다" />}
       </Card>
-      <Card title="역방향 탐색" tag={<span className="badge">2순위</span>}>
+  );
+  if (part === 'reverse') return (
+      <Card title="역방향 탐색">
         <Help>원하는 조건(01의 요구 조건)을 넣으면 맞는 착륙지와 날짜 구간을 순위로 보여 줍니다. 계산이 많아 버튼을 눌러 실행합니다.</Help>
         <div className="row">
           <label className="small muted">시작일 <input type="date" className="field" value={from} onChange={(e) => setFrom(e.target.value)} /></label>
@@ -215,7 +217,6 @@ export default function LandingDate({ part }: { part: 'top' | 'windows' | 'rest'
           </table></div>
         ) : <Empty>조건을 만족하는 구간이 없습니다</Empty>) : null}
       </Card>
-    </>
   );
   return (
     <>

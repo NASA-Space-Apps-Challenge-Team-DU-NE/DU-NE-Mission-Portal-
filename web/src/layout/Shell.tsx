@@ -30,7 +30,7 @@ function download(name: string, text: string, type: string) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
-/** 처음부터 다시: 누르면 확인을 한 번 더 묻고, 확인하면 주소의 설정을 지우고 새로 연다.
+/** 입력값 초기화: 누르면 확인을 한 번 더 묻고, 확인하면 주소의 설정을 지우고 새로 연다.
  *  (화면 언어와 칸 너비·접기는 그대로 둔다) */
 function StartOver() {
   const [ask, setAsk] = useState(false);
@@ -44,15 +44,15 @@ function StartOver() {
   }, [ask]);
   return (
     <>
-      <button type="button" className="btn sm so-btn" onClick={() => setAsk(true)}>처음부터 다시</button>
+      <button type="button" className="btn sm so-btn" onClick={() => setAsk(true)}>입력값 초기화</button>
       {ask ? (
         <div className="confirm-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) setAsk(false); }}>
           <div className="confirm" role="alertdialog" aria-modal="true" aria-labelledby="so-h" aria-describedby="so-p">
-            <div className="confirm-h" id="so-h">처음부터 다시 시작할까요?</div>
+            <div className="confirm-h" id="so-h">입력값을 초기화할까요?</div>
             <p id="so-p">정한 조건, 착륙지, 착륙 날짜, 기지 배치, 비교 목록, 추가한 지상국이 모두 지워지고 처음 화면으로 돌아갑니다. 되돌릴 수 없습니다.</p>
             <div className="confirm-b">
               <button type="button" className="btn" onClick={() => setAsk(false)}>취소</button>
-              <button type="button" className="btn danger" ref={yes} onClick={() => { window.location.href = window.location.pathname; }}>처음부터 다시</button>
+              <button type="button" className="btn danger" ref={yes} onClick={() => { window.location.href = window.location.pathname; }}>입력값 초기화</button>
             </div>
           </div>
         </div>

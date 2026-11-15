@@ -67,7 +67,7 @@ export default function Missions() {
                   <td className="mono small">{m.lat_deg.toFixed(3)}, {m.lon_deg.toFixed(3)}</td>
                   <td className="mono">{deg(f.sun_el)}</td>
                   <td className="mono">{f.since_sunrise_h == null ? '—' : hrs(f.since_sunrise_h)}</td>
-                  <td><button className="btn sm pri" onClick={() => replay(m)}>그때 하늘 재현</button></td>
+                  <td><button className="btn sm pri" onClick={() => replay(m)}>당시 하늘 재현</button></td>
                 </tr>
               );
             })}</tbody>

@@ -54,7 +54,7 @@ function Hud() {
             <span className="mono tiny muted">{rs.site.lat_deg.toFixed(3)}, {rs.site.lon_deg.toFixed(3)}</span>
             <div className="fk">
               <Kpi l="태양 고도" v={deg(n.sun.el_deg, 2)} tone={n.sun_frac > 0.5 ? 'good' : 'bad'} />
-              <Kpi l="지구" v={n.earth_visible ? '보임' : '가림'} tone={n.earth_visible ? 'good' : 'bad'} />
+              <Kpi l="지구" v={n.earth_visible ? '관측 가능' : '가림'} tone={n.earth_visible ? 'good' : 'bad'} />
               <Kpi l="점수" v={ev ? Math.round(ev.score.total) : '—'} />
               <Kpi l="일조율" v={pct(ev?.summary.illum_frac)} />
             </div>
@@ -177,7 +177,7 @@ function SkyTab() {
       <div className="fk">
         <Kpi l="태양 고도" v={deg(now.sun.el_deg, 2)} s={`방위 ${deg(now.sun.az_deg)}`} />
         <Kpi l="태양 원반 노출률" v={pct(now.sun_frac)} s={now.sun_frac > 0.5 ? `일몰까지 ${dur(nx?.next_sunset != null ? nx.next_sunset - app.t : null)}` : `일출까지 ${dur(nx?.next_sunrise != null ? nx.next_sunrise - app.t : null)}`} tone={now.sun_frac > 0.5 ? 'good' : 'bad'} />
-        <Kpi l="지구" v={now.earth_visible ? '보임' : '가림'} s={`고도 ${deg(now.earth.el_deg, 2)} · ${now.earth_visible ? `지구몰까지 ${dur(nx?.next_earthset != null ? nx.next_earthset - app.t : null)}` : `지구돋이까지 ${dur(nx?.next_earthrise != null ? nx.next_earthrise - app.t : null)}`}`} tone={now.earth_visible ? 'good' : 'bad'} />
+        <Kpi l="지구" v={now.earth_visible ? '관측 가능' : '가림'} s={`고도 ${deg(now.earth.el_deg, 2)} · ${now.earth_visible ? `지구몰까지 ${dur(nx?.next_earthset != null ? nx.next_earthset - app.t : null)}` : `지구돋이까지 ${dur(nx?.next_earthrise != null ? nx.next_earthrise - app.t : null)}`}`} tone={now.earth_visible ? 'good' : 'bad'} />
         <Kpi l="조도 (수평면)" v={`${Math.round(now.irr_horizontal_w_m2)} W/m²`} s={`수직 추적 패널 ${Math.round(now.irr_vertical_w_m2)} W/m²`} />
         <Kpi l="임무 기간 일조율" v={pct(sm?.illum_frac)} s={`교신율 ${pct(sm?.comm_frac)}`} />
         <Kpi l="최장 연속 암흑" v={hrs(sm?.longest_dark_h)} s={`기간 평균 (수직 추적) ${Math.round(sm?.mean_irr_vertical_w_m2 ?? 0)} W/m²`} />

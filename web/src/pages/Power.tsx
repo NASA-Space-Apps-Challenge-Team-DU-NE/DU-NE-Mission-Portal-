@@ -136,7 +136,7 @@ export default function Power() {
         ) : null}
       </Card>
       <div className="g2">
-        <Card title="마스트 높이 비교" np={Array.isArray(mast)} tag={<span className="badge">3순위</span>}>
+        <Card title="마스트 높이 비교" np={Array.isArray(mast)}>
           {mast === 'missing' ? <NoData what="마스트 높이 비교" why="파이프라인이 계산한 높이별 지평선 마스크가 있는 카탈로그 착륙지만 됩니다" /> : mast === null ? <Progress p={0} /> : (
             <>
               <table>
@@ -149,7 +149,7 @@ export default function Power() {
             </>
           )}
         </Card>
-        <Card title="빛 릴레이" tag={<span className="badge">3순위</span>}>
+        <Card title="빛 릴레이">
           {relay && relay.length ? (
             <>
               <Help>두 곳에 패널을 나눠 두면 한쪽이 그늘일 때 다른 쪽이 발전합니다. "둘 다 어두운 최장 시간"이 짧을수록 좋습니다.</Help>

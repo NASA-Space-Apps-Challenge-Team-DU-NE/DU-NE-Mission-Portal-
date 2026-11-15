@@ -26,7 +26,7 @@ export function useArtemisVintage(): Map<string, ArtemisVintage> {
   }, [sites, regions]);
 }
 
-export const vintageLabel = (v: ArtemisVintage) => (v.year === 2024 ? `2024 후보 지역 안 · ${v.code}` : '2022 후보 · 2024 제외');
+export const vintageLabel = (v: ArtemisVintage) => (v.year === 2024 ? `2024 후보 지역 내부 · ${v.code}` : '2022 후보 · 2024 제외');
 export const vintageTitle = (v: ArtemisVintage) =>
   v.year === 2024
     ? `USGS 2024 Artemis III 후보 지역 공식 경계(${v.region}) 안의 지점`

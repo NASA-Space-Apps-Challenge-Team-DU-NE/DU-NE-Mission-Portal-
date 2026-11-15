@@ -1,4 +1,4 @@
-// 06 일정 변경 대응: 원래 안 재평가(P1-22), 대안(P1-23), 차이 표시(P1-24), 파노라마 겹쳐 보기(P2-05), 착륙 오차(P3-05)
+// 06 일정 변경 대응: 기존 미션 재평가(P1-22), 대안(P1-23), 차이 표시(P1-24), 파노라마 겹쳐 보기(P2-05), 착륙 오차(P3-05)
 import { useEffect, useMemo, useState } from 'react';
 import { Card, Help, Kpi, NoData, Progress, ScoreChip, km, pct, signed, toast, utc } from '../components/kit';
 import { Pano } from '../components/viz';
@@ -77,7 +77,7 @@ export default function Delay() {
   const fmtC = (k: string | null, x: number | null | undefined) => (x == null ? '—' : k === 'longest_dark_h' ? `${Math.round(x)} h` : pct(x));
   return (
     <>
-      <Card title="원래 안 재평가" sub={rs.site.name}>
+      <Card title="기존 미션 재평가" sub={rs.site.name}>
         <div className="row">
           <span className="small">원래 착륙 시각 <b className="mono">{utc(app.landing)}</b></span>
           <label className="small muted">얼마나 밀렸나 (일) <input className="field num" type="number" min={-30} max={60} value={shift} onChange={(e) => app.setShift(Number(e.target.value))} /></label>
@@ -96,16 +96,16 @@ export default function Delay() {
           </>
         ) : null}
       </Card>
-      <Card title="대안 1 · 같은 곳 다른 날짜">
-        <Help>새 착륙 날짜 앞뒤 {DEFAULTS.alt_span_days}일 안에서 같은 착륙지의 점수 상위 시각 3개. 차이는 "밀린 원래 안" 대비입니다.</Help>
-        {res && res.same.length && res.same[0].score.total <= res.re.after.score.total ? <p className="help">이 범위 안에는 밀린 원래 안보다 점수가 높은 시각이 없습니다. 아래는 점수가 같거나 낮은 상위 시각입니다.</p> : null}
+      <Card title="대안 1 · 같은 지점 다른 날짜">
+        <Help>새 착륙 날짜 앞뒤 {DEFAULTS.alt_span_days}일 안에서 같은 착륙지의 점수 상위 시각 3개. 차이는 "밀린 기존 미션" 대비입니다.</Help>
+        {res && res.same.length && res.same[0].score.total <= res.re.after.score.total ? <p className="help">이 범위 안에는 밀린 기존 미션보다 점수가 높은 시각이 없습니다. 아래는 점수가 같거나 낮은 상위 시각입니다.</p> : null}
         {res ? table(res.same.slice(0, 3).map((ev) => ({ site: rs.site, ev }))) : <Progress p={prog ?? 0} />}
       </Card>
       <Card title="대안 2 · 다른 곳 같은 날짜" tag={<span className="tiny muted">후보 {cands.length}곳 · {DEFAULTS.alt_radius_km} km</span>}>
         {res && res.other.length ? <><Help>지평선 마스크가 있는 착륙지 중 {DEFAULTS.alt_radius_km} km 안에서 새 날짜에 점수가 높은 3곳.</Help>{table(res.other.slice(0, 3))}</> : res ? <NoData what="다른 곳 같은 날짜" why={`${DEFAULTS.alt_radius_km} km 안에 지평선 마스크가 있는 착륙지가 없습니다`} /> : <Progress p={prog ?? 0} />}
       </Card>
-      <Card title="파노라마 겹쳐 보기" sub={ov ? `원래 안(밀림) vs ${ov.site.name} ${utc(ov.landing)}` : ''} tag={<span className="badge">2순위</span>}>
-        <div className="legend"><span><i className="sw" style={{ background: 'var(--terrain)' }} />원래 안 지형</span><span><i className="sw" style={{ border: '1px dashed var(--soft)', background: 'none' }} />대안 지형</span><span><i className="sw" style={{ background: 'var(--sun)' }} />태양 궤적</span><span><i className="sw" style={{ background: 'var(--earth)' }} />지구 궤적 (점선 = 대안)</span></div>
+      <Card title="파노라마 겹쳐 보기" sub={ov ? `기존 미션(밀림) vs ${ov.site.name} ${utc(ov.landing)}` : ''}>
+        <div className="legend"><span><i className="sw" style={{ background: 'var(--terrain)' }} />기존 미션 지형</span><span><i className="sw" style={{ border: '1px dashed var(--soft)', background: 'none' }} />대안 지형</span><span><i className="sw" style={{ background: 'var(--sun)' }} />태양 궤적</span><span><i className="sw" style={{ background: 'var(--earth)' }} />지구 궤적 (점선 = 대안)</span></div>
         <Pano h={210} mask={ctx.mask} layers={[{ track: baseTrack }, ...(ovLayer ? [{ track: ovLayer.track, dashed: true }] : [])]} now={null} maskB={ovLayer?.mask ?? null} />
         {ov ? null : <Help>위 표에서 <b>파노라마 겹쳐 보기</b>를 누르면 그 대안이 점선으로 겹쳐집니다.</Help>}
       </Card>

@@ -14,7 +14,7 @@ const baseline=await read('orbit/docs/finite-mission-30-default-mode-b-only.json
 const data={};
 for(const f of ['ephemeris/index.json','gravity/index.json','terrain/index.json','manifest.json']) data[f]=hash(await readFile(path.join(root,'orbit/frontend/public/data',f)));
 const digest=createHash('sha256');
-async function sources(dir) { for(const e of (await readdir(dir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) { const p=path.join(dir,e.name); if(e.isDirectory()) await sources(p); else {digest.update(path.relative(root,p));digest.update(await readFile(p));} } }
+async function sources(dir) { for(const e of (await readdir(dir,{withFileTypes:true})).sort((a,b)=>a.name.localeCompare(b.name))) { const p=path.join(dir,e.name); if(e.isDirectory()) await sources(p); else {digest.update(path.relative(root,p).split(path.sep).join('/'));digest.update(await readFile(p));} } }
 await sources(path.join(root,'orbit/frontend/src'));digest.update(JSON.stringify(data));
 const caps={protocol:'dune-orbit-bridge.v1',buildId:digest.digest('hex'),upstream:'7d69425493ede243ddd79ab2c87a6169e52c07bf',landing_coverage_utc:eph.landing_coverage_utc,coverage_utc:eph.coverage_utc,terrain_latitude_deg:[-90,-75],gravity_degrees:[20,30,60,90],required_checks:Object.keys(baseline.validation),terminal_policy:'demo-terminal-v1',data_sha256:data};
 const out=path.join(root,'orbit/frontend/public/integration');await mkdir(out,{recursive:true});

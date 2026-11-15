@@ -70,7 +70,7 @@ function SimMain() {
           <span className="mono small">{utc(app.t)}</span>
         </div>
       </Card>
-      <Card title="착륙선 시점" tag={<span className="badge">3순위</span>}>
+      <Card title="착륙선 시점">
         <Help>착륙선에서 본 지평선과 하늘. 위 막대로 시간을 움직이면 태양·지구 위치가 바뀝니다.</Help>
         <Pano h={200} mask={ctx.mask} layers={[{ track: samples.filter((_, i) => i % 2 === 0) }]} now={now} />
       </Card>

@@ -141,7 +141,7 @@ export const useApp = create<AppState>((set, get) => ({
   scenarios: [],
   abSets: {},
   bases: [],
-  landerId: 'small_solar',
+  landerId: 'heavy_cargo',
   landerEdits: {},
   powerSource: DEFAULT_POWER_SOURCE,
   landerExtra: { ...DEFAULT_LANDER_EXTRA },
@@ -213,7 +213,7 @@ export const useApp = create<AppState>((set, get) => ({
       siteRef: { kind: 'catalog', id: DEFAULT_SITE_ID }, orbitSettings: orbitDefaults(),
       landing, t: landing, viewRef: null, viewLanding: null, viewMargin: null, playing: false, duration_h: DEFAULTS.duration_h, margin_deg: DEFAULTS.comm_margin_deg, req: DEFAULT_REQUIREMENTS,
       scenarioWeights: DEFAULT_SCENARIO_WEIGHTS, delay_days: DEFAULTS.delay_days, profile: 'custom', mapWeights: DEFAULT_MAP_WEIGHTS, customWeights: DEFAULT_MAP_WEIGHTS,
-      filters: DEFAULT_FILTERS, shift_days: 14, landerId: 'small_solar', landerEdits: {}, powerSource: DEFAULT_POWER_SOURCE, landerExtra: DEFAULT_LANDER_EXTRA,
+      filters: DEFAULT_FILTERS, shift_days: 14, landerId: 'heavy_cargo', landerEdits: {}, powerSource: DEFAULT_POWER_SOURCE, landerExtra: DEFAULT_LANDER_EXTRA,
     });
   },
   setRightTab: (rightTab) => set({ rightTab }),

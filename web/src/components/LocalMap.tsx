@@ -63,7 +63,7 @@ export function useLocalTerrain(siteId: string | undefined): { img: HTMLImageEle
 }
 
 /** 격자선 간격 (m): 한 변 길이에 맞춰 5~10칸쯤 */
-const gridStep = (m: number) => (m <= 1500 ? 100 : m <= 3000 ? 250 : m <= 6000 ? 500 : m <= 15000 ? 1000 : 2000);
+const gridStep = (m: number) => (m <= 1500 ? 100 : m <= 3000 ? 250 : m <= 6000 ? 500 : m <= 15000 ? 1000 : m <= 30000 ? 2000 : m <= 60000 ? 5000 : 10000);
 
 export function LocalMap(p: {
   lat: number; lon: number; name: string; sizeM: number; bases: BaseElement[];
@@ -91,9 +91,10 @@ export function LocalMap(p: {
 
       // 배경: WAC 모자이크를 이 정사각형으로 다시 표본 (쌍선형)
       x.fillStyle = '#20292d'; x.fillRect(0, 0, W, W);
-      if (useLocal && local) {
+      const localKm = useLocal && local ? 2 * local.meta.half_km : 0;
+      if (useLocal && local && p.sizeM / 1000 <= localKm) {
         // 파이프라인 그림: 한 변 2·half_km, 가운데 = 착륙지. 지금 보이는 한 변만큼 가운데에서 잘라 그린다
-        const n = local.meta.size_px, src = Math.min(n, (p.sizeM / 1000 / (2 * local.meta.half_km)) * n);
+        const n = local.meta.size_px, src = (p.sizeM / 1000 / localKm) * n;
         x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
         x.drawImage(local.img, n / 2 - src / 2, n / 2 - src / 2, src, src, 0, 0, W, W);
       } else if (wac && p.lat <= -75) {
@@ -112,6 +113,13 @@ export function LocalMap(p: {
         t.getContext('2d')!.putImageData(im, 0, 0);
         x.imageSmoothingEnabled = true;
         x.drawImage(t, 0, 0, W, W);
+      }
+      if (useLocal && local && p.sizeM / 1000 > localKm) {
+        // 지도가 지형 그림보다 넓으면: 바깥은 WAC, 가운데 한 변 localKm 만 실제 지형 그림
+        const w = (localKm / (p.sizeM / 1000)) * W;
+        x.imageSmoothingEnabled = true; x.imageSmoothingQuality = 'high';
+        x.drawImage(local.img, W / 2 - w / 2, W / 2 - w / 2, w, w);
+        x.strokeStyle = 'rgba(229,238,236,.35)'; x.setLineDash([4, 4]); x.strokeRect(W / 2 - w / 2, W / 2 - w / 2, w, w); x.setLineDash([]);
       }
 
       // 격자선과 축척

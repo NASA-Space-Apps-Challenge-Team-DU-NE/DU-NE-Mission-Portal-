@@ -123,7 +123,7 @@ export default function Compare() {
         </div>
       </Card>
       <div className="g2">
-        <Card title="빛 쌍둥이" tag={<span className="badge">3순위</span>}>
+        <Card title="빛 쌍둥이">
           {twins && twins.length ? (
             <>
               <Help>선택 지점과 햇빛·교신 패턴이 비슷한 다른 곳. 대안 후보로 씁니다.</Help>
@@ -134,7 +134,7 @@ export default function Compare() {
             </>
           ) : <NoData what="빛 쌍둥이" why={cell < 0 ? '02 추천 순위에서 격자 칸을 먼저 고르세요' : '계산 중'} />}
         </Card>
-        <Card title="과학·공학 균형" tag={<span className="badge">3순위 · 선택</span>}>
+        <Card title="과학·공학 균형">
           <Help>가로: 영구음영(과학 목표)까지 거리, 세로: 전력·통신 점수. 왼쪽 위가 둘 다 좋은 곳입니다.</Help>
           {balance ? <Scatter h={220} pts={balance} xl="영구음영까지 거리 (km)" yl="전력·통신" /> : <NoData what="psr_dist_km" />}
         </Card>

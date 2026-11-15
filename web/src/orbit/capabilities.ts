@@ -14,7 +14,9 @@ export function loadCapabilities(retry = false): Promise<void> {
   const version = ++generation;
   useCapabilityState.setState({ caps: null, error: null });
   request = Promise.resolve().then(() => fetch(capabilitiesUrl(), { cache: 'no-cache' }))
-    .then(r => { if (!r.ok) throw new Error(`Orbit 정적 데이터 준비 필요 (HTTP ${r.status}). 저장소 루트에서 npm run prepare:orbit를 실행하세요.`); return r.json(); })
+    .then(r => { if (!r.ok) throw new Error(`Orbit 정적 데이터 준비 필요 (HTTP ${r.status}). 저장소 루트에서 npm run prepare:orbit를 실행하세요.`); // 파일이 없으면 개발 서버가 index.html 을 돌려준다 → JSON 오류 대신 준비 방법을 알린다
+      if ((r.headers?.get?.('content-type') ?? '').includes('text/html')) throw new Error('Orbit 정적 데이터 준비 필요. 저장소 루트에서 npm run prepare:orbit를 실행하세요.');
+      return r.json(); })
     .then(parseCapabilities)
     .then(caps => { if (version === generation) useCapabilityState.setState({ caps, error: null }); })
     .catch(e => { if (version === generation) useCapabilityState.setState({ caps: null, error: String(e) }); })

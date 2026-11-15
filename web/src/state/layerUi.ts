@@ -21,7 +21,7 @@ export interface LayerUi {
 export const LGROUPS = ['추천', '햇빛', '지구 교신', '착륙 안전', '물·자원'];
 
 const L: LayerUi[] = [
-  { id: 'composite', g: '추천', name: '종합 점수', desc: '01 단계의 필수 조건과 가중치를 합친 점수. 처음엔 이걸 보세요.', lo: '조건에 덜 맞음', hi: '잘 맞음', unit: '0–100', kind: '계산', res: '5 km 격자', src: '아래 레이어를 가중 합산' },
+  { id: 'composite', g: '추천', name: '종합 점수', desc: '01 단계의 필수 조건과 가중치를 합친 점수. 처음엔 이걸 보세요.', lo: '조건에 부적합', hi: '적합', unit: '0–100', kind: '계산', res: '5 km 격자', src: '아래 레이어를 가중 합산' },
   { id: 'illum_mission', g: '햇빛', name: '임무 기간 일조율', desc: '착륙 후 임무 기간 동안 해가 보이는 시간의 비율. 착륙 날짜에 따라 바뀝니다.', lo: '0% (늘 그늘)', hi: '100% (늘 햇빛)', unit: '%', kind: '계산', res: '5 km 격자', src: '천체력 표(MOON_ME), 표 밖은 근사 + 지형 지평선' },
   { id: 'sun_now', g: '햇빛', name: '지금 햇빛', desc: '위쪽 "보는 시각"에 해가 보이는 정도. 재생하면 움직입니다.', lo: '해 없음', hi: '해 전부 보임', unit: '%', kind: '계산', res: '5 km 격자', src: '천체력 표(MOON_ME), 표 밖은 근사 + 지형 지평선' },
   { id: 'illum_avg', g: '햇빛', name: '장기 평균 일조율', tag: 'PGDA69', desc: '여러 해를 평균한 값. 날짜와 상관없는 그 땅의 기본 체질입니다.', lo: '0%', hi: '100%', unit: '%', kind: '실제', res: '120 m → 5 km', src: 'NASA PGDA 69 (Mazarico 등)' },

@@ -1,10 +1,10 @@
 import { OrbitCoverage } from '../orbit/OrbitSettingsCard';
 // 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침).
-// 순서: ① 착륙 날짜(시각·기간, 착륙지 × 시작일 점수표, 검토 중인 조합) → ② 착륙지(지도·순위·목록·좌표)
-//       → ③ 지금 계획 카드 [착륙지 요약 | 점수 근거 | 착륙 윈도] 탭 → 상위 6곳 비교·역방향 탐색
+// 순서: ① 착륙 날짜(시각·기간, 착륙지 × 시작일 점수표, 검토 중인 조합)
+//       → 지금 계획 카드 [착륙지 요약 | 점수 근거 | 착륙 윈도] 탭 → 상위 6곳 비교 → ② 착륙지(지도·순위·목록·좌표) → 역방향 탐색
 // 착륙지 부분: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
 import { useEffect, useMemo, useState } from 'react';
-import { ArtemisBadge, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, gridLabel, hrs, pct, toast, utc, Empty } from '../components/kit';
+import { ArtemisBadge, Help, Kpi, ScoreChip, Seg, TerrBadge, gridLabel, hrs, pct, toast, utc, Empty } from '../components/kit';
 import { useArtemisVintage } from '../state/artemis';
 import { MapCard } from '../components/MapCard';
 import { REGION_LABEL } from '../components/SouthMap';
@@ -167,16 +167,6 @@ export default function Site() {
     <>
       <h2 className="sechead first"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>
       <LandingDate part="top" /><OrbitCoverage/>
-      <h2 className="sechead"><span>착륙지</span><small>지도·추천 순위·목록·좌표 중 편한 방법으로 고릅니다</small></h2>
-      <div className="g21">
-        <MapCard where="site" />
-        <section className="card">
-          <div className="tabs" role="tablist">
-            {([['rank', '추천 순위'], ['list', '착륙지 목록'], ['coord', '좌표 입력']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={ui.siteTab === k} onClick={() => ui.set({ siteTab: k })}>{l}</button>)}
-          </div>
-          {ui.siteTab === 'rank' ? <RankTab /> : ui.siteTab === 'list' ? <ListTab /> : <CoordTab />}
-        </section>
-      </div>
       {rs ? (
         <section className="card">
           <div className="hd">
@@ -197,7 +187,7 @@ export default function Site() {
                 <Kpi l="하루 최소 교신" v={hrs(ev.summary.daily_comm_h_min)} s={`기준 ≥ ${R.min_daily_comm_h} h`} tone={ev.summary.daily_comm_h_min >= R.min_daily_comm_h ? '' : 'bad'} />
                 <Kpi l="최장 연속 암흑" v={hrs(ev.summary.longest_dark_h)} s={`기준 ≤ ${R.max_dark_h} h`} tone={ev.summary.longest_dark_h <= R.max_dark_h ? '' : 'bad'} />
               </div>
-              <div className="row small"><b>날짜가 밀리면?</b>{prev.map((p) => <span key={p.d} className="mono">+{p.d}일 → <ScoreChip v={p.e.score.total} /></span>)}<button className="btn sm ghost" onClick={() => app.setPage('delay')}>06 일정 변경에서 자세히 →</button></div>
+              <div className="row small"><b>if. 날짜 지연</b>{prev.map((p) => <span key={p.d} className="mono">+{p.d}일 → <ScoreChip v={p.e.score.total} /></span>)}<button className="btn sm ghost" onClick={() => app.setPage('delay')}>06 일정 변경에서 자세히 →</button></div>
             </div>
           ) : <div className="bd"><Empty>점수 계산 중…</Empty></div>) : planTab === 'why' ? (
             <div className="bd">
@@ -226,8 +216,19 @@ export default function Site() {
             </div>
           ) : <LandingDate part="windows" />}
         </section>
-      ) : <NoData what="착륙지" why="지도·순위표·목록에서 고르세요" />}
-      <LandingDate part="rest" />
+      ) : null}
+      <LandingDate part="top6" />
+      <h2 className="sechead"><span>착륙지</span><small>지도·추천 순위·목록·좌표 중 편한 방법으로 고릅니다</small></h2>
+      <div className="g21">
+        <MapCard where="site" />
+        <section className="card">
+          <div className="tabs" role="tablist">
+            {([['rank', '추천 순위'], ['list', '착륙지 목록'], ['coord', '좌표 입력']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={ui.siteTab === k} onClick={() => ui.set({ siteTab: k })}>{l}</button>)}
+          </div>
+          {ui.siteTab === 'rank' ? <RankTab /> : ui.siteTab === 'list' ? <ListTab /> : <CoordTab />}
+        </section>
+      </div>
+      <LandingDate part="reverse" />
     </>
   );
 }

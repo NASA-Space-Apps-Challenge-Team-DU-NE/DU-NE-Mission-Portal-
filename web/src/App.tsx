@@ -1,6 +1,6 @@
 import { useOrbitInvalidation } from './orbit/hooks';
 // 앱 틀: 검은 띠 | 지도 모드(달 전체) ↔ 계획 모드(왼쪽 단계 01→09 | 가운데 단계 화면 | 오른쪽 3D 달 + 현장 뷰)
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useRef } from 'react';
 import { Masthead, Overlays, PageFrame, Resizers, Sidebar } from './layout/Shell';
 import { Rail } from './layout/Rail';
 import { useData } from './state/data';
@@ -71,6 +71,9 @@ export default function App() {
   } as React.CSSProperties;
   useOrbitInvalidation();
   const orbitPage = mode === 'plan' && page === 'orbit';
+  // 언어를 바꾸면 화면을 새로 그린다(key). 단, 05 궤도 분석에 있을 때는 Orbit iframe 계산이 끊기지 않게 미뤘다가 나갈 때 반영한다
+  const langKey = useRef(lang);
+  if (page !== 'orbit') langKey.current = lang;
   useShortcuts();
   useDefaults();
   useGridRunner();
@@ -78,14 +81,15 @@ export default function App() {
   return (
     <>
       <Masthead />
-      <div className={`app mode-${mode}${sideCollapsed ? ' side-collapsed' : ''}${orbitPage ? ' orbit-page' : ''}`} key={page === 'orbit' ? 'orbit' : lang} style={layoutVars}>
+      <div className={`app mode-${mode}${sideCollapsed ? ' side-collapsed' : ''}${orbitPage ? ' orbit-page' : ''}`} key={langKey.current} style={layoutVars}>
         <Sidebar />
         <PageFrame>
           <Suspense fallback={<div className="muted">불러오는 중…</div>}>
             <P />
           </Suspense>
         </PageFrame>
-        {!orbitPage && <><Rail /><Resizers /></>}
+        <Rail />
+        <Resizers />
       </div>
       <Overlays />
     </>

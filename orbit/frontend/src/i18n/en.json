@@ -175,7 +175,7 @@
   "국소 수직 대비 추력 기울기 {0}° / 해당 구간 제한 {1}°입니다. 기체 자세 자체를 계산한 값은 아닙니다.": "Thrust tilt relative to local vertical is {0}° / segment limit {1}°. This is not a spacecraft attitude solution.",
   "궤도 계산 중…": "Computing trajectory…",
   "궤도 연결 또는 수치 검증 미충족": "Orbit connection or numerical validation failed",
-  "궤도에서 접지까지": "From orbit to touchdown",
+  "궤도에서 착륙까지": "From orbit to landing",
   "그래프를 클릭하면 해당 시점으로 이동합니다.": "Click the chart to jump to that time.",
   "기간 안에서도 반복되면 출발 시각과 원본 구간·공백 진단을 확인하고 다른 착륙 UTC 또는 전이 시간으로 다시 계산하세요.": "If this recurs within coverage, inspect departure time, source segments and gaps; try another landing UTC or transfer duration.",
   "기동 시 정지": "Pause at manoeuvres",
