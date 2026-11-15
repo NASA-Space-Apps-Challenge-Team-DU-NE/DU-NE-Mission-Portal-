@@ -6,6 +6,9 @@
 
 *NASA Space Apps Challenge 2026: "Lunar Landing Site Navigator" · Team DU:NE*
 
+### [🌐 Live Website](https://du-ne-mission-portal.ellfuge1507.workers.dev/) · [🚀 Mission Portal](https://du-ne-mission-portal.ellfuge1507.workers.dev/mission-portal/) · [▶ Demo Video](https://drive.google.com/file/d/1bMrFynrqyqA3BojAFyTJWUA2UwmcWBc5/view)
+
+[![Live Website](https://img.shields.io/badge/🌐_Live_Website-Cloudflare-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://du-ne-mission-portal.ellfuge1507.workers.dev/)
 [![Demo Video](https://img.shields.io/badge/▶_Demo_Video-Google_Drive-EA4335?style=for-the-badge&logo=googledrive&logoColor=white)](https://drive.google.com/file/d/1bMrFynrqyqA3BojAFyTJWUA2UwmcWBc5/view)
 [![NASA Space Apps 2026](https://img.shields.io/badge/NASA_Space_Apps-2026-0B3D91?style=for-the-badge&logo=nasa&logoColor=white)](https://www.spaceappschallenge.org/2026/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-black?style=for-the-badge)](./LICENSE)
@@ -223,6 +226,8 @@ pytest
 Outputs are written to `web/public/data/`.
 
 ### Deployment
+
+**Live:** https://du-ne-mission-portal.ellfuge1507.workers.dev/ (portal: [`/mission-portal/`](https://du-ne-mission-portal.ellfuge1507.workers.dev/mission-portal/))
 
 Cloudflare Workers (`wrangler.jsonc`) serves the `dist/` folder produced by `npm run build` as static files: `/` is the team homepage and `/mission-portal/` is the portal. No runtime server or database is needed. See [`docs/ORBIT_INTEGRATION.md`](docs/ORBIT_INTEGRATION.md) and [`docs/ORBIT_GITHUB_HANDOFF.md`](docs/ORBIT_GITHUB_HANDOFF.md) for details.
 
