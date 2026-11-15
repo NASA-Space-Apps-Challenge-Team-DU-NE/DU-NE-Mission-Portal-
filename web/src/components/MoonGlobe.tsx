@@ -19,7 +19,6 @@ import { LAYER_UI } from '../state/layerUi';
 import { useApp } from '../state/store';
 import { playClock } from '../state/playClock';
 import { createSky } from './starfield';
-import { useUi } from '../state/ui';
 import { rampRGB } from './kit';
 import { useArtemisVintage } from '../state/artemis';
 
@@ -69,7 +68,6 @@ function orthoUp(g: { pos: THREE.Vector3; up: THREE.Vector3 }) {
   g.up.normalize();
 }
 const lonOf = (p: THREE.Vector3) => Math.atan2(-p.z, p.x) / D2R;
-const latOf = (p: THREE.Vector3) => Math.asin(clamp(p.y, -1, 1)) / D2R;
 const view = { g: null as G | null };
 /** 실제 크기·거리라 지구(약 221 달 반지름)까지 볼 수 있게 */
 const maxDist = () => 900;
@@ -87,29 +85,6 @@ export function globeView(v: 'pole' | 'npole' | 'sun' | 'globe' | 'in' | 'out' |
   else if (v === 'in') { g.dist = clamp(g.dist * 0.8, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
   else if (v === 'out') { g.dist = clamp(g.dist * 1.25, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
   if (v !== 'in' && v !== 'out') g.lookT.set(0, 0, 0);
-  g.dirty = true;
-}
-
-/** 지구를 누르면: 카메라가 천천히 지구로 날아가 화면 가운데에 지구가 오면
- *  05 임무 시뮬레이션의 지상국 통신 창을 전체화면으로 연다 (한국이 보이게). 달 화면은 원래 보기로 돌려 놓는다. */
-export function flyToEarth() {
-  const g = view.g;
-  if (!g || g.onArrive) return;
-  const before = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: g.dist, look: g.look.clone() };
-  const pos = new THREE.Vector3().setFromMatrixPosition(g.earth.matrix);
-  const rE = new THREE.Vector3().setFromMatrixScale(g.earth.matrix).x;
-  const dir = pos.clone().negate().normalize(); // 지구에서 달 쪽: 달에서 보이는 지구 면을 바라본다
-  g.lookT.copy(pos);
-  g.target = { lat: Math.asin(clamp(dir.y, -1, 1)) * R2D, lon: Math.atan2(-dir.z, dir.x) * R2D, dist: rE * 3.2 };
-  g.k = 0.06;
-  g.onArrive = () => {
-    useUi.getState().set({ mode: 'plan', gsFull: true, simTab: 'comm' });
-    const st = useApp.getState();
-    if (st.fullscreen) st.setFullscreen(false);
-    st.setPage('sim');
-    g.target = { lat: before.lat, lon: before.lon, dist: before.dist };
-    g.lookT.copy(before.look);
-  };
   g.dirty = true;
 }
 
@@ -270,7 +245,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       const rc = new THREE.Raycaster(); rc.setFromCamera(m, cam);
       const hitE = rc.intersectObject(earth)[0];
       const hit = rc.intersectObject(moon)[0];
-      if (hitE && (!hit || hitE.distance < hit.distance)) return flyToEarth();
+      if (hitE && (!hit || hitE.distance < hit.distance)) return; // 지구를 눌러도 이동하지 않는다
       if (!hit) return;
       const p = hit.point.clone().normalize(), lat = Math.asin(p.y) * R2D, lon = Math.atan2(-p.z, p.x) * R2D;
       const gr = useData.getState().southGrid, st = useApp.getState();
@@ -411,7 +386,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         const p = proj(new THREE.Vector3(0, y, 0));
         if (p.z < 1 && p.x > 0 && p.x < W && p.y > 0 && p.y < H) html += `<div class="axl" style="transform:translate(${(p.x - 7).toFixed(0)}px,${(p.y - 9).toFixed(0)}px)">${lb}</div>`;
       }
-      if (!far) body(ed, g.dE, 'earth act', '◉ 지구', now ? `고도 ${now.earth.el_deg.toFixed(1)}°` : '');
+      if (!far) body(ed, g.dE, 'earth', '◉ 지구', now ? `고도 ${now.earth.el_deg.toFixed(1)}°` : '');
       o.innerHTML = html;
     };
     loop();
@@ -551,8 +526,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
           const t = (e.target as HTMLElement).closest('[data-act]') as HTMLElement | null;
           if (!t) return;
           const [k, v] = (t.dataset.act ?? '').split(':');
-          if (k === 'earth') flyToEarth();
-          else if (k === 'cell') app.setViewSite({ kind: 'cell', cell: Number(v) });
+          if (k === 'cell') app.setViewSite({ kind: 'cell', cell: Number(v) });
           else if (k === 'site') app.setViewSite({ kind: 'catalog', id: v });
         }}
       />
