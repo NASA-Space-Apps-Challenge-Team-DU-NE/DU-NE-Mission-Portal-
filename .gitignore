@@ -1,0 +1,28 @@
+# 비밀·로컬 설정
+.env.local
+.env.*.local
+
+# 파이프라인 중간물 (CLAUDE.md 4.2, ARCHITECTURE 2절)
+build/
+.horizons_cache/
+pipeline/.venv/
+**/__pycache__/
+*.pyc
+.pytest_cache/
+
+# 웹
+web/node_modules/
+web/dist/
+web/test-results/
+web/playwright-report/
+
+# 편집기·OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.egg-info/
+
+# 로컬 백업 (UI 작업 전 원본)
+.ui-backup-*/

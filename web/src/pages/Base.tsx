@@ -1,0 +1,114 @@
+// 03 기지 배치: 기지 배치(P2-06), 기지 간 거리, 관측된 단층애 근접 경고. 경고는 참고용이며 안전을 보장하지 않는다.
+// 착륙 먼지 도달 반경은 공개 근거가 없어 기능을 뺐다 (2026-11-15).
+// 지도는 착륙지 중심 정사각형(기본 1 km, 100 m 단위로 조절). 기지가 필요 없으면 스위치를 꺼서 착륙지 = 기지로 본다.
+import { useEffect, useRef, useState } from 'react';
+import { Card, Help, NoData, Seg, km, Empty } from '../components/kit';
+import { LocalMap, useLocalTerrain } from '../components/LocalMap';
+import { DEFAULTS } from '../config';
+import { distanceTable, type BaseKind } from '../core/hazards';
+import { useBases, useSiteWarnings } from '../state/derived';
+import { useResolvedSite } from '../state/hooks';
+import { useApp } from '../state/store';
+import { useUi } from '../state/ui';
+
+const KN: Record<BaseKind, string> = { landing_pad: '착륙장', power: '발전', water_mining: '물 채굴', habitat: '거주' };
+const WK = { protected_site: '보호 대상 근처', base_conflict: '기지 요소 겹침', fault: '관측된 단층애 근처' } as const;
+
+const VIEW_MIN = 100, VIEW_MAX = 20000, VIEW_STEP = 100;
+
+export default function Base() {
+  const app = useApp();
+  const ui = useUi();
+  const rs = useResolvedSite();
+  const W = useSiteWarnings();
+  const bases = useBases();
+  const [kind, setKind] = useState<BaseKind>('landing_pad');
+  const D = distanceTable(bases);
+  const local = useLocalTerrain(rs?.site.id);
+  const lt = local && rs ? local.meta.sites[rs.site.id] : undefined;
+  const off = ui.baseOff;
+  const lockRef = useRef<HTMLDivElement>(null);
+  // 꺼졌을 때 회색 영역 안으로 키보드 초점도 못 들어가게 (React 18 은 inert 속성 타입이 없어 직접 단다)
+  useEffect(() => { lockRef.current?.toggleAttribute('inert', off); }, [off]);
+  const view = ui.baseViewM;
+  const setView = (m: number) => ui.set({ baseViewM: Math.max(VIEW_MIN, Math.min(VIEW_MAX, Math.round(m / VIEW_STEP) * VIEW_STEP)) });
+  return (
+    <>
+      <div className={`switchbar ${off ? 'off' : ''}`}>
+        <button className="switch" role="switch" aria-checked={!off} onClick={() => ui.set({ baseOff: !off })}><i /></button>
+        <div>
+          <b>{off ? '기지 배치 꺼짐 · 착륙지 = 기지 위치' : '기지 따로 배치'}</b>
+          <span className="small muted">{off
+            ? `착륙만 필요한 임무입니다. ${rs?.site.name ?? '착륙지'}를 기지 위치로 봅니다${W.length ? ` (단층애 경고 ${W.length}건)` : ''}. 놓아 둔 기지 ${app.bases.length}개는 지워지지 않고, 켜면 다시 쓰입니다.`
+            : '착륙장·발전·물 채굴·거주 기지를 착륙지 주변에 놓습니다. 착륙만 필요하면 끄세요.'}</span>
+        </div>
+      </div>
+      <div ref={lockRef} className={off ? 'locked' : ''} aria-disabled={off}>
+      <div className="g21">
+        <Card title="기지 놓기" sub={rs ? `${rs.site.name} 중심 · 한 변 ${view.toLocaleString()} m` : ''} tag={<><Seg value={kind} opts={(Object.keys(KN) as BaseKind[]).map((k) => [k, KN[k]] as [BaseKind, string])} onChange={setKind} /></>}>
+          {!rs ? <NoData what="착륙지" why="02에서 착륙지를 먼저 고르세요" /> : (
+            <>
+              <LocalMap lat={rs.site.lat_deg} lon={rs.site.lon_deg} name={rs.site.name} siteId={rs.site.id} sizeM={view} bases={bases} disabled={off}
+                onPick={(lat, lon) => app.addBase({ id: `b${Date.now().toString(36)}`, kind, name: `${KN[kind]} ${app.bases.filter((b) => b.kind === kind).length + 1}`, lat_deg: lat, lon_deg: lon })} />
+              <div className="row zoomrow">
+                <span className="small muted">지도 크기 (한 변)</span>
+                <button className="ibtn" aria-label="100 m 줄이기" disabled={view <= VIEW_MIN} onClick={() => setView(useUi.getState().baseViewM - VIEW_STEP)}>−</button>
+                <label className="viewm"><input className="field num mono" type="number" min={VIEW_MIN} max={VIEW_MAX} step={VIEW_STEP} value={view} aria-label="지도 한 변 (m)" onChange={(e) => { const v = Number(e.target.value); if (Number.isFinite(v) && v > 0) setView(v); }} /> m</label>
+                <button className="ibtn" aria-label="100 m 늘리기" disabled={view >= VIEW_MAX} onClick={() => setView(useUi.getState().baseViewM + VIEW_STEP)}>+</button>
+                <button className="btn sm" disabled={view === 1000} onClick={() => setView(1000)}>기본 1,000 m</button>
+              </div>
+              <div className="mlg">
+                <span><i style={{ border: '2px solid #fff', borderRadius: '50%' }} />착륙지 (가운데)</span>
+                <span><i style={{ border: '2px solid var(--amber)' }} />내 기지</span>
+              </div>
+              <div className="row tiny muted" style={{ gap: 6 }}>
+                {lt && local ? <>
+                  <span className="badge ok">실제 지형</span><span>배경: LOLA 30 m 지형 음영기복 · 약 {Math.round(local.meta.m_per_px)} m/화소 · 조명 방향 북서 {local.meta.light.alt_deg}°(보기용, 실제 햇빛 아님)</span>
+                  <span className="mono">고도 {Math.round(lt.elev_min_m).toLocaleString()} ~ {Math.round(lt.elev_max_m).toLocaleString()} m (중심 {Math.round(lt.elev_center_m).toLocaleString()} m)</span>
+                </> : <>
+                  <span className="badge approx">저해상도</span><span>배경: LROC WAC 남극 모자이크 확대 (약 440 m/화소, 1 km 안에서는 흐릿함). 상세 지형 그림은 카탈로그 착륙지에만 있습니다.</span>
+                </>}
+              </div>
+              <Help>지도를 누르면 위에서 고른 종류의 기지가 그 자리에 놓입니다. 위쪽이 북(위도가 커지는 쪽)입니다.</Help>
+            </>
+          )}
+        </Card>
+        <div className="col">
+          <Card title="단층애 근접 경고" sub={rs?.site.name ?? ''} tag={<span className="badge approx">경고 거리 {DEFAULTS.fault_warn_km} km (임시값)</span>}>
+            <p className="note">착륙지가 관측된 단층애(LROC 목록)에서 경고 거리 안이면 알립니다. 경고는 참고용이며 안전을 보장하지 않습니다. 착륙 먼지 도달 반경은 공개 근거가 없어 검사하지 않습니다.</p>
+            {!rs ? <NoData what="착륙지" /> : W.length === 0 ? <span className="badge ok">경고 없음</span> : (
+              <table><tbody>{W.map((w, i) => (
+                <tr key={i}><td><span className="badge warn">경고</span></td><td className="wrap"><b>{WK[w.kind]}</b><div className="small muted">{w.target_name}</div></td><td className="mono">{km(w.distance_km)}</td><td className="mono small muted">≤ {km(w.limit_km, 0)}</td></tr>
+              ))}</tbody></table>
+            )}
+          </Card>
+          <Card title={<>놓은 기지 <small>{app.bases.length}개</small></>} np={!!app.bases.length}>
+            {app.bases.length ? (
+              <table><tbody>{app.bases.map((b) => (
+                <tr key={b.id}>
+                  <td><span className="badge" style={{ borderColor: 'var(--amber)', color: 'var(--amber)' }}>{KN[b.kind]}</span></td>
+                  <td>{b.name}<div className="mono tiny muted">{b.lat_deg.toFixed(4)}, {b.lon_deg.toFixed(4)}</div></td>
+                  <td><button className="btn sm" aria-label="삭제" onClick={() => app.removeBase(b.id)}>×</button></td>
+                </tr>
+              ))}</tbody></table>
+            ) : <Empty>지도를 눌러 기지를 놓으세요</Empty>}
+          </Card>
+        </div>
+      </div>
+      {bases.length > 1 ? (
+        <Card title="기지 간 거리 (km)" np>
+          <div className="tblwrap"><table>
+            <thead><tr><th />{bases.map((b) => <th key={b.id}>{b.name}</th>)}</tr></thead>
+            <tbody>{bases.map((a, i) => (
+              <tr key={a.id}><td>{a.name}</td>{bases.map((b, j) => {
+                const d = D[i][j];
+                return <td key={b.id} className="mono small">{i === j ? '—' : d.toFixed(2)}</td>;
+              })}</tr>
+            ))}</tbody>
+          </table></div>
+        </Card>
+      ) : null}
+      </div>
+    </>
+  );
+}
