@@ -1,0 +1,305 @@
+{
+  "generated_at_utc": "2026-11-14T20:58:48.373Z",
+  "runtime": "v24.15.0",
+  "static_asset_bytes_read": 4840393,
+  "static_assets_read": [
+    "/data/terrain/index.json",
+    "/data/frames.json",
+    "/data/terrain/global.json",
+    "/data/terrain/global.bin",
+    "/data/terrain/tiles/7_7.bin",
+    "/data/terrain/tiles/12_11.bin",
+    "/data/terrain/tiles/12_12.bin",
+    "/data/terrain/tiles/11_11.bin",
+    "/data/terrain/tiles/10_10.bin",
+    "/data/terrain/tiles/11_10.bin",
+    "/data/terrain/tiles/10_9.bin",
+    "/data/terrain/tiles/8_8.bin",
+    "/data/terrain/tiles/9_8.bin",
+    "/data/terrain/tiles/9_9.bin",
+    "/data/terrain/tiles/8_7.bin",
+    "/data/terrain/tiles/6_7.bin",
+    "/data/terrain/tiles/4_3.bin",
+    "/data/terrain/tiles/4_2.bin",
+    "/data/terrain/tiles/3_2.bin",
+    "/data/terrain/tiles/3_1.bin",
+    "/data/terrain/tiles/4_4.bin",
+    "/data/terrain/tiles/5_4.bin",
+    "/data/terrain/tiles/6_6.bin",
+    "/data/terrain/tiles/5_6.bin",
+    "/data/terrain/tiles/5_5.bin",
+    "/data/terrain/tiles/0_10.bin",
+    "/data/terrain/tiles/1_10.bin",
+    "/data/terrain/tiles/3_9.bin",
+    "/data/terrain/tiles/2_9.bin",
+    "/data/terrain/tiles/4_9.bin",
+    "/data/terrain/tiles/4_8.bin",
+    "/data/terrain/tiles/5_8.bin",
+    "/data/terrain/tiles/6_8.bin"
+  ],
+  "tests": [
+    {
+      "name": "connecting-ridge",
+      "input": {
+        "target": {
+          "latitude_deg": -89.4441,
+          "longitude_deg": -137.291,
+          "landing_time_utc": "2026-11-16T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 1500,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 12000,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel"
+      },
+      "status": "VALIDATED",
+      "elapsed_ms": 433.356,
+      "summary": {
+        "landing_position_error_m": 0.00002241408835785068,
+        "touchdown_velocity_m_s": 0.5000002537083694,
+        "horizontal_touchdown_velocity_m_s": 2.690474701712696e-7,
+        "vertical_touchdown_velocity_m_s": -0.5000002537082969,
+        "doi_delta_v_m_s": 19.45507345242777,
+        "powered_descent_delta_v_m_s": 1738.3611151193209,
+        "total_delta_v_m_s": 1757.8161885717486,
+        "propellant_consumed_kg": 643.3132211715003,
+        "remaining_propellant_kg": 206.68677882849965,
+        "final_mass_kg": 856.6867788284997,
+        "flight_duration_s": 3851.8361394498083,
+        "powered_descent_duration_s": 260,
+        "circular_speed_m_s": 1633.5041340503267,
+        "circular_period_s": 7067.459728299708,
+        "target_elevation_m": 1953.7251419525205,
+        "actual_latitude_deg": -89.44409999999972,
+        "actual_longitude_deg": -137.29100005402785,
+        "maximum_thrust_n": 7993.6748805848865,
+        "candidates_attempted": 48,
+        "admissible_candidates": 44,
+        "terrain_checked_candidates": 1,
+        "approach_heading_deg": 90,
+        "phase_factor": 1.1,
+        "landing_success": true,
+        "doi_finite_burn_estimate_s": 2.424361406155605,
+        "global_optimality_proven": false
+      },
+      "validation": {
+        "position": {
+          "passed": true,
+          "actual_m": 0.00002241408835785068,
+          "limit_m": 100
+        },
+        "speed": {
+          "passed": true,
+          "actual_m_s": 0.5000002537083694,
+          "limit_m_s": 2
+        },
+        "horizontal_speed": {
+          "passed": true,
+          "actual_m_s": 2.690474701712696e-7,
+          "limit_m_s": 1
+        },
+        "mass": {
+          "passed": true,
+          "final_kg": 856.6867788284997,
+          "dry_kg": 650
+        },
+        "thrust": {
+          "passed": true,
+          "maximum_n": 7993.6748805848865,
+          "minimum_powered_n": 7227.737525753581,
+          "limit_n": 12000
+        },
+        "terrain": {
+          "passed": true,
+          "collision_samples": 0,
+          "unavailable_samples": 0,
+          "low_resolution_below_12km": 0,
+          "minimum_prelanding_clearance_m": 0.2400788062545871,
+          "checked_samples": 3856,
+          "high_resolution_samples": 2123,
+          "global_coarse_samples": 1733,
+          "sampling": "Powered: ≤120m path spacing and ≤0.5s. Coast: ≤2s. Validation is against the supplied DEM model; unresolved hazards are excluded.",
+          "numerical_tolerance_m": 0.02
+        },
+        "continuity": {
+          "passed": true,
+          "position_jump_m": 0,
+          "pdi_position_residual_m": 4.3128695229167825e-9,
+          "pdi_velocity_jump_m_s": 9.108304294376293e-12,
+          "doi_delta_v_residual_m_s": 9.947598300641403e-14,
+          "intentional_doi_delta_v_m_s": 19.45507345242777,
+          "method": "One continuous seven-state forward propagation; DOI velocity and rocket-equation mass impulse only."
+        },
+        "forward_propagation": {
+          "passed": true,
+          "refined_endpoint_difference_m": 4.547747076642263e-9
+        }
+      },
+      "message": "Forward-integrated landing satisfies the configured numerical and DEM-model checks. This is not NASA certification."
+    },
+    {
+      "name": "south-polar-second-target",
+      "input": {
+        "target": {
+          "latitude_deg": -87.9,
+          "longitude_deg": 25.1,
+          "landing_time_utc": "2026-11-16T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 1500,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 12000,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel"
+      },
+      "status": "VALIDATED",
+      "elapsed_ms": 444.28369999999984,
+      "summary": {
+        "landing_position_error_m": 0.000028448457692509536,
+        "touchdown_velocity_m_s": 0.500000359938032,
+        "horizontal_touchdown_velocity_m_s": 3.051101450539123e-7,
+        "vertical_touchdown_velocity_m_s": -0.500000359937939,
+        "doi_delta_v_m_s": 19.45507345242777,
+        "powered_descent_delta_v_m_s": 1749.0516055371872,
+        "total_delta_v_m_s": 1768.506678989615,
+        "propellant_consumed_kg": 646.2266841609162,
+        "remaining_propellant_kg": 203.7733158390838,
+        "final_mass_kg": 853.7733158390838,
+        "flight_duration_s": 3851.8361394498106,
+        "powered_descent_duration_s": 260,
+        "circular_speed_m_s": 1633.5041340503267,
+        "circular_period_s": 7067.459728299708,
+        "target_elevation_m": -1792.9907013747934,
+        "actual_latitude_deg": -87.89999999941097,
+        "actual_longitude_deg": 25.100000000149116,
+        "maximum_thrust_n": 8039.0695843572,
+        "candidates_attempted": 48,
+        "admissible_candidates": 44,
+        "terrain_checked_candidates": 2,
+        "approach_heading_deg": 180,
+        "phase_factor": 1.1,
+        "landing_success": true,
+        "doi_finite_burn_estimate_s": 2.424361406155605,
+        "global_optimality_proven": false
+      },
+      "validation": {
+        "position": {
+          "passed": true,
+          "actual_m": 0.000028448457692509536,
+          "limit_m": 100
+        },
+        "speed": {
+          "passed": true,
+          "actual_m_s": 0.500000359938032,
+          "limit_m_s": 2
+        },
+        "horizontal_speed": {
+          "passed": true,
+          "actual_m_s": 3.051101450539123e-7,
+          "limit_m_s": 1
+        },
+        "mass": {
+          "passed": true,
+          "final_kg": 853.7733158390838,
+          "dry_kg": 650
+        },
+        "thrust": {
+          "passed": true,
+          "maximum_n": 8039.0695843572,
+          "minimum_powered_n": 7337.812321988243,
+          "limit_n": 12000
+        },
+        "terrain": {
+          "passed": true,
+          "collision_samples": 0,
+          "unavailable_samples": 0,
+          "low_resolution_below_12km": 0,
+          "minimum_prelanding_clearance_m": 0.32024334285142686,
+          "checked_samples": 3857,
+          "high_resolution_samples": 2105,
+          "global_coarse_samples": 1752,
+          "sampling": "Powered: ≤120m path spacing and ≤0.5s. Coast: ≤2s. Validation is against the supplied DEM model; unresolved hazards are excluded.",
+          "numerical_tolerance_m": 0.02
+        },
+        "continuity": {
+          "passed": true,
+          "position_jump_m": 0,
+          "pdi_position_residual_m": 1.3195690850916484e-8,
+          "pdi_velocity_jump_m_s": 1.8678231930279445e-11,
+          "doi_delta_v_residual_m_s": 3.552713678800501e-15,
+          "intentional_doi_delta_v_m_s": 19.45507345242777,
+          "method": "One continuous seven-state forward propagation; DOI velocity and rocket-equation mass impulse only."
+        },
+        "forward_propagation": {
+          "passed": true,
+          "refined_endpoint_difference_m": 1.8632294079441902e-8
+        }
+      },
+      "message": "Forward-integrated landing satisfies the configured numerical and DEM-model checks. This is not NASA certification."
+    },
+    {
+      "name": "insufficient-thrust",
+      "input": {
+        "target": {
+          "latitude_deg": -89.4441,
+          "longitude_deg": -137.291,
+          "landing_time_utc": "2026-11-16T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 1500,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 100,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel"
+      },
+      "status": "INFEASIBLE UNDER ASSUMPTIONS",
+      "elapsed_ms": 304.8778000000002,
+      "summary": {
+        "candidates_attempted": 48,
+        "admissible_candidates": 0
+      },
+      "validation": {},
+      "message": "No admissible solution was found in the 48-candidate search (four headings, four durations, three phases). This is a bounded-search result, not proof of physical impossibility."
+    },
+    {
+      "name": "missing-target-dem",
+      "status": "DATA UNAVAILABLE",
+      "error": "DataUnavailable: TERRAIN DATA UNAVAILABLE — precise landing targets require the supplied south-polar LOLA 240m DEM (75°S–90°S). Global data only supports high-altitude clearance checks.",
+      "elapsed_ms": 0.5393000000001393
+    }
+  ]
+}

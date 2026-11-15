@@ -1,6 +1,8 @@
+import { ORBIT_EN } from './orbit/en';
 // 영어 화면 문구: 한국어 원문 → 영어. i18n.ts 가 화면의 글자를 이 표로 바꾼다.
 // 새 문구를 화면에 넣으면 여기에도 한 줄 넣는다 (없으면 한국어로 남는다).
 export const EN: Record<string, string> = {
+ ...ORBIT_EN,
  "← 3D 달로": "← Back to 3D",
  "불러오는 중…": "Loading…",
  "파일 없음": "file missing",

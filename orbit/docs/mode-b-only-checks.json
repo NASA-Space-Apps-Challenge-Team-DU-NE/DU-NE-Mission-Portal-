@@ -1,0 +1,42 @@
+{
+  "checked_at_utc": "2026-11-15T10:38:37.268Z",
+  "passed": true,
+  "tests": {
+    "passed": 76,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 32104.3381
+  },
+  "build": {
+    "typescript": true,
+    "vite": true,
+    "elapsed_s": 7.79,
+    "worker_bytes": 92867
+  },
+  "browser_checks": 18,
+  "default_mission_checks": 20,
+  "numerical_arrays_identical": {
+    "trajectory": true,
+    "controls": true,
+    "finite_burns": true
+  },
+  "ephemeris_sha256_unchanged": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+  "removed_files": [
+    "frontend/src/physics/nrho/cr3bp.ts",
+    "frontend/src/physics/nrho/frames.ts",
+    "frontend/src/physics/nrho/mission.ts",
+    "frontend/src/physics/nrho/transfer.ts",
+    "frontend/src/physics/nrho/types.ts",
+    "frontend/public/data/nrho/reference.json",
+    "scripts/prepare_nrho.py",
+    "scripts/independent_verify_nrho.py",
+    "scripts/run-nrho-validation.mjs",
+    "tests/nrho-core.test.ts",
+    "tests/nrho-frames.test.ts",
+    "tests/nrho-mission.test.ts",
+    "tests/nrho-transfer.test.ts"
+  ],
+  "retained_llo_start": true,
+  "runtime_backend_required": false,
+  "scope": "Mode A retirement and unchanged Mode B calculation verification; historical scientific records retained."
+}

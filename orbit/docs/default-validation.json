@@ -1,0 +1,35 @@
+{
+  "generated_at_utc": "2026-11-15T09:20:44.012729+00:00",
+  "tests": {
+    "passed": 81,
+    "failed": 0,
+    "skipped": 0,
+    "duration_s": 44.7305315
+  },
+  "static_build": {
+    "passed": true,
+    "duration_s": 9.64,
+    "worker": "simulation.worker-COQAXDbs.js"
+  },
+  "default_mission": {
+    "status": "VALIDATED",
+    "checks_passed": 20,
+    "checks_total": 20,
+    "full_result_sha256": "f6735257aedf06780b025e72209438f461fbc3eb075c25f0266481ff88c84d21"
+  },
+  "independent": {
+    "passed": true,
+    "checks": 28,
+    "final_position_difference_m": 0.004690142696459037
+  },
+  "terminal_constraints_unchanged": true,
+  "terminal_validator_sha256": "17448c2a17345433f0c906d8bbda4e7665bb650a3c856d92db39fb7e11af6bbb",
+  "source_sha256": {
+    "frontend/src/defaultMission.ts": "092b2a5b00cf9dd4c4b3ddcef7129815ad1279ac5d9136f22551c6d49ac51cea",
+    "frontend/src/physics/ephemeris/landing.ts": "ba00aad86cb17a2d3af81f1f70778a39ae4e53d180ed804acd7ece10fc0ab1f6",
+    "frontend/src/physics/ephemeris/mission.ts": "dbb79ba2bdbb92501b2ada2eb4899c7e3f071bf48b9c6be8a394b6523d5ae4c4",
+    "frontend/src/App.tsx": "b0be23ce698476678a35ab48d1d7ee0c972206cb7dcd2d9a7e3d76363d87b9b8",
+    "scripts/terminal_audit.py": "21e2fc011374e4dc44600d93bc8a33aacff949075607cc2884d1331e088b2443",
+    "tests/ephemeris-mission.test.ts": "4e3e1887e88666be3a6f6aab4f06fd1559228ed4a5dd4300e2c1878dd2bdcbcd"
+  }
+}

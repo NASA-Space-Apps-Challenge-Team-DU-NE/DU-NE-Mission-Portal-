@@ -1,0 +1,323 @@
+/* Mission Portal cd38551 (2026-11-15): final dark theme from web/src/styles/base.css.
+   Presentation only. Keep solver, safety limits and default mission independent.
+   This standalone stylesheet is not intended for global import into the Portal. */
+@font-face {
+  font-family: 'Pretendard Variable'; font-style: normal; font-weight: 45 920;
+  font-display: swap; src: url('/fonts/PretendardVariable.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'JetBrains Mono'; font-style: normal; font-weight: 400;
+  font-display: swap; src: url('/fonts/JetBrainsMono-Regular.woff2') format('woff2');
+}
+:root {
+  --bg: #000; --panel: #0d0d0d; --panel2: #111; --panel3: #1a1a1a;
+  --line: #2c2c2e; --line2: #3d3d42; --line3: #57575e;
+  --fg: #fff; --soft: #d8d8d8; --muted: #9a9a9a; --dim: #6b6b6b;
+  --accent: #4ade80; --accent-bg: rgba(74,222,128,.08);
+  --warn: #ef4444; --warn-bg: rgba(239,68,68,.06);
+  --amber: #f59e0b; --amber-bg: rgba(245,158,11,.06);
+  --navy: #000; --navy2: #0d0d0d; --r: 0px;
+  --f-display: 'Pretendard Variable', Pretendard, system-ui, 'Malgun Gothic', sans-serif;
+  --f-body: var(--f-display);
+  --f-mono: 'JetBrains Mono', 'Courier New', ui-monospace, monospace;
+  --ls: .14em;
+  color-scheme: dark;
+}
+body { font-size: 14px; letter-spacing: -.005em; }
+::selection { background: #fff; color: #000; }
+:focus-visible { outline: 1px solid #fff; outline-offset: 3px; }
+button, a, input, select, summary { scroll-margin: 16px; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline-color: #fff; }
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-thumb { background: var(--line3); border-radius: 0; }
+button, input, select { border-radius: 0; }
+input, select { height: 38px; font-size: 13px; }
+input[type=number] { font-size: 12px; }
+input[type=datetime-local] { font-size: 12px; }
+input:hover, select:hover { border-color: var(--line3); }
+input[type=range], input[type=checkbox] { accent-color: #fff; }
+a { color: var(--soft); text-underline-offset: 3px; }
+a:hover { color: #fff; text-decoration: underline; }
+
+/* The standalone masthead uses the same team mark, without inactive Portal navigation. */
+.topbar { height: 96px; min-height: 96px; background: #000; border-bottom: 1px solid var(--line); }
+.brand { gap: 18px; }
+.brand img { width: auto; height: 72px; display: block; }
+.brand b { font-size: 12px; letter-spacing: var(--ls); }
+.brand small { font-size: 10px; color: var(--muted); letter-spacing: .05em; margin-top: 6px; }
+.brand:hover { text-decoration: none; }
+.header-separator { background: var(--line); }
+.project-name, .runtime-label, .team-label span { color: var(--muted); font-size: 10px; }
+.project-name>span { color: var(--soft); }
+.runtime-label i, .footer>span:first-child i { background: var(--accent); }
+.header-button { border-color: var(--line2); color: var(--soft); font-size: 12px; }
+.header-button:hover { background: var(--panel3); }
+.team-label { font-size: 13px; }
+.mission-heading { height: auto; min-height: 136px; padding: 22px 28px 20px; align-items: center; }
+.eyebrow { color: var(--muted); font: 600 11px var(--f-mono); letter-spacing: var(--ls); }
+.mission-heading h1 { font: 700 30px/1.15 var(--f-display); letter-spacing: -.01em; margin: 6px 0; }
+.mission-heading p { font-size: 13px; line-height: 1.6; }
+.mission-badges { flex-wrap: wrap; justify-content: flex-end; }
+.tag, .status-pill { background: var(--panel); border-color: var(--line2); font-size: 10px; letter-spacing: .05em; }
+.status-pill.success, .transfer-status.ok, .verdict-button.passed { border-color: #1f4d32; }
+.status-pill.warning { border-color: #5a4214; }
+.dot.teal { background: var(--accent); }
+
+/* Cards use the Portal's flat surfaces and 14 px gutters. */
+.workspace { grid-template-columns: 304px minmax(0,1fr) 288px; gap: 14px; margin: 0 28px;
+  border: 0; box-shadow: none; background: var(--bg); align-items: start; min-height: 0; }
+.setup-panel, .visual-panel, .telemetry-panel { border: 1px solid var(--line); background: var(--panel); }
+.panel-heading { height: 66px; padding: 12px 14px; }
+.panel-heading h2 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.panel-heading h2 small { font: 10px var(--f-mono); color: var(--muted); letter-spacing: .08em; }
+.panel-number { color: var(--muted); background: none; border: 0; width: 22px; }
+.setup-scroll { max-height: 760px; }
+.form-section { padding: 18px 14px; gap: 12px; }
+.section-label { color: var(--muted); font-size: 10px; letter-spacing: .1em; }
+.section-label span { color: var(--fg); font-size: 13px; font-weight: 600; }
+.field-label, .number-field>span { font-size: 12px; }
+.input-unit em { font-size: 10px; top: 12px; right: 7px; }
+.field-pair { gap: 10px; }
+.coordinate-note { font-size: 10px; letter-spacing: 0; line-height: 1.6; flex-wrap: wrap; }
+.help-text, .site-note p { font-size: 12px; line-height: 1.7; }
+.site-note p { max-height: 100px; }
+.site-note { border-color: #5a4214; }
+.mini-badge, .site-note a { font-size: 11px; }
+.assumption-label { border-color: #5a4214; font-size: 10px; }
+.assumption-label b { color: var(--amber); }
+summary, .modal summary { font-size: 12px; color: var(--soft); min-height: 30px; }
+.setup-action { padding: 14px; background: var(--panel); }
+.setup-action p { font-size: 11px; }
+.run-button { min-height: 42px; height: auto; padding: 10px 12px; background: #fff; color: #000; border-color: #fff; border-radius: 0; font-size: 13px; }
+.run-button:hover { background: var(--soft); }
+.cancel-button { font-size: 12px; color: var(--soft); }
+.preset-button { margin: 14px 14px 0; padding: 9px 12px; border: 1px solid var(--line2);
+  background: none; color: var(--soft); font-size: 12px; }
+.preset-button:hover { border-color: var(--fg); color: var(--fg); }
+.orbit-select b { font: 600 13px var(--f-body); }
+.orbit-select small { font-size: 11px; }
+.orbit-select button { padding: 11px; }
+.orbit-select button[aria-pressed=true] { border-color: #fff; background: var(--panel3); color: #fff; box-shadow: none; }
+.reference-mode, .reference-mode.ephemeris-mode {
+  background: var(--panel2); border-left-color: var(--line3); color: var(--soft); }
+.reference-mode b, .reference-mode.ephemeris-mode b { color: var(--muted); font-size: 10px; }
+.reference-mode span { font-size: 12px; }
+.reference-mode small,
+.reference-quality, .ephemeris-coverage, .ephemeris-coverage b,
+.ephemeris-coverage>span, .ephemeris-coverage small, .ephemeris-coverage p { font-size: 11px; }
+.ephemeris-coverage b { color: var(--soft); }
+.gravity-settings { background: var(--panel2); border-color: var(--line); padding: 12px; }
+.gravity-settings select { font-size: 12px; }
+.gravity-source, .gravity-caution { font-size: 11px; }
+
+/* Scene phase colors stay independent of UI status colors. */
+.viewport-heading { height: 52px; padding: 10px 14px; }
+.viewport-heading b { font: 700 15px var(--f-body); }
+.viewport-heading>div>svg { color: var(--muted); }
+.viewport-heading>div>span { font-size: 10px; }
+.text-button { font-size: 12px; }
+.viewport { flex: none; height: 460px; min-height: 400px; max-height: none; background: #000; }
+.view-tag { font-size: 10px; background: #0d0d0dcc; border-color: var(--line2); color: var(--soft); }
+.scene-note { color: var(--muted); font-size: 10px; max-width: 180px; }
+.view-toolbar button { background: #111e; border-color: var(--line2); color: var(--soft); border-radius: 0; width: 42px; height: 44px; font-size: 10px; }
+.view-toolbar button:hover { border-color: var(--line3); }
+.view-toolbar button[aria-pressed=true] { background: #fff; color: #000; border-color: #fff; }
+.view-toolbar.extended { grid-template-columns: 42px 42px; }
+.view-toolbar.extended button { width: 42px; }
+.scene-intro { max-width: calc(100% - 120px); }
+.scene-intro>span { color: var(--muted); font-size: 10px; }
+.scene-intro>b { font: 700 24px var(--f-display); }
+.scene-intro p { color: var(--soft); font-size: 13px; }
+.scene-intro>div { color: var(--muted); font-size: 11px; }
+.scene-bottomline { background: #000c; border-color: var(--line); }
+.orbit-legend { font-size: 10px; color: var(--soft); gap: 10px; }
+.scene-bottomline>span { color: var(--muted); font-size: 10px; }
+.computation-panel { background: #111e; border-color: var(--line3); color: var(--fg); }
+.computation-panel b { font-size: 13px; }
+.computation-panel p { font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.spinner { border-color: var(--line2); border-top-color: #fff; }
+.terrain-alert { background: #211907e8; border-color: #5a4214; color: var(--amber); font-size: 12px; }
+.result-banner { font-size: 12px; padding: 12px 14px; }
+.result-banner button { font-size: 11px; }
+.result-banner.validated { background: var(--accent-bg); }
+.result-banner.error { color: #fca5a5; }
+
+.timeline-panel { padding: 16px 14px; }
+.play-button { background: transparent; border-radius: 0; color: var(--fg); width: 36px; height: 36px; }
+.play-button:hover { border-color: var(--line3); background: var(--panel3); }
+.tiny-label { font-size: 10px; }
+.play-controls output { font-size: 16px; letter-spacing: -.03em; }
+.play-controls output small { font-size: 10px; }
+.timeline-options>span, .timeline-tools>label:first-child, .burn-pause { font-size: 11px; }
+.timeline-options select { width: 80px; height: 32px; font-size: 11px; }
+.timeline-tools { flex-wrap: wrap; }
+.timeline-tools select { height: 32px; font-size: 12px; max-width: 240px; }
+.phase-ruler { font-size: 10px; }
+.phase-ruler button { background: var(--panel); font-size: 10px; }
+.event-chips { gap: 6px; }
+.event-chips button { font-size: 11px; padding: 5px 8px; background: transparent; border-radius: 0; }
+.event-chips button:hover, .event-chips button.active { background: var(--panel3); border-color: var(--fg); color: var(--fg); }
+.burn-inspector { background: var(--panel2); color: var(--soft); border-left-color: #bc9af6; font-size: 12px; }
+.burn-inspector b, .burn-inspector small { color: var(--muted); font-size: 11px; }
+.charts-panel { background: var(--panel); }
+.chart-tabs { overflow-x: auto; padding: 0 8px; }
+.chart-tabs button { font-size: 12px; padding: 12px 10px; gap: 5px; }
+.chart-tabs button small { font-size: 10px; color: var(--muted); }
+.chart-tabs button[aria-selected=true] { color: #fff; border-bottom-color: #fff; }
+.chart-container { height: 200px; }
+.chart-empty>span { font-size: 12px; color: var(--muted); background: var(--panel); padding: 9px 12px; }
+.empty-grid { background: repeating-linear-gradient(0deg,transparent,transparent 31px,var(--line) 32px); }
+.chart-caption { font-size: 11px; color: var(--muted); padding: 0 14px; flex-wrap: wrap; }
+.chart-caption .mono { font-size: 10px; }
+
+.telemetry-scroll { padding: 14px; max-height: 1000px; }
+.phase-card { padding: 12px; }
+.phase-card>b { font-size: 17px; }
+.phase-steps i { background: var(--line2); }
+.phase-caption { font-size: 9px; color: var(--muted); flex-wrap: wrap; }
+.phase-caption>span { color: var(--muted); }
+.primary-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.primary-metrics>div>span { font-size: 11px; }
+.primary-metrics b { font-size: 23px; color: var(--fg); letter-spacing: -.04em; flex-wrap: wrap; gap: 4px; }
+.primary-metrics small { font-size: 11px; }
+.metric-section h3, .landing-verdict h3 { font-size: 10px; letter-spacing: .1em; }
+.metric-section h3 span { color: var(--muted); }
+.metric-row, .transfer-results .metric-row { font-size: 12px; gap: 12px; }
+.metric-row>b, .transfer-results .metric-row b { font-size: 11px; letter-spacing: 0; text-align: right; white-space: normal; overflow-wrap: anywhere; }
+.metric-row small { color: var(--muted); font-size: 10px; }
+.fuel-gauge { background: var(--line); }
+.fuel-label { color: var(--muted); font-size: 10px; gap: 6px; flex-wrap: wrap; }
+.reference-quality { color: var(--muted); border-color: var(--line3); }
+.transfer-status { font-size: 10px; border-color: #5a4214; }
+.dated-telemetry, .dated-telemetry b, .gravity-model-tag, .gravity-results>small, .gravity-results>a { font-size: 11px; }
+.verdict-button { border-left-color: var(--line3); }
+.verdict-button>span { font-size: 12px; }
+.verdict-button small { font-size: 10px; color: var(--muted); }
+.verdict-button:disabled { color: var(--muted); }
+.exports button { height: 36px; background: none; border-radius: 0; font-size: 11px; }
+.scientific-note { color: var(--muted); font-size: 11px; }
+.gravity-comparison { background: var(--panel); font-size: 13px; padding: 16px 14px; }
+.gravity-comparison-heading { flex-wrap: wrap; }
+.gravity-comparison-heading h3 { font-size: 15px; }
+.gravity-comparison-heading>span, .gravity-comparison-experiment>small, .gravity-comparison caption { font-size: 11px; }
+.gravity-comparison-experiment>b { font-size: 13px; color: var(--soft); }
+.gravity-comparison-experiment>p, .gravity-comparison-values>span { font-size: 12px; }
+.gravity-comparison-values strong { font-size: 13px; }
+.gravity-comparison table { font-size: 11px; }
+.footer { color: var(--muted); font-size: 10px; padding: 20px 28px; flex-wrap: wrap; }
+.footer b { color: var(--line3); }
+.footer button { font-size: 12px; }
+
+/* Dialogs and computed failure states share the same surfaces and semantic colors. */
+.modal-backdrop { background: #000b; }
+.modal { background: var(--panel); box-shadow: 0 16px 40px #0009; font-size: 14px; }
+.modal-heading h2 { font-size: 24px; }
+.modal>p { font-size: 13px; }
+.source-cards>div { background: var(--panel2); }
+.source-cards b { font-size: 14px; }
+.source-cards span, .source-cards p, .source-cards a { font-size: 12px; }
+.modal pre { background: var(--panel2); font-size: 11px; }
+.model-note { font-size: 12px; }
+.validation-list>div { font-size: 12px; overflow-wrap: anywhere; }
+.validation-list>div>span:last-child { font-size: 10px; flex-shrink: 0; }
+.icon-button { border-radius: 0; }
+.failure-dialog { border-color: #5a4214; border-radius: 0; }
+.failure-symbol { border-color: #5a4214; color: var(--amber); }
+.failure-heading .eyebrow, .failure-issues h3>span { color: var(--amber); }
+.failure-issues section { border-radius: 0; }
+.failure-actions button { border-radius: 0; }
+.failure-dismiss { background: transparent; }
+.failure-edit { background: #fff; border-color: #fff; color: #000; }
+.failure-edit:hover { background: var(--soft); }
+.failure-banner { color: var(--amber); border-color: #5a4214; }
+.failure-banner b { font-size: 13px; }
+.failure-banner span { font-size: 12px; }
+.failure-banner button { background: var(--panel); border-color: #5a4214; border-radius: 0; color: var(--soft); font-size: 12px; }
+
+@media (min-width: 1800px) {
+  .workspace { grid-template-columns: 330px minmax(0,1fr) 320px; }
+  .viewport { height: 540px; }
+}
+@media (max-width: 1280px) {
+  .workspace { grid-template-columns: 300px minmax(0,1fr); }
+  .telemetry-panel { grid-column: 1/-1; }
+  .telemetry-scroll, .telemetry-scroll:has(.nrho-results) { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 18px; max-height: none; overflow: visible; }
+  .primary-metrics { align-content: start; padding-top: 0; border: 0; }
+  .phase-card { align-self: start; }
+  .mission-badges { flex-direction: column; align-items: flex-end; }
+  .scene-bottomline>span { display: none; }
+  .chart-tabs button small { display: none; }
+}
+@media (max-width: 900px) {
+  .topbar { padding: 0 20px; gap: 12px; }
+  .brand img { height: 60px; }
+  .brand small, .project-name, .team-label, .header-separator, .runtime-label { display: none; }
+  .mission-heading { padding: 22px 20px; align-items: flex-start; }
+  .mission-heading h1 { font-size: 28px; }
+  .mission-badges .tag { display: none; }
+  .workspace { grid-template-columns: minmax(0,1fr); margin: 0 20px; }
+  .setup-panel form { display: flex; }
+  .setup-scroll { max-height: 460px; }
+  .initial-orbit .orbit-select { display: grid; grid-template-columns: 1fr 1fr; }
+  .form-section { padding: 16px; }
+  .viewport { height: 440px; min-height: 400px; }
+  .telemetry-scroll, .telemetry-scroll:has(.nrho-results) { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .footer { padding: 20px; }
+}
+@media (max-width: 560px) {
+  .topbar { height: 76px; min-height: 76px; padding: 0 14px; }
+  .brand { gap: 10px; }
+  .brand img { height: 48px; }
+  .brand b { font-size: 10px; }
+  .header-button { font-size: 11px; padding: 8px; }
+  .header-button svg { display: none; }
+  .mission-heading { padding: 20px 14px; flex-wrap: wrap; gap: 12px; }
+  .mission-heading h1 { font-size: 28px; }
+  .mission-heading p { font-size: 13px; max-width: none; }
+  .mission-badges { padding: 0; }
+  .status-pill { font-size: 10px; max-width: none; }
+  .eyebrow { font-size: 10px; }
+  .workspace { display: grid; margin: 0 12px; }
+  .setup-panel .panel-heading, .telemetry-panel .panel-heading { height: 64px; }
+  .setup-action { display: block; }
+  .setup-action p { display: block; }
+  .form-section { padding: 16px 12px; }
+  .orbit-select button { gap: 6px; padding: 9px; }
+  .orbit-select b { font-size: 12px; }
+  .orbit-select small { font-size: 10px; }
+  .viewport-heading { height: 52px; }
+  .viewport-heading>div>span { display: none; }
+  .scene-topline { align-items: flex-start; }
+  .scene-note { max-width: 140px; font-size: 10px; }
+  .view-tag { font-size: 9px; max-width: 145px; }
+  .view-toolbar { right: 10px; top: 78px; }
+  .view-toolbar.extended { grid-template-columns: 36px 36px; }
+  .view-toolbar.extended button { width: 36px; font-size: 9px; }
+  .scene-intro { left: 16px; bottom: 70px; max-width: calc(100% - 100px); }
+  .scene-intro>b { font-size: 22px; }
+  .scene-intro p { font-size: 12px; }
+  .scene-intro>div { font-size: 10px; }
+  .orbit-legend { font-size: 10px; gap: 8px; }
+  .timeline-header { align-items: flex-start; flex-wrap: wrap; gap: 12px; }
+  .timeline-options { margin-left: auto; }
+  .timeline-tools { align-items: flex-start; }
+  .timeline-tools>label:first-child { min-width: 100%; font-size: 11px; }
+  .timeline-tools select { flex: 1; max-width: none; }
+  .chart-tabs { justify-content: flex-start; }
+  .chart-tabs button { padding: 12px 9px; font-size: 12px; }
+  .result-banner { flex-wrap: wrap; }
+  .result-banner button { margin-left: 24px; }
+  .telemetry-scroll, .telemetry-scroll:has(.nrho-results) { grid-template-columns: minmax(0,1fr); gap: 12px; padding: 14px; }
+  .primary-metrics { padding: 10px 0; }
+  .metric-row, .transfer-results .metric-row { font-size: 13px; }
+  .metric-row>b, .transfer-results .metric-row b { font-size: 12px; }
+  .footer { padding: 18px 14px; }
+  .validation-list>div { font-size: 11px; }
+}
+/* Keep Drei's HTML marker layer inside the canvas, below controls and dialogs. */
+.viewport { isolation: isolate; }
+.viewport>div:first-child { z-index: 0; }
+.scene-topline, .view-toolbar, .scene-intro, .scene-bottomline,
+.computation-panel, .terrain-alert { z-index: 1; }
+.scene-intro { background: linear-gradient(90deg,#000b,transparent); padding: 10px; left: 14px; }
+.view-toolbar button span { white-space: nowrap; }

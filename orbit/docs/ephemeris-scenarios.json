@@ -1,0 +1,607 @@
+{
+  "generated_utc": "2026-11-14T23:04:22.572Z",
+  "source_sha256": {
+    "frontend/src/physics/ephemeris/data.ts": "6453976af2faef4965ab832547e7ffb0051c50adc69063e5abfb92dfdc788bec",
+    "frontend/src/physics/ephemeris/dynamics.ts": "8d6af8626c6d4b9c4751aabfd2370b4038601a78df5aae0b0980365b0f2f3a72",
+    "frontend/src/physics/ephemeris/transfer.ts": "c4c74d7f359380977bb4290bac65583c98b549a30351bb86c21518077aabbcb4",
+    "frontend/src/physics/ephemeris/landing.ts": "06dcdef2dd4c9b523f2fbedc3169219f3befd2bb74835435714f82354e3e7398",
+    "frontend/src/physics/ephemeris/mission.ts": "01e0dce8ee610f607fad2dbfa673236bee640e8d8126fb1aced55b12b0af5c66"
+  },
+  "description": "Actual browser TypeScript Mode B mission calculations executed under Node with local static NASA assets after dense low-altitude coast sampling and independent adaptive coast refinement were added. Source SHA-256 hashes identify the numerical implementation. No engine limits changed. Every VALIDATED run independently asserts insertion position/velocity/mass continuity, total fuel bookkeeping, dry-mass and thrust limits, chronological samples, and real DEM touchdown.",
+  "scenarios": [
+    {
+      "id": "next-date-2026-11-17",
+      "input": {
+        "target": {
+          "latitude_deg": -89.4441,
+          "longitude_deg": -137.291,
+          "landing_time_utc": "2026-11-17T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 1500,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 12000,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel",
+        "initial_orbit": "nrho",
+        "nrho": {
+          "reference_id": "jpl-earth-moon-l2-southern",
+          "departure_phase_mode": "auto",
+          "departure_phase": 0,
+          "transfer_tof_min_days": 0.3,
+          "transfer_tof_max_days": 3,
+          "max_transfer_delta_v_m_s": 2500,
+          "parking_revolutions": 0,
+          "objective": "delta_v",
+          "max_iterations": 20,
+          "max_computation_seconds": 120,
+          "mass_basis": "llo",
+          "mode": "b"
+        }
+      },
+      "status": "VALIDATED",
+      "message": "날짜별 지구·달·태양 중력으로 전이부터 접지까지 계산해 모델 검증 조건을 충족했습니다.",
+      "elapsed_ms": 13571.1847,
+      "summary": {
+        "landing_success": true,
+        "landing_position_error_m": 0.0000033355502496239284,
+        "touchdown_velocity_m_s": 0.5000000154526141,
+        "horizontal_touchdown_velocity_m_s": 3.573172929370939e-8,
+        "vertical_touchdown_velocity_m_s": -0.5000000154526129,
+        "actual_latitude_deg": -89.44410000000103,
+        "actual_longitude_deg": -137.29099999331044,
+        "doi_delta_v_m_s": 19.45507345333567,
+        "powered_descent_delta_v_m_s": 1738.4082539486046,
+        "total_delta_v_m_s": 3746.465438525218,
+        "propellant_consumed_kg": 1970.1553333589934,
+        "remaining_propellant_kg": 206.67391034751313,
+        "initial_nrho_mass_kg": 2826.8292437065065,
+        "llo_initial_mass_kg": 1500.0000000000002,
+        "final_mass_kg": 856.6739103475131,
+        "maximum_thrust_n": 7994.184508001956,
+        "flight_duration_s": 186371.8361392906,
+        "transfer_duration_s": 171720,
+        "parking_duration_s": 0,
+        "nrho_coast_duration_s": 10800,
+        "departure_delta_v_m_s": 320.51213241379804,
+        "insertion_delta_v_m_s": 1668.0899787094793,
+        "departure_utc": "2026-11-14T23:13:48.163Z",
+        "llo_insertion_utc": "2026-11-16T22:55:48.163Z",
+        "landing_time_utc": "2026-11-17T00:00:00.000Z",
+        "global_optimality_proven": false,
+        "transfer_search_timed_out": false
+      },
+      "validation": {
+        "contact": {
+          "passed": true,
+          "final_dem_clearance_m": -0.000002681618980204803,
+          "vertical_speed_m_s": -0.5000000154526129,
+          "clearance_tolerance_m": 0.02
+        },
+        "position": {
+          "passed": true,
+          "actual_m": 0.0000033355502496239284,
+          "limit_m": 100
+        },
+        "speed": {
+          "passed": true,
+          "actual_m_s": 0.5000000154526141,
+          "limit_m_s": 2
+        },
+        "horizontal_speed": {
+          "passed": true,
+          "actual_m_s": 3.573172929370939e-8
+        },
+        "mass": {
+          "passed": true,
+          "final_kg": 856.6739103475131,
+          "dry_kg": 650
+        },
+        "thrust": {
+          "passed": true,
+          "maximum_n": 7994.184508001956,
+          "minimum_n": 7228.151516890214
+        },
+        "terrain": {
+          "passed": true,
+          "unavailable_samples": 0,
+          "collision_samples": 0,
+          "low_resolution_below_12km": 0,
+          "minimum_prelanding_clearance_m": 0.04626141301696407,
+          "checked_samples": 11006,
+          "sampling": "Powered descent and coast below 20 km: time step limited to 120 m / inertial speed; powered step <=0.25s, other coast <=2s. DEM grid is 240m, unresolved obstacles excluded."
+        },
+        "continuity": {
+          "passed": true,
+          "landing_start_position_error_m": 0.0005640705569615811,
+          "position_was_reset": false
+        },
+        "forward_propagation": {
+          "passed": true,
+          "coast_refined_position_difference_m": 0.0000013098069021275858,
+          "coast_refined_velocity_difference_m_s": 1.3842685478291375e-9,
+          "refined_endpoint_difference_m": 0.000003163324426700596,
+          "refined_velocity_difference_m_s": 3.860283637987948e-8,
+          "method": "Coast: independent adaptive DOPRI from actual insertion through DOI. Powered descent: half-step RK4 from actual PDI."
+        },
+        "ephemeris_coverage": {
+          "passed": true,
+          "start_utc": "2026-11-14T20:13:48.163Z",
+          "end_utc": "2026-11-17T00:00:00.000Z",
+          "coverage_utc": [
+            "2026-11-01T00:00:00Z",
+            "2026-12-01T00:00:00Z"
+          ]
+        },
+        "nrho_reference": {
+          "passed": true,
+          "refined_position_difference_m": 0.0009655567051849247,
+          "source": "NASA reference epoch initial state, propagated in the documented DE440 three-body force model. No Jacobi/period closure criterion."
+        },
+        "nrho_coast": {
+          "passed": true,
+          "minimum_altitude_m": 61100780.080881156
+        },
+        "transfer_coast": {
+          "passed": true,
+          "position_error_m": 0.0005640705569615811,
+          "position_tolerance_m": 0.05,
+          "post_insertion_velocity_error_m_s": 1.1368683772161603e-13,
+          "refined_position_difference_m": 0.000001238537960666892,
+          "post_insertion_eccentricity": 1.6334300748860087e-10,
+          "target_eccentricity": 5.558157969524301e-16,
+          "orbit_plane_error_rad": 2.5993137333146785e-10,
+          "actual_llo_altitude_lola_km": 100.00000008544676,
+          "target_llo_altitude_lola_km": 100,
+          "minimum_moon_altitude_km": 100.00000008544676,
+          "minimum_earth_altitude_km": 392875.1052786857,
+          "collision_envelope_radius_km": 1749.4,
+          "position_was_reset": false,
+          "limit_total_delta_v_m_s": 2500,
+          "model": "Date-dependent lunar central gravity plus geometric Earth/Sun differential accelerations, J2000 axes.",
+          "collision_check": "Accepted adaptive states; maximum step travel 2% of lunar radius vector. 12 km spherical margin, not terrain certification.",
+          "accepted_steps": 1061,
+          "rejected_steps": 0
+        },
+        "llo_insertion": {
+          "passed": true,
+          "position_error_m": 0.0005640705569615811,
+          "velocity_error_m_s": 1.1368683772161603e-13,
+          "eccentricity": 1.6334300748860087e-10,
+          "plane_error_rad": 2.5993137333146785e-10,
+          "altitude_m": 100000.00008544675,
+          "position_was_reset": false
+        },
+        "total_fuel": {
+          "passed": true,
+          "initial_nrho_mass_kg": 2826.8292437065065,
+          "after_departure_mass_kg": 2552.3662162612545,
+          "after_insertion_mass_kg": 1500.0000000000002,
+          "final_mass_kg": 856.6739103475131,
+          "departure_propellant_kg": 274.463027445252,
+          "insertion_propellant_kg": 1052.3662162612543,
+          "landing_propellant_kg": 643.3260896524871,
+          "mass_continuity_error_kg": 2.2737367544323206e-13
+        }
+      },
+      "independent_assertions": {
+        "passed": true,
+        "insertion_position_exactly_continuous": true,
+        "insertion_impulse_delta_v_error_m_s": 0,
+        "insertion_mass_continuity_error_kg": 0,
+        "total_propellant_bookkeeping_error_kg": 0,
+        "chronological_samples": true,
+        "dry_mass_and_max_thrust": true,
+        "actual_dem_touchdown": true
+      },
+      "transfer_status": "TRANSFER VALIDATED"
+    },
+    {
+      "id": "one-parking-revolution-2026-11-16",
+      "input": {
+        "target": {
+          "latitude_deg": -89.4441,
+          "longitude_deg": -137.291,
+          "landing_time_utc": "2026-11-16T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 1500,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 12000,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel",
+        "initial_orbit": "nrho",
+        "nrho": {
+          "reference_id": "jpl-earth-moon-l2-southern",
+          "departure_phase_mode": "auto",
+          "departure_phase": 0,
+          "transfer_tof_min_days": 0.3,
+          "transfer_tof_max_days": 3,
+          "max_transfer_delta_v_m_s": 2500,
+          "parking_revolutions": 1,
+          "objective": "delta_v",
+          "max_iterations": 20,
+          "max_computation_seconds": 120,
+          "mass_basis": "llo",
+          "mode": "b"
+        }
+      },
+      "status": "VALIDATED",
+      "message": "날짜별 지구·달·태양 중력으로 전이부터 접지까지 계산해 모델 검증 조건을 충족했습니다.",
+      "elapsed_ms": 12630.825799999999,
+      "summary": {
+        "landing_success": true,
+        "landing_position_error_m": 0.0000012566212375029883,
+        "touchdown_velocity_m_s": 0.49999999472912504,
+        "horizontal_touchdown_velocity_m_s": 1.8250120749944284e-8,
+        "vertical_touchdown_velocity_m_s": -0.49999999472912476,
+        "actual_latitude_deg": -89.44410000000038,
+        "actual_longitude_deg": -137.29100000308108,
+        "doi_delta_v_m_s": 19.45507345333567,
+        "powered_descent_delta_v_m_s": 1738.395359110091,
+        "total_delta_v_m_s": 3909.08730270465,
+        "propellant_consumed_kg": 2120.516078797146,
+        "remaining_propellant_kg": 206.67743051707419,
+        "initial_nrho_mass_kg": 2977.19350931422,
+        "llo_initial_mass_kg": 1499.9999999999998,
+        "final_mass_kg": 856.6774305170742,
+        "maximum_thrust_n": 7996.557080651684,
+        "flight_duration_s": 164279.29586726055,
+        "transfer_duration_s": 142560,
+        "parking_duration_s": 7067.459727969926,
+        "nrho_coast_duration_s": 10800,
+        "departure_delta_v_m_s": 397.8799046527308,
+        "insertion_delta_v_m_s": 1753.3569654884925,
+        "departure_utc": "2026-11-14T05:22:00.704Z",
+        "llo_insertion_utc": "2026-11-15T20:58:00.704Z",
+        "landing_time_utc": "2026-11-16T00:00:00.000Z",
+        "global_optimality_proven": false,
+        "transfer_search_timed_out": false
+      },
+      "validation": {
+        "contact": {
+          "passed": true,
+          "final_dem_clearance_m": 8.638285180495586e-7,
+          "vertical_speed_m_s": -0.49999999472912476,
+          "clearance_tolerance_m": 0.02
+        },
+        "position": {
+          "passed": true,
+          "actual_m": 0.0000012566212375029883,
+          "limit_m": 100
+        },
+        "speed": {
+          "passed": true,
+          "actual_m_s": 0.49999999472912504,
+          "limit_m_s": 2
+        },
+        "horizontal_speed": {
+          "passed": true,
+          "actual_m_s": 1.8250120749944284e-8
+        },
+        "mass": {
+          "passed": true,
+          "final_kg": 856.6774305170742,
+          "dry_kg": 650
+        },
+        "thrust": {
+          "passed": true,
+          "maximum_n": 7996.557080651684,
+          "minimum_n": 7223.262725881976
+        },
+        "terrain": {
+          "passed": true,
+          "unavailable_samples": 0,
+          "collision_samples": 0,
+          "low_resolution_below_12km": 0,
+          "minimum_prelanding_clearance_m": 0.04626379416981763,
+          "checked_samples": 14541,
+          "sampling": "Powered descent and coast below 20 km: time step limited to 120 m / inertial speed; powered step <=0.25s, other coast <=2s. DEM grid is 240m, unresolved obstacles excluded."
+        },
+        "continuity": {
+          "passed": true,
+          "landing_start_position_error_m": 0.0000010284447283211288,
+          "position_was_reset": false
+        },
+        "forward_propagation": {
+          "passed": true,
+          "coast_refined_position_difference_m": 0.00000919476394583086,
+          "coast_refined_velocity_difference_m_s": 8.959527957501666e-9,
+          "refined_endpoint_difference_m": 0.0000014151630195796581,
+          "refined_velocity_difference_m_s": 2.0761476394544528e-8,
+          "method": "Coast: independent adaptive DOPRI from actual insertion through DOI. Powered descent: half-step RK4 from actual PDI."
+        },
+        "ephemeris_coverage": {
+          "passed": true,
+          "start_utc": "2026-11-14T02:22:00.704Z",
+          "end_utc": "2026-11-16T00:00:00.000Z",
+          "coverage_utc": [
+            "2026-11-01T00:00:00Z",
+            "2026-12-01T00:00:00Z"
+          ]
+        },
+        "nrho_reference": {
+          "passed": true,
+          "refined_position_difference_m": 0.0005199021527923588,
+          "source": "NASA reference epoch initial state, propagated in the documented DE440 three-body force model. No Jacobi/period closure criterion."
+        },
+        "nrho_coast": {
+          "passed": true,
+          "minimum_altitude_m": 48188087.3210056
+        },
+        "transfer_coast": {
+          "passed": true,
+          "position_error_m": 0.0000010284447283211288,
+          "position_tolerance_m": 0.05,
+          "post_insertion_velocity_error_m_s": 5.684341886080802e-14,
+          "refined_position_difference_m": 0.0000015492842504413325,
+          "post_insertion_eccentricity": 3.682869857616973e-13,
+          "target_eccentricity": 4.44793382973689e-16,
+          "orbit_plane_error_rad": 4.2140648188889055e-13,
+          "actual_llo_altitude_lola_km": 99.99999999985239,
+          "target_llo_altitude_lola_km": 100.00000000000023,
+          "minimum_moon_altitude_km": 99.99999999985239,
+          "minimum_earth_altitude_km": 396201.20602547243,
+          "collision_envelope_radius_km": 1749.4,
+          "position_was_reset": false,
+          "limit_total_delta_v_m_s": 2500,
+          "model": "Date-dependent lunar central gravity plus geometric Earth/Sun differential accelerations, J2000 axes.",
+          "collision_check": "Accepted adaptive states; maximum step travel 2% of lunar radius vector. 12 km spherical margin, not terrain certification.",
+          "accepted_steps": 894,
+          "rejected_steps": 0
+        },
+        "llo_insertion": {
+          "passed": true,
+          "position_error_m": 0.0000010284447283211288,
+          "velocity_error_m_s": 5.684341886080802e-14,
+          "eccentricity": 3.682869857616973e-13,
+          "plane_error_rad": 4.2140648188889055e-13,
+          "altitude_m": 99999.99999985239,
+          "position_was_reset": false
+        },
+        "total_fuel": {
+          "passed": true,
+          "initial_nrho_mass_kg": 2977.19350931422,
+          "after_departure_mass_kg": 2622.6680704859896,
+          "after_insertion_mass_kg": 1499.9999999999998,
+          "final_mass_kg": 856.6774305170742,
+          "departure_propellant_kg": 354.52543882823056,
+          "insertion_propellant_kg": 1122.6680704859898,
+          "landing_propellant_kg": 643.3225694829256,
+          "mass_continuity_error_kg": 2.2737367544323206e-13
+        }
+      },
+      "independent_assertions": {
+        "passed": true,
+        "insertion_position_exactly_continuous": true,
+        "insertion_impulse_delta_v_error_m_s": 0,
+        "insertion_mass_continuity_error_kg": 0,
+        "total_propellant_bookkeeping_error_kg": 0,
+        "chronological_samples": true,
+        "dry_mass_and_max_thrust": true,
+        "actual_dem_touchdown": true
+      },
+      "transfer_status": "TRANSFER VALIDATED"
+    },
+    {
+      "id": "nrho-mass-basis-3000kg",
+      "input": {
+        "target": {
+          "latitude_deg": -89.4441,
+          "longitude_deg": -137.291,
+          "landing_time_utc": "2026-11-16T00:00:00Z"
+        },
+        "lander": {
+          "initial_mass_kg": 3000,
+          "dry_mass_kg": 650,
+          "max_thrust_n": 12000,
+          "min_thrust_n": 0,
+          "isp_s": 320
+        },
+        "orbit": {
+          "altitude_km": 100,
+          "pdi_altitude_km": 15
+        },
+        "constraints": {
+          "position_tolerance_m": 100,
+          "speed_tolerance_m_s": 2,
+          "horizontal_speed_tolerance_m_s": 1
+        },
+        "objective": "fuel",
+        "initial_orbit": "nrho",
+        "nrho": {
+          "reference_id": "jpl-earth-moon-l2-southern",
+          "departure_phase_mode": "auto",
+          "departure_phase": 0,
+          "transfer_tof_min_days": 0.3,
+          "transfer_tof_max_days": 3,
+          "max_transfer_delta_v_m_s": 2500,
+          "parking_revolutions": 0,
+          "objective": "delta_v",
+          "max_iterations": 20,
+          "max_computation_seconds": 120,
+          "mass_basis": "nrho",
+          "mode": "b"
+        }
+      },
+      "status": "VALIDATED",
+      "message": "날짜별 지구·달·태양 중력으로 전이부터 접지까지 계산해 모델 검증 조건을 충족했습니다.",
+      "elapsed_ms": 41857.28169999999,
+      "summary": {
+        "landing_success": true,
+        "landing_position_error_m": 0.00001679889928154362,
+        "touchdown_velocity_m_s": 0.4999999964015044,
+        "horizontal_touchdown_velocity_m_s": 5.268356063861754e-9,
+        "vertical_touchdown_velocity_m_s": -0.4999999964015044,
+        "actual_latitude_deg": -89.44410000004366,
+        "actual_longitude_deg": -137.29100005409023,
+        "doi_delta_v_m_s": 19.45507345333567,
+        "powered_descent_delta_v_m_s": 1738.4040749491592,
+        "total_delta_v_m_s": 3883.1468776404995,
+        "propellant_consumed_kg": 2129.594781816277,
+        "remaining_propellant_kg": 220.4052181837228,
+        "initial_nrho_mass_kg": 3000,
+        "llo_initial_mass_kg": 1524.040913160059,
+        "final_mass_kg": 870.4052181837228,
+        "maximum_thrust_n": 8121.724020592806,
+        "flight_duration_s": 157211.8361392906,
+        "transfer_duration_s": 142560,
+        "parking_duration_s": 0,
+        "nrho_coast_duration_s": 10800,
+        "departure_delta_v_m_s": 400.2669329197757,
+        "insertion_delta_v_m_s": 1725.0207963182288,
+        "departure_utc": "2026-11-14T07:19:48.163Z",
+        "llo_insertion_utc": "2026-11-15T22:55:48.163Z",
+        "landing_time_utc": "2026-11-16T00:00:00.000Z",
+        "global_optimality_proven": false,
+        "transfer_search_timed_out": false
+      },
+      "validation": {
+        "contact": {
+          "passed": true,
+          "final_dem_clearance_m": -0.000005270733254292281,
+          "vertical_speed_m_s": -0.4999999964015044,
+          "clearance_tolerance_m": 0.02
+        },
+        "position": {
+          "passed": true,
+          "actual_m": 0.00001679889928154362,
+          "limit_m": 100
+        },
+        "speed": {
+          "passed": true,
+          "actual_m_s": 0.4999999964015044,
+          "limit_m_s": 2
+        },
+        "horizontal_speed": {
+          "passed": true,
+          "actual_m_s": 5.268356063861754e-9
+        },
+        "mass": {
+          "passed": true,
+          "final_kg": 870.4052181837228,
+          "dry_kg": 650
+        },
+        "thrust": {
+          "passed": true,
+          "maximum_n": 8121.724020592806,
+          "minimum_n": 7344.998230190646
+        },
+        "terrain": {
+          "passed": true,
+          "unavailable_samples": 0,
+          "collision_samples": 0,
+          "low_resolution_below_12km": 0,
+          "minimum_prelanding_clearance_m": 0.046257910848680694,
+          "checked_samples": 11006,
+          "sampling": "Powered descent and coast below 20 km: time step limited to 120 m / inertial speed; powered step <=0.25s, other coast <=2s. DEM grid is 240m, unresolved obstacles excluded."
+        },
+        "continuity": {
+          "passed": true,
+          "landing_start_position_error_m": 0.0000020148856792615403,
+          "position_was_reset": false
+        },
+        "forward_propagation": {
+          "passed": true,
+          "coast_refined_position_difference_m": 0.000006975976553788519,
+          "coast_refined_velocity_difference_m_s": 6.350018596392983e-9,
+          "refined_endpoint_difference_m": 1.798715036578673e-8,
+          "refined_velocity_difference_m_s": 9.008660981529354e-9,
+          "method": "Coast: independent adaptive DOPRI from actual insertion through DOI. Powered descent: half-step RK4 from actual PDI."
+        },
+        "ephemeris_coverage": {
+          "passed": true,
+          "start_utc": "2026-11-14T04:19:48.163Z",
+          "end_utc": "2026-11-16T00:00:00.000Z",
+          "coverage_utc": [
+            "2026-11-01T00:00:00Z",
+            "2026-12-01T00:00:00Z"
+          ]
+        },
+        "nrho_reference": {
+          "passed": true,
+          "refined_position_difference_m": 0.0005641657203848126,
+          "source": "NASA reference epoch initial state, propagated in the documented DE440 three-body force model. No Jacobi/period closure criterion."
+        },
+        "nrho_coast": {
+          "passed": true,
+          "minimum_altitude_m": 49947517.24419879
+        },
+        "transfer_coast": {
+          "passed": true,
+          "position_error_m": 0.0000020148856792615403,
+          "position_tolerance_m": 0.05,
+          "post_insertion_velocity_error_m_s": 5.684341886080802e-14,
+          "refined_position_difference_m": 0.0000017053359332179153,
+          "post_insertion_eccentricity": 7.281697333421497e-13,
+          "target_eccentricity": 6.667118051786499e-16,
+          "orbit_plane_error_rad": 8.19915203784561e-13,
+          "actual_llo_altitude_lola_km": 100.00000000002957,
+          "target_llo_altitude_lola_km": 100.00000000000023,
+          "minimum_moon_altitude_km": 100.00000000002957,
+          "minimum_earth_altitude_km": 396004.71223461843,
+          "collision_envelope_radius_km": 1749.4,
+          "position_was_reset": false,
+          "limit_total_delta_v_m_s": 2500,
+          "model": "Date-dependent lunar central gravity plus geometric Earth/Sun differential accelerations, J2000 axes.",
+          "collision_check": "Accepted adaptive states; maximum step travel 2% of lunar radius vector. 12 km spherical margin, not terrain certification.",
+          "accepted_steps": 895,
+          "rejected_steps": 0
+        },
+        "llo_insertion": {
+          "passed": true,
+          "position_error_m": 0.0000020148856792615403,
+          "velocity_error_m_s": 5.684341886080802e-14,
+          "eccentricity": 7.281697333421497e-13,
+          "plane_error_rad": 8.19915203784561e-13,
+          "altitude_m": 100000.00000002957,
+          "position_was_reset": false
+        },
+        "total_fuel": {
+          "passed": true,
+          "initial_nrho_mass_kg": 3000,
+          "after_departure_mass_kg": 2640.749295260729,
+          "after_insertion_mass_kg": 1524.040913160059,
+          "final_mass_kg": 870.4052181837228,
+          "departure_propellant_kg": 359.250704739271,
+          "insertion_propellant_kg": 1116.70838210067,
+          "landing_propellant_kg": 653.6356949763363,
+          "mass_continuity_error_kg": 2.2737367544323206e-13
+        }
+      },
+      "independent_assertions": {
+        "passed": true,
+        "insertion_position_exactly_continuous": true,
+        "insertion_impulse_delta_v_error_m_s": 0,
+        "insertion_mass_continuity_error_kg": 0,
+        "total_propellant_bookkeeping_error_kg": 0,
+        "chronological_samples": true,
+        "dry_mass_and_max_thrust": true,
+        "actual_dem_touchdown": true
+      },
+      "transfer_status": "TRANSFER VALIDATED"
+    }
+  ]
+}

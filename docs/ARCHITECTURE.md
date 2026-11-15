@@ -414,3 +414,7 @@ npm run e2e                   # Playwright 스모크
 ## 11. 결정 기록 규칙
 `docs/decisions.md`에 한 줄씩: `YYYY-MM-DD HH:MM | 결정 | 이유 | 영향 파일 | 결정한 사람`.
 CLAUDE.md 1.2의 항목을 정하면 반드시 여기 남기고 1.1 표를 채운다.
+
+## 2026-11-15 Orbit 통합
+
+사용자 요청으로 검증된 Orbit 소스를 `orbit/`에 포함했다. 포탈은 계획 입력을 소유하고 같은 origin의 정적 iframe 및 내부 Worker로 계산한다. 별도 런타임 서버는 없다. 최신 연결 계약·빌드·범위는 [ORBIT_INTEGRATION.md](ORBIT_INTEGRATION.md)를 따른다. 표면 MOON_ME와 궤도 J2000 적분 상태는 명시적으로 구별한다.

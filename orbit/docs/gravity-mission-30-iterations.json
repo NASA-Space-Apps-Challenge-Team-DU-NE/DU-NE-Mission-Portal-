@@ -1,0 +1,275 @@
+{
+  "generated_at_utc": "2026-11-15T00:28:45.057Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics         ",
+  "logical_cpus": 12,
+  "elapsed_s": 11.1996483,
+  "memory_before": {
+    "rss": 49668096,
+    "heapTotal": 10944512,
+    "heapUsed": 6073016,
+    "external": 2376222,
+    "arrayBuffers": 135741
+  },
+  "memory_after": {
+    "rss": 110055424,
+    "heapTotal": 60227584,
+    "heapUsed": 37680832,
+    "external": 6340444,
+    "arrayBuffers": 2517088
+  },
+  "benchmark_notes": "Single Node run per scenario; includes loading, optimizing and validating. Browser measurement is separate. Memory is process usage, not an isolated gravity allocation.",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 180,
+      "max_iterations": 1
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "TRANSFER NOT CONVERGED",
+  "message": "No date-specific transfer passed endpoint, delta-V, collision and integration refinement checks in the attempted set. This is not proof of physical impossibility.",
+  "summary": {
+    "gravity_model": "grail",
+    "gravity_degree": 30,
+    "gravity_calls": 1307541,
+    "gravity_cpu_ms": 8136.489100000199,
+    "gravity_source": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml",
+    "gravity_static_tides_omitted": true,
+    "mission_elapsed_ms": 11116.6786
+  },
+  "validation": {},
+  "reference": {
+    "mode": "EPHEMERIS",
+    "mode_b_implemented": true,
+    "epoch_utc": "2026-11-01T00:00:00Z",
+    "gravity": {
+      "model": "grail",
+      "degree": 30,
+      "gm_m3_s2": 4902800306330.2,
+      "reference_radius_m": 1738000,
+      "frame": "MOON_PA_DE440",
+      "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml"
+    }
+  },
+  "transfer": {
+    "arrival_time_s": 1292148.1641641164,
+    "candidates": [
+      {
+        "departure_time_s": 1266228.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 97995.95178531826
+      },
+      {
+        "departure_time_s": 1266228.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 0,
+        "error": "Mode B adaptive integration minimum step reached."
+      },
+      {
+        "departure_time_s": 1237068.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.6375,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 709753.1643321125
+      },
+      {
+        "departure_time_s": 1237068.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.6375,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 391682.96411555604
+      },
+      {
+        "departure_time_s": 1207908.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 2127204.085723131
+      },
+      {
+        "departure_time_s": 1207908.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 1146027.9673238886
+      },
+      {
+        "departure_time_s": 1178748.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.3125000000000002,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 4298366.7332949005
+      },
+      {
+        "departure_time_s": 1178748.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.3125000000000002,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 2426476.8669159054
+      },
+      {
+        "departure_time_s": 1149588.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 6846343.428052186
+      },
+      {
+        "departure_time_s": 1149588.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 4175817.2384498985
+      },
+      {
+        "departure_time_s": 1120428.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.9875,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 9551826.414266149
+      },
+      {
+        "departure_time_s": 1120428.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.9875,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 6283148.180423048
+      },
+      {
+        "departure_time_s": 1091268.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 12304423.048401367
+      },
+      {
+        "departure_time_s": 1091268.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 8603344.348437421
+      },
+      {
+        "departure_time_s": 1062108.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.6625,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 14662040.206795905
+      },
+      {
+        "departure_time_s": 1062108.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.6625,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 10840706.382493585
+      },
+      {
+        "departure_time_s": 1032948.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 0,
+        "error": "Mode B adaptive integration minimum step reached."
+      },
+      {
+        "departure_time_s": 1032948.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 1,
+        "position_error_m": 10680322.832365304
+      }
+    ],
+    "timed_out": false,
+    "elapsed_ms": 3310.1436999999996,
+    "status": "TRANSFER NOT CONVERGED",
+    "message": "No date-specific transfer passed endpoint, delta-V, collision and integration refinement checks in the attempted set. This is not proof of physical impossibility.",
+    "validation": {}
+  },
+  "gravity_stats": {
+    "calls": 1307541,
+    "hessian_calls": 117348,
+    "cpu_ms": 8136.489100000199
+  }
+}

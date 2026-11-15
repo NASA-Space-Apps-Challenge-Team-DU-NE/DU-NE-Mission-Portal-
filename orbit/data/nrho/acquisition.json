@@ -1,0 +1,25 @@
+{
+  "request_url": "https://ssd-api.jpl.nasa.gov/periodic_orbits.api?sys=earth-moon&family=halo&libr=2&branch=S&periodmin=6&periodmax=7&periodunits=d",
+  "acquired_utc": "2026-11-14T21:36:41.594703Z",
+  "bytes": 22919,
+  "sha256": "de4a61474cacc2b3ee10670ad5ef081db4a8cb6130c34248caf8c3c60a945f6d",
+  "signature": {
+    "version": "1.0",
+    "source": "NASA/JPL Three-Body Periodic Orbits API"
+  },
+  "response_count": 102,
+  "fields": [
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "jacobi",
+    "period",
+    "stability"
+  ],
+  "source_file": "data/nrho/jpl-earth-moon-l2-southern-halo-6-7days.json",
+  "status": "NEW_SMALL_OFFICIAL_API_RESPONSE",
+  "runtime_external_api_required": false
+}

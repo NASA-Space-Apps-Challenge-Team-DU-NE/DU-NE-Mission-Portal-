@@ -1,0 +1,37 @@
+{
+  "checked_at_utc": "2026-11-15T10:24:41.069Z",
+  "host": "Vite preview of production dist; no calculation backend",
+  "checks": [
+    "Landing input starts November 1",
+    "Landing input includes all of January 31",
+    "Date validity 2026-11-01T00:00:00",
+    "Date validity 2027-01-31T23:59:59",
+    "Date validity 2026-10-31T23:59:59",
+    "Date validity 2027-02-01T00:00:00",
+    "Direct reference lookup label",
+    "Mode A retains relative time",
+    "December 2 actual Web Worker validated",
+    "All mission checks pass",
+    "Export identifies direct NASA source",
+    "Departure seed is the actual departure epoch",
+    "January 1 failed search opens actionable guidance",
+    "Failed search exports diagnostics with an empty trajectory",
+    "No browser exceptions",
+    "Only local static requests"
+  ],
+  "errors": [],
+  "external": [],
+  "success": {
+    "landing_utc": "2026-12-02T00:00Z",
+    "status": "VALIDATED",
+    "validation_checks": 20,
+    "trajectory_samples": 6501,
+    "ui_flow_elapsed_s": 50.781,
+    "timing_scope": "Run click through completion, JSON export and success screenshot; includes UI capture overhead."
+  },
+  "failure": {
+    "landing_utc": "2027-01-01T00:00:00Z",
+    "visible_warning": true,
+    "no_success_path": true
+  }
+}

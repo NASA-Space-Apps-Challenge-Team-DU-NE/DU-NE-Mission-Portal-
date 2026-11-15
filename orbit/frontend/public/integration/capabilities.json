@@ -1,0 +1,52 @@
+{
+  "protocol": "dune-orbit-bridge.v1",
+  "buildId": "c4e126c7b8150ebe690db22f74497d5b81db5130e7bd97fa101d34c2e7de83e0",
+  "upstream": "7d69425493ede243ddd79ab2c87a6169e52c07bf",
+  "landing_coverage_utc": [
+    "2026-11-01T00:00:00Z",
+    "2027-01-31T23:59:59.999Z"
+  ],
+  "coverage_utc": [
+    "2026-10-16T00:00:00Z",
+    "2027-02-01T00:00:00Z"
+  ],
+  "terrain_latitude_deg": [
+    -90,
+    -75
+  ],
+  "gravity_degrees": [
+    20,
+    30,
+    60,
+    90
+  ],
+  "required_checks": [
+    "terminal_descent",
+    "low_altitude_speed",
+    "thrust_tilt",
+    "contact",
+    "position",
+    "speed",
+    "horizontal_speed",
+    "mass",
+    "thrust",
+    "terrain",
+    "continuity",
+    "forward_propagation",
+    "ephemeris_coverage",
+    "nrho_reference",
+    "nrho_coast",
+    "transfer_coast",
+    "llo_insertion",
+    "total_fuel",
+    "finite_burns",
+    "joint_selection"
+  ],
+  "terminal_policy": "demo-terminal-v1",
+  "data_sha256": {
+    "ephemeris/index.json": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+    "gravity/index.json": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "terrain/index.json": "1777283afdd014051c29842058429644ff5a5dd46040a50fb059ae34869f6691",
+    "manifest.json": "891d99ca2b81c4d59f67d3d554c155b6281ba5748802ab0a7c6c4f0fb6adb326"
+  }
+}

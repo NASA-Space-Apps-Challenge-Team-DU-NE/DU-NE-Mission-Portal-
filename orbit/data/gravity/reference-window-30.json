@@ -1,0 +1,153 @@
+{
+  "schema": "lunar.gravity.reference-window.v1",
+  "passed": true,
+  "checks": {
+    "original_seed_matches": true,
+    "six_golden_states": true,
+    "position_step_refinement": true,
+    "velocity_step_refinement": true,
+    "sampled_moon_clearance": true,
+    "sampled_earth_clearance": true
+  },
+  "limits": {
+    "position_refinement_m": 0.1,
+    "velocity_refinement_m_s": 1e-05,
+    "min_moon_altitude_m": 12000.0,
+    "min_earth_clearance_m": 0.0
+  },
+  "model": "GL1800F",
+  "degree": 30,
+  "gravity_asset_sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+  "ephemeris_sha256": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+  "method": "Independent SciPy DOP853 with complex angular harmonics and direct SPICE PA rotation/Earth/Sun at every RHS. Original source SPK seed only; no intermediate resets. 300s vs150s step caps at rtol2e-13.",
+  "epoch_et": 845380869.1823691,
+  "epoch_utc": "2026-10-16T00:00:00Z",
+  "coverage_utc": [
+    "2026-11-05T00:00:00.000111Z",
+    "2026-11-18T23:59:59.999869Z"
+  ],
+  "coverage_s": [
+    1728000.0003073215,
+    2937600.0003073215
+  ],
+  "seed_t_s": 2332800.0003073215,
+  "seed_utc": "2026-11-12T00:00:00Z",
+  "seed_state": [
+    -15396776.335926581,
+    14980114.0322024,
+    -34298811.812279515,
+    -4.990768684717262,
+    -134.12768567411848,
+    331.95071867967533
+  ],
+  "golden_states": [
+    {
+      "t_s": 2246400.0003073215,
+      "duration_s": -86400.0,
+      "state": [
+        -12283667.391404295,
+        22609483.66500489,
+        -55400823.07744405,
+        -54.31089104866476,
+        -48.85886952294453,
+        173.75950680335046
+      ]
+    },
+    {
+      "t_s": 2073600.0003073215,
+      "duration_s": -259200.0,
+      "state": [
+        -2269111.462656344,
+        19983979.863207236,
+        -67162854.48011559,
+        -49.64103899745834,
+        72.8922079903816,
+        -33.50031244229788
+      ]
+    },
+    {
+      "t_s": 1728000.0003073215,
+      "duration_s": -604800.0,
+      "state": [
+        -4183624.1123962947,
+        35360823.03774965,
+        -33568862.89991185,
+        12.161393623356913,
+        -112.92767753774413,
+        265.35194801464826
+      ]
+    },
+    {
+      "t_s": 2419200.0003073215,
+      "duration_s": 86400.0,
+      "state": [
+        10560820.113413874,
+        1448434.1408019685,
+        -4630047.2073651785,
+        435.79094365979415,
+        268.6955204754761,
+        -689.8974610280969
+      ]
+    },
+    {
+      "t_s": 2592000.0003073215,
+      "duration_s": 259200.0,
+      "state": [
+        17292268.59414053,
+        21774918.395058177,
+        -58495875.980458595,
+        -43.57067347830901,
+        35.166847814024166,
+        -147.01361913728635
+      ]
+    },
+    {
+      "t_s": 2937600.0003073215,
+      "duration_s": 604800.0,
+      "state": [
+        174254.7118812646,
+        -2466469.726988965,
+        -32413026.94056559,
+        -39.18377268335612,
+        -136.02579128059259,
+        415.7419983642085
+      ]
+    }
+  ],
+  "windows": [
+    {
+      "direction": -1,
+      "end_t_s": 1728000.0003073215,
+      "end_utc": "2026-11-05T00:00:00.000111Z",
+      "duration_tdb_days": -7.0,
+      "min_sampled_moon_altitude_m": 1715002.301404484,
+      "max_sampled_moon_altitude_m": 69581311.6291812,
+      "min_sampled_earth_clearance_m": 381077868.52589846,
+      "moon_samples": 20001,
+      "earth_samples": 1001,
+      "max_step_refinement_position_m": 3.663600554712358e-05,
+      "max_step_refinement_velocity_m_s": 1.7202037124825914e-09,
+      "coarse_evaluations": 30392,
+      "fine_evaluations": 60542
+    },
+    {
+      "direction": 1,
+      "end_t_s": 2937600.0003073215,
+      "end_utc": "2026-11-18T23:59:59.999869Z",
+      "duration_tdb_days": 7.0,
+      "min_sampled_moon_altitude_m": 1723735.081997672,
+      "max_sampled_moon_altitude_m": 70036816.71097639,
+      "min_sampled_earth_clearance_m": 388485001.1066592,
+      "moon_samples": 20001,
+      "earth_samples": 1001,
+      "max_step_refinement_position_m": 0.00023999283130350627,
+      "max_step_refinement_velocity_m_s": 2.51906109131417e-09,
+      "coarse_evaluations": 30404,
+      "fine_evaluations": 60542
+    }
+  ],
+  "evaluations": 181880,
+  "elapsed_s": 114.18645149999975,
+  "scope": "Numerical propagation of this single NASA seed in the selected model for +/-7 TDB days; clearance is sampled, not interval-certified. Does not prove periodicity, operational stationkeeping, or landing feasibility for every date/site.",
+  "other_degrees": "This report validates only its named degree; other degree windows require their own execution or browser/reference checks."
+}

@@ -1,0 +1,37 @@
+{
+  "generated_at_utc": "2026-11-15T08:54:04.828482+00:00",
+  "scope": "Mode B terminal acceptance guards; existing Mode A/LLO regressions retained; no operational safety certification",
+  "tests": {
+    "passed": 80,
+    "failed": 0,
+    "skipped": 0,
+    "duration_s": 125.5183572
+  },
+  "build": {
+    "passed": true,
+    "duration_s": 13.39,
+    "worker": "simulation.worker-D1Pwr9yd.js"
+  },
+  "grail_full_mission": {
+    "status": "LANDING CONSTRAINT VIOLATION",
+    "trajectory_samples": 0,
+    "elapsed_s": 55.2704485,
+    "report": "finite-mission-30-default-terminal-constraints.json",
+    "search_complete": false
+  },
+  "independent_unsafe_regression": {
+    "passed": true,
+    "samples": 2112,
+    "report": "terminal-independent-regression.json"
+  },
+  "source_sha256": {
+    "frontend/src/physics/ephemeris/terminalDescent.ts": "17448c2a17345433f0c906d8bbda4e7665bb650a3c856d92db39fb7e11af6bbb",
+    "frontend/src/physics/ephemeris/landing.ts": "a9f13e9cd4bf5e63b60cecd55302c6a94fbc44c6a684e7ce7b43b3386b49d1b7",
+    "frontend/src/physics/ephemeris/mission.ts": "3180e514b9dced8d167833340c287735225c5d86a910df9462724fd2a2d37b7b",
+    "frontend/src/services/failureGuidance.ts": "80f1ef2c5100f75e6314fe7be444fafd9902ea5e3dbc06d2c98cbdcea5503d4c",
+    "tests/terminal-descent.test.ts": "15dcb6db8e7090edd245bdcde392464a28a46e4453a9b1422e046187e423d8d5",
+    "tests/ephemeris-mission.test.ts": "3741a36309a856a701241897b37c7b856ee179a65c67ae1b7ef0b873503fe982",
+    "scripts/terminal_audit.py": "2a92f980d0625ffe3a576d0c9b81b4b23162a96e615b2e3efcba9a93bcb6b3e6",
+    "scripts/independent_verify_ephemeris.py": "69bfb1419c23afca03a76f47a4af9a911e02cd9c59b802be350018701652e29d"
+  }
+}

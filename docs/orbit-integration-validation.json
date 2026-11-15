@@ -1,0 +1,95 @@
+{
+  "checked_at_utc": "2026-11-15T11:43:50.306505+00:00",
+  "scope": "Local Mission Portal integration. No commit, push, deployment or independent flight certification.",
+  "portal_base_commit": "ed8146bf3f91f0067f630cc4af9df31ba079d18a",
+  "orbit_upstream_commit": "7d69425493ede243ddd79ab2c87a6169e52c07bf",
+  "build_id": "6fde718b9747ce3c3d3695a66879b7ead8d2e2594d27a062f843eb7dac2d9130",
+  "data_sha256": {
+    "ephemeris/index.json": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+    "gravity/index.json": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "terrain/index.json": "1777283afdd014051c29842058429644ff5a5dd46040a50fb059ae34869f6691",
+    "manifest.json": "891d99ca2b81c4d59f67d3d554c155b6281ba5748802ab0a7c6c4f0fb6adb326"
+  },
+  "source_integrity": {
+    "numerical_physics": {
+      "file_count": 19,
+      "total_bytes": 166342,
+      "mismatches": [],
+      "sha256_of_sorted_path_hash_manifest": "2a5603a6999525fb2b984aefbe1f8777a34351f5370e9ec04de2b158eeef4cab"
+    },
+    "static_nasa_assets": {
+      "file_count": 213,
+      "total_bytes": 41353532,
+      "mismatches": [],
+      "sha256_of_sorted_path_hash_manifest": "98831d342a01205c0f82aa6a69821557c8cd11dad891371e2a47afdebd8078d8"
+    },
+    "worker": {
+      "file_count": 1,
+      "total_bytes": 2232,
+      "mismatches": [],
+      "sha256_of_sorted_path_hash_manifest": "103de6155372ff5f55608d6c9d0603d4e2d90111a690026be2c0e73de270d34c"
+    },
+    "solver_tests": {
+      "file_count": 21,
+      "total_bytes": 94358,
+      "mismatches": [],
+      "sha256_of_sorted_path_hash_manifest": "f59ac36fe4185fad5626f0a4286a6684a670aefedce8790bf6badd0d8ef13759"
+    }
+  },
+  "checks": {
+    "root_npm_install": "passed; postinstall installs both locked frontend dependency trees",
+    "portal_typecheck_rules_unit": {
+      "passed": 150,
+      "files": 19,
+      "new_integration_tests": 13
+    },
+    "orbit_existing_unit": {
+      "passed": 76,
+      "failed": 0,
+      "skipped": 0
+    },
+    "root_production_build": "passed",
+    "chrome_integration_cases": {
+      "passed": 6,
+      "scope": [
+        "default real Worker calculation",
+        "January non-convergence warning and empty path",
+        "cancel and tab-exit Worker termination",
+        "missing GRAIL rejected without model substitution",
+        "editable propulsion and invalid-input blocking",
+        "390px layout and plan/view time separation"
+      ],
+      "run_notes": "Initial run: 4 passed, 2 locator failures (dialog vs existing alertdialog). Corrected only test locator. Both cases passed on rerun."
+    },
+    "existing_nine_tab_chrome_smoke": "passed on rerun with the two corrected integration cases",
+    "real_default": {
+      "report": "orbit-integration-browser-default.json",
+      "status": "VALIDATED",
+      "required_checks": 20,
+      "all_checks_passed": true,
+      "browser_errors": [],
+      "trajectory_samples": 6653
+    },
+    "static_nested_path": {
+      "report": "orbit-integration-subpath.json",
+      "passed": true,
+      "path": "/mission-portal/",
+      "worker_loaded": true,
+      "ephemeris_loaded": true
+    },
+    "root_npm_run_dev": {
+      "passed": true,
+      "url": "http://127.0.0.1:5175/?p=orbit",
+      "status": "현재 계획 입력 적용 완료 · 계산 전",
+      "browser_errors": [],
+      "screenshot": "ui/orbit-integrated-ready.png"
+    }
+  },
+  "limitations": [
+    "Other legacy browser test suites were not run.",
+    "No GitHub Actions or external deployment was run.",
+    "Prior independent physics validation reports are preserved under orbit/docs; this integration did not rerun the complete independent validation campaign.",
+    "Embedded Orbit controls retain their existing Korean localization.",
+    "VALIDATED denotes the implemented numerical checks, not operational flight certification."
+  ]
+}

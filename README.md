@@ -9,20 +9,36 @@ NASA Space Apps Challenge 2026 **"Lunar Landing Site Navigator"** — 날짜와 
 ## 구성
 ```
 pipeline/   Python 3.11 사전 계산 (Drive "DU_NE Data" → web/public/data)
-web/        React + Vite + TypeScript + three.js 웹앱
+web/        React + Vite + TypeScript + three.js 포탈
+orbit/      검증된 Orbit 소스·정적 NASA 자료·회귀 검사
+scripts/    통합 빌드와 로컬 확인
 docs/       결정·검증·출처·좌표계 확인표
 tests/      Python↔TS 교차 테스트 입력
 ```
 
-## 웹 실행
-```
-cd web
+## 포탈 + Orbit 실행
+
+프로젝트 **루트**에서 실행합니다. Node.js 22 이상을 권장합니다.
+
+```sh
 npm install
-npm run dev          # http://localhost:5173
-npm run check        # 타입 + 규칙 검사 + Vitest
-npm run build
+npm run dev          # http://127.0.0.1:5175
 ```
-`web/public/data` 가 비어 있으면 화면마다 "자료 없음"이 뜬다 (합성 값으로 채우지 않는다). 근사 천체력·구면 지평선만으로 하늘 화면은 동작한다.
+
+05 궤도 분석은 NRHO Mode B를 브라우저 Worker에서 계산합니다. 01 착륙선 정보에서 질량·추진·궤도 조건, 02에서 계획 착륙지·UTC를 바꾸면 같은 입력이 05로 전달됩니다. 기본 임무는 Connecting Ridge, 2026-11-16 UTC, GRAIL 30차, LLO 총질량 1500 kg / 건조 650 kg / 최대 추력 12000 N의 검증 예제입니다. 저장된 성공 경로를 재생하지 않고 실행할 때 다시 계산합니다.
+
+포탈 EN/KR 선택에 Orbit 언어도 따라 바뀌며 계산과 결과는 유지됩니다. 상단 보고서와 순위 CSV에는 Orbit 입력·계산 상태·검증 결과를 포함합니다. 순위 점수는 기존 표면 평가 기준을 유지하고, 미계산 후보에는 `NOT_CALCULATED`를 표시합니다. 카탈로그 복원·재연결 등 후속 수정은 [검토 수정 기록](docs/ORBIT_REVIEW_FIXES.md)을 확인하세요.
+
+```sh
+npm test             # 포탈 타입·규칙·170개 검사 + Orbit 76개 회귀 검사
+npm run build        # 정적 배포물: web/dist
+npm run preview      # 빌드 결과 확인, 포트 5175
+npm --prefix web run e2e -- e2e/orbit-integration.spec.ts e2e/orbit-review-fixes.spec.ts e2e/smoke.spec.ts
+```
+
+Chrome으로 브라우저 검사를 하려면 `PLAYWRIGHT_CHANNEL=chrome` 환경 변수를 설정합니다. 통합 검사는 실제 계산을 포함합니다. `web`만 개발하려면 먼저 루트 `npm run prepare:orbit` 후 기존 `web` 명령을 사용할 수 있습니다. Orbit 소스를 수정한 경우 `npm run prepare:orbit`로 임베드 빌드를 갱신합니다.
+
+`web/public/orbit`는 자동 생성·Git 제외 디렉터리입니다. Orbit 원본은 `orbit/`에 포함되어 다른 로컬 저장소 경로를 참조하지 않습니다. 런타임 Python/Node API/DB는 필요 없습니다. `web/dist`를 하위 경로에 배포할 때는 포탈의 Vite base를 그 경로로 지정하고 다시 빌드합니다. 자세한 구조·범위·검증은 [Orbit 통합 기록](docs/ORBIT_INTEGRATION.md)을 확인하세요.
 
 ## 데이터 만들기 (Drive 데이터가 있는 PC)
 ```
@@ -37,7 +53,7 @@ pytest
 결과는 `web/public/data/` 에 생긴다. 확인용 그림은 `build/preview/`. 결과를 커밋하는 PR 은 `data/` 브랜치로.
 
 ## 배포
-보류. 당분간 로컬 `npm run dev` 로 확인한다.
+Cloudflare Workers 설정(`wrangler.jsonc`)은 `web/dist` 정적 파일을 제공한다. Orbit 통합본의 빌드 명령은 **저장소 루트에서 `npm ci && npm run build`**다. 기존 `cd web && npm ci && npm run build` 설정은 변경해야 한다. GitHub 업로드와 서비스 배포는 별개이며, 이번 작업에서는 Cloudflare 계정 설정을 변경하지 않았다. [반영·배포 안내](docs/ORBIT_GITHUB_HANDOFF.md).
 
 ## 데이터 출처
 [`docs/sources.md`](docs/sources.md)

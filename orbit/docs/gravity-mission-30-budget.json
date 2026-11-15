@@ -1,0 +1,64 @@
+{
+  "generated_at_utc": "2026-11-15T00:28:33.589Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics         ",
+  "logical_cpus": 12,
+  "elapsed_s": 1.0892935,
+  "memory_before": {
+    "rss": 49713152,
+    "heapTotal": 10944512,
+    "heapUsed": 6089952,
+    "external": 2376222,
+    "arrayBuffers": 135741
+  },
+  "memory_after": {
+    "rss": 78204928,
+    "heapTotal": 29818880,
+    "heapUsed": 14852456,
+    "external": 5023092,
+    "arrayBuffers": 1199768
+  },
+  "benchmark_notes": "Single Node run per scenario; includes loading, optimizing and validating. Browser measurement is separate. Memory is process usage, not an isolated gravity allocation.",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 1
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "ERROR",
+  "message": "MISSION COMPUTATION TIME LIMIT",
+  "summary": {},
+  "validation": {},
+  "transfer": {},
+  "gravity_stats": {
+    "calls": 133940,
+    "hessian_calls": 0,
+    "cpu_ms": 726.7401999999983
+  }
+}

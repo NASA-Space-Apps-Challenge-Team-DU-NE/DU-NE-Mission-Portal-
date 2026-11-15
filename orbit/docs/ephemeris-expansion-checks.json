@@ -1,0 +1,31 @@
+{
+  "checked_at_utc": "2026-11-15T10:24:41.069Z",
+  "passed": true,
+  "asset_sha256": "e6e308c593d9e33e527990556ec8750aa79ede74d5507a73f1726ee4a077a20d",
+  "tests": {
+    "passed": 84,
+    "failed": 0,
+    "skipped": 0,
+    "duration_ms": 42335.4625
+  },
+  "typescript_and_static_build": true,
+  "browser_checks_passed": 16,
+  "representative_dates": 5,
+  "validated_missions": 4,
+  "honest_failure_cases": 1,
+  "independent_mission_checks": [
+    30,
+    30
+  ],
+  "mode_a_terminal_policy_default_and_dependencies_unchanged": true,
+  "source_sha256": {
+    "frontend/src/physics/ephemeris/reference.ts": "d3250a32f3dcf5774003806625bb33b627b16e6c86032ca10268eddadd0a09d7",
+    "frontend/src/physics/ephemeris/data.ts": "22f4f4407092f5a0c5813f3050f082791412c14f014dafbf3e17ded1aa3210a6",
+    "frontend/src/physics/ephemeris/mission.ts": "1187710814daf1a4b1646b1a9ba6d2afd233b9c3b419f834bcbdb04df353a658",
+    "frontend/src/physics/ephemeris/terminalDescent.ts": "17448c2a17345433f0c906d8bbda4e7665bb650a3c856d92db39fb7e11af6bbb",
+    "frontend/src/defaultMission.ts": "092b2a5b00cf9dd4c4b3ddcef7129815ad1279ac5d9136f22551c6d49ac51cea",
+    "scripts/nrho_reference.py": "fd8055c4e66ece945309d3eea6311350ae0387a97701fabbab0291caa3736f4d",
+    "scripts/prepare_ephemeris.py": "ec1ad8d0a37dd8ae45e6ba225221499c4035d48ebb441cc2528831280eb53149"
+  },
+  "scope": "Local validation only. No GitHub push or portal edits. Representative dates and source/boundary tests, not flight certification."
+}

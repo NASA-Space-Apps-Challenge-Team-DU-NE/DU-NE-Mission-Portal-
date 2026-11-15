@@ -114,3 +114,19 @@
 | AUDIT-V2 | 감사 보고서 R01–R16: 시간 적분·기지 전력·Worker 복구·입력 검증·캐시·출처 수정 | 리뷰 | Codex | fix/audit-v2-16-issues |
 
 감사 번호 R01–R16은 위 3순위 기능 ID와 별개다. 웹 125개·파이프라인 69개·Chrome 11개 테스트 및 배포 빌드 통과. 상세 변경과 검증 한계: `docs/audit-fixes-2026-11-15.txt`. 전체 고해상도 원시 자료의 재생성은 수행하지 않았다.
+
+## 로컬 Orbit 통합 · 2026-11-15
+
+| ID | 작업 | 상태 | 브랜치 |
+|---|---|---|---|
+| ORBIT-01 | 01/02 계획 입력과 05 정적 Mode B iframe/Worker 연결, 기본 예제 적용, 취소·실패·입력 변경 검증 | 리뷰 | integration/orbit-local |
+
+원격 클레임/푸시 없이 사용자 요청 범위에서 로컬로 진행했다. 기록: [Orbit 통합](docs/ORBIT_INTEGRATION.md). 이후 사용자 요청으로 통합 브랜치와 main 대상 PR에 반영한다.
+
+## Orbit 통합 후 검토 수정 · 2026-11-15
+
+| ID | 작업 | 상태 | 브랜치 |
+|---|---|---|---|
+| ORBIT-02 | 카탈로그 보존·재연결 복구·Esc, EN/KR 동기화, 보고서/CSV에 정확히 일치한 Orbit 결과 연결 | 리뷰 | integration/orbit-local |
+
+기존 계산식과 NASA 자료는 유지했다. 상세 변경과 검증 범위: [검토 수정 기록](docs/ORBIT_REVIEW_FIXES.md). 사용자 요청에 따른 GitHub 반영: [게시 기록](docs/ORBIT_GITHUB_HANDOFF.md).

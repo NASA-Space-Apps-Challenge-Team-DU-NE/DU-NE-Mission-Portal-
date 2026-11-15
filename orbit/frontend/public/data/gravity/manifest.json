@@ -1,0 +1,10 @@
+{
+  "schema": "lunar.gravity.manifest.v1",
+  "schema_version": 1,
+  "file": "index.json",
+  "sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+  "bytes": 164088,
+  "model": "GL1800F",
+  "max_degree": 90,
+  "source_sha256": "d2a552067a78bf1d2755807ae14ee1d6843a8f6a4228e01ce59a665516738fec"
+}

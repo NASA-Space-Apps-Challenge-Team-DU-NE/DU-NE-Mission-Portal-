@@ -1,0 +1,64 @@
+{
+  "generated_at_utc": "2026-11-15T00:28:32.227Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics         ",
+  "logical_cpus": 12,
+  "elapsed_s": 0.09188879999999998,
+  "memory_before": {
+    "rss": 49414144,
+    "heapTotal": 10944512,
+    "heapUsed": 6235592,
+    "external": 2377096,
+    "arrayBuffers": 136615
+  },
+  "memory_after": {
+    "rss": 81149952,
+    "heapTotal": 21532672,
+    "heapUsed": 14567344,
+    "external": 17629063,
+    "arrayBuffers": 10686014
+  },
+  "benchmark_notes": "Single Node run per scenario; includes loading, optimizing and validating. Browser measurement is separate. Memory is process usage, not an isolated gravity allocation.",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 180
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-12-02T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "ERROR",
+  "message": "EPHEMERIS COVERAGE — the complete flight must stay inside the packaged UTC/ET interval.",
+  "summary": {},
+  "validation": {},
+  "transfer": {},
+  "gravity_stats": {
+    "calls": 0,
+    "hessian_calls": 0,
+    "cpu_ms": 0
+  }
+}

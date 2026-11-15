@@ -1,3 +1,4 @@
+import { makeOrbitConfig, parseConfig } from '../orbit/model';
 // 페이지 공용: 시나리오 만들기, Worker 로 보낼 지점·마스크, 대안 후보 목록
 import { useEffect, useMemo, useState } from 'react';
 import { DEFAULTS } from '../config';
@@ -12,7 +13,11 @@ import { useApp } from './store';
 
 let seq = 0;
 export function makeScenario(site: Site, landing: number, duration_h: number, origin: Scenario['origin'], name?: string): Scenario {
+  const app = useApp.getState();
+  let orbit_input: unknown;
+  try { orbit_input = parseConfig(makeOrbitConfig(site, landing, app.landerExtra, app.orbitSettings)); } catch { /* Incomplete propulsion or unsupported region: no orbit snapshot. */ }
   return {
+    orbit_input,
     id: `sc_${Date.now().toString(36)}_${++seq}`,
     name: name ?? `${site.name} · ${new Date(landing).toISOString().slice(0, 13).replace('T', ' ')}Z`,
     site,

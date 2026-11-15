@@ -1,0 +1,5 @@
+# Scientific runtime assets are checked by SHA-256; preserve exact bytes on all OSes.
+frontend/public/data/** -text whitespace=cr-at-eol
+# Original NASA label/kernel files retain their acquired checksums.
+data/ephemeris/*.tpc -text -whitespace
+data/ephemeris/*.lbl -text -whitespace

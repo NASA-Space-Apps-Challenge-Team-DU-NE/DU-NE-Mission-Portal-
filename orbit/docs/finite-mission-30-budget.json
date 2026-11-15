@@ -1,0 +1,42 @@
+{
+  "generated_at_utc": "2026-11-15T07:55:09.107Z",
+  "runtime": "v24.15.0",
+  "elapsed_s": 1.0816968999999999,
+  "trajectory_sample_count": 0,
+  "full_result_sha256": "5ec91d5bc58822d6dcf3a9bc9361a0edbf44b7c932d1e049da2bb5e30b01ceb3",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 30,
+      "max_computation_seconds": 1
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "ERROR",
+  "message": "MISSION COMPUTATION TIME LIMIT",
+  "summary": {},
+  "validation": {}
+}

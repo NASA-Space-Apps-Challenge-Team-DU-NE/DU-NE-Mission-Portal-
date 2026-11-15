@@ -1,6 +1,7 @@
+import { orbitDefaults, parseConfig, type OrbitSettings, type Config as OrbitConfig } from '../orbit/model';
 // 앱 상태 (Zustand, ARCHITECTURE 6.4). 계산 결과는 넣지 않는다 — 파생값은 hooks 의 셀렉터·useMemo.
 import { create } from 'zustand';
-import { DEFAULT_LANDER_EXTRA, DEFAULT_POWER_SOURCE, POWER_KINDS, type LanderExtra, type PowerSource, DEFAULT_LANDING_UTC, DEFAULT_FILTERS, DEFAULT_MAP_WEIGHTS, DEFAULT_REQUIREMENTS, DEFAULT_SCENARIO_WEIGHTS, DEFAULTS, PROFILES, type ProfileId } from '../config';
+import { DEFAULT_LANDER_EXTRA, DEFAULT_POWER_SOURCE, POWER_KINDS, DEFAULT_SITE_ID, type LanderExtra, type PowerSource, DEFAULT_LANDING_UTC, DEFAULT_FILTERS, DEFAULT_MAP_WEIGHTS, DEFAULT_REQUIREMENTS, DEFAULT_SCENARIO_WEIGHTS, DEFAULTS, PROFILES, type ProfileId } from '../config';
 import type { BaseElement } from '../core/hazards';
 import type { Criterion, HardFilters, Lander, LayerName, Requirements, Scenario, ScenarioWeights, Station, TimeMs } from '../core/types';
 
@@ -56,6 +57,9 @@ export interface AppState {
   powerSource: PowerSource;
   /** 착륙선 질량·추진 (궤도 분석용 입력) */
   landerExtra: LanderExtra;
+  orbitSettings: OrbitSettings;
+  setOrbitSettings(value: OrbitSettings): void;
+  applyOrbitConfig(value: OrbitConfig, siteRef?: SiteRef): void;
   rightTab: RightTab;
   fullscreen: boolean;
   presentation: boolean;
@@ -140,7 +144,18 @@ export const useApp = create<AppState>((set, get) => ({
   landerId: 'small_solar',
   landerEdits: {},
   powerSource: DEFAULT_POWER_SOURCE,
-  landerExtra: DEFAULT_LANDER_EXTRA,
+  landerExtra: { ...DEFAULT_LANDER_EXTRA },
+  orbitSettings: orbitDefaults(),
+  setOrbitSettings: (orbitSettings) => set({ orbitSettings }),
+  applyOrbitConfig: (input, preferred) => {
+    const c = parseConfig(input);
+    if (!orbitSiteResolver) throw new Error('착륙지 자료 연결이 준비되지 않았습니다.');
+    const siteRef = orbitSiteResolver(c.target, get().siteRef, preferred);
+    const landing = Date.parse(c.target.landing_time_utc);
+    set({ landing, t: landing, siteRef, viewRef: null, viewLanding: null, playing: false,
+      landerExtra: { dry_mass_kg: c.lander.dry_mass_kg, prop_mass_kg: c.lander.initial_mass_kg-c.lander.dry_mass_kg, thrust_n: c.lander.max_thrust_n, min_thrust_n: c.lander.min_thrust_n, isp_s: c.lander.isp_s },
+      orbitSettings: structuredClone({ nrho:c.nrho, orbit:c.orbit, constraints:c.constraints, objective:c.objective }) });
+  },
   rightTab: 'sky',
   fullscreen: false,
   presentation: false,
@@ -195,6 +210,7 @@ export const useApp = create<AppState>((set, get) => ({
   resetInputs: () => {
     const landing = Date.parse(DEFAULT_LANDING_UTC);
     set({
+      siteRef: { kind: 'catalog', id: DEFAULT_SITE_ID }, orbitSettings: orbitDefaults(),
       landing, t: landing, viewRef: null, viewLanding: null, viewMargin: null, playing: false, duration_h: DEFAULTS.duration_h, margin_deg: DEFAULTS.comm_margin_deg, req: DEFAULT_REQUIREMENTS,
       scenarioWeights: DEFAULT_SCENARIO_WEIGHTS, delay_days: DEFAULTS.delay_days, profile: 'custom', mapWeights: DEFAULT_MAP_WEIGHTS, customWeights: DEFAULT_MAP_WEIGHTS,
       filters: DEFAULT_FILTERS, shift_days: 14, landerId: 'small_solar', landerEdits: {}, powerSource: DEFAULT_POWER_SOURCE, landerExtra: DEFAULT_LANDER_EXTRA,
@@ -212,6 +228,10 @@ export const MAX_DURATION_H = 60 * 24;
 /** 'cell' 칸 번호는 남극 격자 기준. 지도 지역이 북극·전역일 때 순위표·지도에서 고른 칸은 좌표로 바꾼다 (data.ts 가 등록) */
 let cellResolver: ((cell: number) => SiteRef) | null = null;
 export function setCellResolver(f: (cell: number) => SiteRef) { cellResolver = f; }
+
+type OrbitSiteResolver = (target: OrbitConfig['target'], current: SiteRef | null, preferred?: SiteRef) => SiteRef;
+let orbitSiteResolver: OrbitSiteResolver | null = null;
+export function setOrbitSiteResolver(resolve: OrbitSiteResolver) { orbitSiteResolver = resolve; }
 
 // ───────── URL 동기화 (?site=&t=&d=&p=) ─────────
 export function siteRefToParam(r: SiteRef | null): string | null {

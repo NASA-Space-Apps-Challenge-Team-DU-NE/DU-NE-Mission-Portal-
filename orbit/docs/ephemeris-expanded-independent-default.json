@@ -1,0 +1,285 @@
+{
+  "schema": "lunar.ephemeris.independent-validation.v1",
+  "passed": true,
+  "checks": {
+    "original_initial_state": true,
+    "original_source_hashes": true,
+    "same_gravitational_parameters": true,
+    "gravity_asset_integrity": true,
+    "gravity_source_frame_conventions": true,
+    "departure_state": true,
+    "transfer_state": true,
+    "full_chain_final_state": true,
+    "mass_accounting": true,
+    "target_position": true,
+    "target_radial_contact": true,
+    "target_surface_speed": true,
+    "target_horizontal_speed": true,
+    "dry_mass": true,
+    "thrust": true,
+    "transfer_collision_envelope_sampled": true,
+    "utc_tdb_landing_epoch": true,
+    "independent_lunar_frame": true,
+    "original_spice_coverage": true,
+    "static_data_coverage": true,
+    "reference_departure_coverage": true,
+    "control_and_display_times": true,
+    "display_sample_crosscheck": true,
+    "direct_departure_epoch": true,
+    "departure_utc_display_rounding": true,
+    "independent_terminal_envelope": true,
+    "finite_burn_mass_and_delta_v": true,
+    "finite_burn_states": true,
+    "finite_burn_engine_limits": true,
+    "finite_burn_schedule": true
+  },
+  "limits": {
+    "state_position_m": 0.1,
+    "state_velocity_m_s": 0.0001,
+    "mass_kg": 1e-07,
+    "landing_time_s": 1e-05,
+    "control_time_gap_s": 1e-06,
+    "target_radial_clearance_m": 0.02
+  },
+  "method": "Independent SciPy DOP853, direct geometric SPICE Earth/Sun and sxform at requested ET, original NASA reference SPK initial state, no TS state resets",
+  "scope": "Static GL1800F degree 30 DE440 PA lunar gravity + differential Earth/Sun point masses in Moon-centered J2000 axes; finite force/time burns when exported, otherwise legacy impulses; exported piecewise acceleration controls. Not operational flight validation; new terminal-policy exports audit powered descent with native LOLA, but no full-flight terrain or unresolved-hazard certification.",
+  "terminal_descent": {
+    "passed": true,
+    "checks": {
+      "finite_terrain_samples": true,
+      "native_terrain_below_12km": true,
+      "dense_inspection": true,
+      "terminal_duration_and_direction": true,
+      "low_altitude_speed": true,
+      "thrust_tilt": true,
+      "contact": true
+    },
+    "samples": 7200,
+    "policy": "demo-terminal-v1",
+    "speed_violation_count": 0,
+    "tilt_violation_count": 0,
+    "premature_contact_samples": 0,
+    "penetration_samples": 0,
+    "final_thrust_tilt_deg": 0.34797357417712355,
+    "final_contact_clearance_m": 0.0010020423546848178,
+    "terminal_duration_s": 120.28153153136373,
+    "coarse_terrain_samples_above_12km": 40,
+    "coarse_terrain_samples_below_12km": 0,
+    "global_terrain_sha256": "bd8384500762d3686c9297e67ec7be92e129b8cf2c19f2e72abbd5471db64647",
+    "scope": "Dense DOP853 states, direct SPICE frame and original 240m LOLA below 12km and integrity-checked conservative global DEM above; radial 2m support-point proxy only."
+  },
+  "finite_burns": [
+    {
+      "name": "NRHO_DEPARTURE",
+      "start_s": 2414728.164306206,
+      "duration_s": 30.606470790719474,
+      "thrust_n": 11999.999999999998,
+      "initial_mass_kg": 2142.799432435619,
+      "final_mass_kg": 2025.7622531082202,
+      "mass_flow_error_kg": 9.622169727663277e-11,
+      "delta_v_accounting_error_m_s": 1.4932766134734266e-10,
+      "state_position_vs_export_m": 4.276244662971616e-06,
+      "state_velocity_vs_export_m_s": 5.167398568335736e-09
+    },
+    {
+      "name": "LLO_INSERTION",
+      "start_s": 2673790.6718688877,
+      "duration_s": 137.49243731847426,
+      "thrust_n": 12000.0,
+      "initial_mass_kg": 2025.7622531082202,
+      "final_mass_kg": 1500.0000000002567,
+      "mass_flow_error_kg": 1.6063950170064345e-10,
+      "delta_v_accounting_error_m_s": 3.8835423765704036e-10,
+      "state_position_vs_export_m": 0.0060472967314243375,
+      "state_velocity_vs_export_m_s": 3.878244639209124e-06
+    },
+    {
+      "name": "DOI",
+      "start_s": 2674108.164306206,
+      "duration_s": 2.4243614525746913,
+      "thrust_n": 11999.999999999998,
+      "initial_mass_kg": 1500.0000000002567,
+      "final_mass_kg": 1490.729397453285,
+      "mass_flow_error_kg": 4.374918205485301e-10,
+      "delta_v_accounting_error_m_s": 9.241922782621259e-10,
+      "state_position_vs_export_m": 0.005970826036201071,
+      "state_velocity_vs_export_m_s": 3.860092828454083e-06
+    }
+  ],
+  "input": ".cache\\expanded-mission-2026-11-16.json",
+  "input_sha256": "fb81e62a2e9ab616f941a57bdb4be9a584961f1eb21daaecb68cc3cf2bfd2da8",
+  "input_generated_at_utc": "2026-11-15T10:14:44.440012Z",
+  "input_timestamp_source": "File last modification UTC; the exported result has no generated_at field",
+  "validated_at_utc": "2026-11-15T10:16:01.474741Z",
+  "source_checks": {
+    "naif0012.tls": {
+      "sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+      "actual_sha256": "678e32bdb5a744117a467cd9601cd6b373f0e9bc9bbde1371d5eee39600a039b",
+      "matches": true
+    },
+    "pck00011.tpc": {
+      "sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+      "actual_sha256": "3dff7b1dbeceaa01f25467767d3fa25816051c85d162d1edf04acb310ee28bb1",
+      "matches": true
+    },
+    "de440s.bsp": {
+      "sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+      "actual_sha256": "c1c7feeab882263fc493a9d5a5b2ddd71b54826cdf65d8d17a76126b260a49f2",
+      "matches": true
+    },
+    "moon_pa_de440_200625.bpc": {
+      "sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+      "actual_sha256": "60cd55aa401ea2ea97360636f567554bfe4e37bb829f901b4460a455dfaf783f",
+      "matches": true
+    },
+    "moon_de440_250416.tf": {
+      "sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+      "actual_sha256": "a47c71e9c9f33796bdafb2c9d69a7ee447b6016ecad80f71cd6f3e479f9cf768",
+      "matches": true
+    },
+    "gm_de440.tpc": {
+      "sha256": "924ddf4fb9ead9fe8a1aa55780bcabde40b09d00065d58226e24b68d8092f140",
+      "actual_sha256": "924ddf4fb9ead9fe8a1aa55780bcabde40b09d00065d58226e24b68d8092f140",
+      "matches": true
+    },
+    "nrho.lbl": {
+      "sha256": "f0105931977ed9bbcfffcd789890f4bc7975fd5b8a55ca39792a4e29d841b234",
+      "actual_sha256": "f0105931977ed9bbcfffcd789890f4bc7975fd5b8a55ca39792a4e29d841b234",
+      "matches": true
+    },
+    "receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp": {
+      "sha256": "114bf4bf418237d28b8945e05d7a04d90358199f62d50f9bf14f38b13985f8ec",
+      "actual_sha256": "114bf4bf418237d28b8945e05d7a04d90358199f62d50f9bf14f38b13985f8ec",
+      "matches": true
+    }
+  },
+  "gravitational_parameters_m3_s2": {
+    "moon": 4902800306330.2,
+    "earth": 398600435507022.6,
+    "sun": 1.3271244004127939e+20
+  },
+  "gravity_model": {
+    "model": "grail",
+    "product": "GL1800F",
+    "degree": 30,
+    "asset_sha256": "52127cccb74dd3c26d3ceac6e7099d63d818d31e22653fe79cdea6023282c848",
+    "original_tab_sha256": "d2a552067a78bf1d2755807ae14ee1d6843a8f6a4228e01ce59a665516738fec",
+    "asset_integrity": true,
+    "source_frame_consistent": true,
+    "normalization": "4pi",
+    "csphase": 1,
+    "reference_radius_m": 1738000.0,
+    "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.tab",
+    "frame": "MOON_PA_DE440",
+    "evaluation": "Independent SciPy complex angular harmonics and analytic angular derivatives; direct SPICE J2000<->PA at every RHS call. No browser recurrence or frame interpolation.",
+    "tides": "Static source coefficients; degree2/3 permanent tide and dynamic solid-body tides omitted"
+  },
+  "solver": {
+    "method": "DOP853",
+    "rtol": 2e-13,
+    "position_atol_m": 1e-07,
+    "velocity_atol_m_s": 1e-10,
+    "mass_atol_kg": 1e-10,
+    "reference_transfer_max_step_s": 300,
+    "landing_coast_max_step_s": 2,
+    "powered_max_step_s": 0.5,
+    "evaluations": 75886
+  },
+  "source_state": {
+    "method": "Original SPICE departure lookup",
+    "position_difference_m": 4.476820547340091e-05,
+    "velocity_difference_m_s": 6.375628785592045e-09,
+    "position_limit_m": 0.001,
+    "velocity_limit_m_s": 1e-06,
+    "replay_starts_from": "Original SPICE state, not the exported browser state"
+  },
+  "state_comparisons": {
+    "seed_position_vs_export_m": 4.476820547340091e-05,
+    "seed_velocity_vs_export_m_s": 6.375628785592045e-09,
+    "start_position_vs_typescript_m": 4.624255187186889e-06,
+    "departure_position_vs_typescript_m": 4.276244662971616e-06,
+    "departure_velocity_vs_typescript_m_s": 5.167398568335736e-09,
+    "arrival_position_vs_typescript_m": 0.0060472967314243375,
+    "arrival_velocity_vs_typescript_m_s": 3.875210614591853e-06,
+    "post_insertion_position_vs_typescript_m": 0.006042423990916492,
+    "post_insertion_velocity_vs_typescript_m_s": 3.878244639209124e-06,
+    "doi_delta_v_accounting_m_s": 9.241958309758047e-10,
+    "pdi_position_vs_typescript_m": 0.0020306057279392215,
+    "pdi_velocity_vs_typescript_m_s": 9.954364162220217e-07,
+    "final_position_vs_typescript_m": 0.0013856178293422566,
+    "final_velocity_vs_typescript_m_s": 2.3817754541472612e-06,
+    "final_mass_vs_typescript_kg": 4.834191713598557e-09
+  },
+  "transfer": {
+    "duration_s": 259200.0,
+    "departure_delta_v_m_s": 176.25945233501872,
+    "insertion_delta_v_m_s": 942.9476604109584,
+    "minimum_moon_altitude_m": 99564.93250243831,
+    "minimum_earth_altitude_m": 395540523.53707314,
+    "collision_samples": 10001,
+    "position_or_velocity_reset": false
+  },
+  "landing": {
+    "target_position_error_m": 0.0013888820299421114,
+    "target_radial_clearance_m": 0.0009965973440557718,
+    "surface_speed_m_s": 0.4999984397057335,
+    "horizontal_speed_m_s": 1.80383397072318e-06,
+    "vertical_speed_m_s": -0.4999984397024796,
+    "peak_thrust_n": 12000.0,
+    "minimum_powered_thrust_n": 1182.3425946721043,
+    "controls": 96,
+    "powered_delta_v_m_s": 2277.3305398801335
+  },
+  "mass": {
+    "basis": "llo",
+    "initial_nrho_kg": 2142.799432435619,
+    "post_departure_kg": 2025.7622531082202,
+    "post_insertion_kg": 1500.0000000002567,
+    "doi_propellant_kg": 9.270602546971759,
+    "final_kg": 721.4937095338897,
+    "total_propellant_kg": 1421.3057229017295
+  },
+  "time": {
+    "epoch_et": 845380869.1823691,
+    "seed_et": 847795597.3466753,
+    "start_et_offset_s": 2403928.164306206,
+    "departure_et_offset_s": 2414728.164306206,
+    "arrival_et_offset_s": 2673928.164306206,
+    "landing_et_offset_s": 2678400.0003801268,
+    "landing_utc": "2026-11-16T00:00:00.000000Z",
+    "landing_epoch_vs_requested_utc_s": 3.5762786865234375e-07,
+    "maximum_control_gap_s": 0.0,
+    "maximum_event_time_difference_s": 0.0
+  },
+  "frame": {
+    "fixed_frame": "MOON_ME",
+    "resolved_frame": "MOON_ME_DE440_ME421",
+    "inertial_frame": "J2000",
+    "coverage_utc": [
+      "1849-12-25T23:59:18.816175Z",
+      "2150-01-21T23:58:50.815541Z"
+    ],
+    "time_standard": "ET/TDB seconds past J2000; UTC converted by NAIF LSK",
+    "state_units": [
+      "m",
+      "m/s"
+    ],
+    "final_fixed_position_vs_typescript_same_inertial_state_m": 6.054995795948593e-09,
+    "final_surface_speed_vs_typescript_same_inertial_state_m_s": 2.7755575615628914e-16
+  },
+  "display_samples": {
+    "count": 80,
+    "maximum_position_difference_m": 0.006047336897600437,
+    "maximum_velocity_difference_m_s": 3.881353939108492e-06,
+    "maximum_mass_difference_kg": 1.0507164915907197e-08
+  },
+  "independent_final_state_m_m_s_kg": [
+    -9856.276874702553,
+    653841.9825168824,
+    -1611754.279583437,
+    0.009584240764165695,
+    -0.14551085897885085,
+    0.4804948158189057,
+    721.4937095338897
+  ]
+}

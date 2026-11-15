@@ -1,3 +1,7 @@
+import { useOrbitRun, orbitStatus } from '../state/orbitRun';
+import { useOrbitPlan } from '../orbit/hooks';
+import { makeOrbitConfig } from '../orbit/model';
+import { ORBIT_CSV_HEADERS, orbitCsvCells, orbitReportSection } from '../orbit/exports';
 // 앱 틀: 검은 띠(로고·화면 이동) | 지도 모드(달이 가운데 전체) ↔ 계획 모드(단계 | 단계 화면 | 오른쪽 달 + 현장 뷰)
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HOUR_MS } from '../core/constants';
@@ -11,7 +15,7 @@ import { useApp, viewLandingOf, type PageId } from '../state/store';
 import { playClock } from '../state/playClock';
 import { PROFILE_UI, STEPS, useUi } from '../state/ui';
 import { HOMEPAGE_URL, POWER_KINDS } from '../config';
-import { useLang } from '../i18n';
+import { useLang, tx } from '../i18n';
 import { t } from '../strings';
 
 
@@ -60,6 +64,7 @@ function StartOver() {
 /** 맨 위 검은 띠: 팀 로고(홈페이지와 같은 크기·위치) · 화면 이동 · 데이터 상태 · 내보내기 */
 export function Masthead() {
   const app = useApp();
+  const orbitPlan = useOrbitPlan(), orbitRun = useOrbitRun();
   const status = useData((d) => d.status);
   const unverified = useData((d) => d.unverified);
   const reasons = useData((d) => d.missingReasons);
@@ -74,8 +79,13 @@ export function Masthead() {
 
   const csv = () => {
     if (!res) return;
-    const rows = res.top.map((c, i) => [i + 1, `cell_${c.cell}`, c.lat_deg.toFixed(4), c.lon_deg.toFixed(4), c.score.toFixed(3), res.dyn.illum_mission[c.cell].toFixed(3), res.dyn.comm_mission[c.cell].toFixed(3), res.dyn.dark_h[c.cell].toFixed(0)]);
-    download('luna-nav-ranking.csv', toCsv(['rank', 'id', 'lat_deg', 'lon_deg', 'score_0_1', 'illum_mission', 'comm_mission', 'longest_dark_h'], rows), 'text/csv');
+    const rows: Array<Array<string|number|null>> = res.top.map((c, i) => {
+      const input=makeOrbitConfig(c,app.landing,app.landerExtra,app.orbitSettings);
+      return [i + 1, `cell_${c.cell}`, c.lat_deg.toFixed(4), c.lon_deg.toFixed(4), c.score.toFixed(3), res.dyn.illum_mission[c.cell].toFixed(3), res.dyn.comm_mission[c.cell].toFixed(3), res.dyn.dark_h[c.cell].toFixed(0), 'ranked_candidate', ...orbitCsvCells(input,orbitRun,orbitPlan.caps)];
+    });
+    // An explicitly unranked current-plan row keeps its Orbit result available even when it is not in the top grid candidates.
+    if(orbitPlan.config)rows.push([null,rs?.site.id??'current_plan',orbitPlan.config.target.latitude_deg,orbitPlan.config.target.longitude_deg,null,null,null,null,'current_plan',...orbitCsvCells(orbitPlan.config,orbitRun,orbitPlan.caps)]);
+    download('luna-nav-ranking.csv', toCsv(['rank', 'id', 'lat_deg', 'lon_deg', 'score_0_1', 'illum_mission', 'comm_mission', 'longest_dark_h','row_type',...ORBIT_CSV_HEADERS], rows), 'text/csv');
   };
   const report = async () => {
     const s = rs?.site;
@@ -84,9 +94,10 @@ export function Masthead() {
       { title: '선택 착륙지', lines: s && ev ? [`- ${s.name} (${s.lat_deg.toFixed(3)}, ${s.lon_deg.toFixed(3)}) · ${rs?.terrain === 'site' ? '지형 반영' : rs?.terrain === 'grid' ? `격자 근사${rs.gridRegion ? ` (${gridLabel(rs.gridRegion, rs.gridKm)})` : ''}` : '지형 미반영'}`, `- 점수 ${Math.round(ev.score.total)} · ${ev.score.meets_requirements ? '요구 조건 충족' : '요건 미달'} · 일조율 ${pct(ev.summary.illum_frac)} · 교신율 ${pct(ev.summary.comm_frac)} · 최장 암흑 ${Math.round(ev.summary.longest_dark_h)} h`] : ['- 없음'] },
       { title: '상위 후보', lines: (res?.top ?? []).slice(0, 5).map((c, i) => `${i + 1}. cell_${c.cell} (${c.lat_deg.toFixed(3)}, ${c.lon_deg.toFixed(3)}) ${Math.round(c.score * 100)}`) },
       { title: '경고', lines: [...warns.map((w) => `- 경고: ${w.target_name} (${w.distance_km.toFixed(1)} km)`), unverified ? '- 일부 수치 미검증' : ''] },
+      orbitReportSection(orbitPlan.config,orbitRun,orbitPlan.caps,lang),
       { title: '', lines: ['점수는 후보 간 상대 비교용 지표이며 확률이 아님.'] },
     ]);
-    try { await navigator.clipboard.writeText(txt); toast('보고서를 복사했습니다'); } catch { download('luna-nav-report.txt', txt, 'text/plain'); }
+    try { await navigator.clipboard.writeText(lang==='en'?txt.split('\n').map(line=>{const json=line.indexOf('{');return json<0?tx(line):tx(line.slice(0,json))+line.slice(json);}).join('\n'):txt); toast('보고서를 복사했습니다'); } catch { download('luna-nav-report.txt', lang==='en'?txt.split('\n').map(line=>{const json=line.indexOf('{');return json<0?tx(line):tx(line.slice(0,json))+line.slice(json);}).join('\n'):txt, 'text/plain'); }
   };
   const go = (page?: PageId) => { if (page) app.setPage(page); ui.set({ mode: 'plan' }); };
   const plan = ui.mode === 'plan';
@@ -171,6 +182,7 @@ export function TimeBar() {
 }
 
 export function Sidebar() {
+  const orbitRun = useOrbitRun();
   const app = useApp();
   const rs = useResolvedSite();
   const ev = useEval();
@@ -186,7 +198,7 @@ export function Sidebar() {
     switch (id) {
       case 'cond': return `${PROFILE_UI[app.profile].name} · ${app.duration_h} h · ${POWER_KINDS[app.powerSource.kind].name}`;
       case 'site': return `${rs ? rs.site.name : '아직 안 고름'} · ${utc(app.landing).slice(5)}`;
-      case 'orbit': return '준비 중';
+      case 'orbit': return orbitStatus(orbitRun);
       case 'base': return ui.baseOff ? '기지 없음 · 착륙지 = 기지' : `기지 ${app.bases.length}개${warns.length ? ` · 경고 ${warns.length}` : ''}`;
       case 'sim': return [sim ? VN[sim.sim.verdict] : null, pw?.plan.feasible ? `패널 ${Math.round(pw.plan.panel_area_m2)} m²` : null, ev ? `교신 ${pct(ev.summary.comm_frac)}` : null].filter(Boolean).join(' · ') || '—';
       case 'delay': return `+${app.shift_days}일 지연 가정`;
@@ -196,13 +208,14 @@ export function Sidebar() {
     }
   };
   const dot = (id: PageId) => {
+    if (id === 'orbit') return orbitRun.phase === 'complete' ? (orbitRun.result?.status === 'VALIDATED' ? 'ok' : 'warn') : ['error','stale'].includes(orbitRun.phase) ? 'warn' : '';
     if (id === 'base' && warns.length) return 'warn';
     if (id === 'sim') return sim && sim.sim.verdict !== 'met' ? 'warn' : 'ok';
     if (id === 'site' && ev && !ev.score.meets_requirements) return 'warn';
     return '';
   };
   // 경고는 점 대신 빨간 경고 삼각형(느낌표). 마우스를 올리면 이유를 보여 준다
-  const WARN_WHY: Partial<Record<PageId, string>> = { site: '지금 계획이 필수 요구 조건을 넘지 못합니다', base: '관측된 단층애 근접 경고가 있습니다', sim: '표면 운용 요구 조건을 다 충족하지 못합니다' };
+  const WARN_WHY: Partial<Record<PageId, string>> = { orbit: orbitRun.error ?? '궤도 결과 미충족 또는 입력 변경 — 05에서 확인하세요', site: '지금 계획이 필수 요구 조건을 넘지 못합니다', base: '관측된 단층애 근접 경고가 있습니다', sim: '표면 운용 요구 조건을 다 충족하지 못합니다' };
   const mark = (id: PageId) => {
     const d = dot(id);
     if (d !== 'warn') return <span className={`dot ${d}`} />;

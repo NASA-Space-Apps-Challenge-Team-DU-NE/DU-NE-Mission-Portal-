@@ -1,0 +1,1190 @@
+{
+  "generated_at_utc": "2026-11-15T00:21:39.779Z",
+  "runtime": "v24.15.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 7430U with Radeon Graphics         ",
+  "logical_cpus": 12,
+  "elapsed_s": 19.8267335,
+  "memory_before": {
+    "rss": 49549312,
+    "heapTotal": 10944512,
+    "heapUsed": 6093920,
+    "external": 2376222,
+    "arrayBuffers": 135741
+  },
+  "memory_after": {
+    "rss": 165232640,
+    "heapTotal": 112689152,
+    "heapUsed": 67063608,
+    "external": 8453623,
+    "arrayBuffers": 4630363
+  },
+  "benchmark_notes": "Single Node run per scenario; includes loading, optimizing and validating. Browser measurement is separate. Memory is process usage, not an isolated gravity allocation.",
+  "input": {
+    "initial_orbit": "nrho",
+    "nrho": {
+      "mode": "b",
+      "gravity_model": "grail",
+      "gravity_degree": 20,
+      "max_computation_seconds": 180
+    },
+    "target": {
+      "latitude_deg": -89.4441,
+      "longitude_deg": -137.291,
+      "landing_time_utc": "2026-11-16T00:00:00Z"
+    },
+    "lander": {
+      "initial_mass_kg": 1500,
+      "dry_mass_kg": 650,
+      "max_thrust_n": 12000,
+      "min_thrust_n": 0,
+      "isp_s": 320
+    },
+    "orbit": {
+      "altitude_km": 100,
+      "pdi_altitude_km": 15
+    },
+    "constraints": {
+      "position_tolerance_m": 100,
+      "speed_tolerance_m_s": 2,
+      "horizontal_speed_tolerance_m_s": 1
+    },
+    "objective": "fuel"
+  },
+  "status": "VALIDATED",
+  "message": "선택한 달 중력장과 날짜별 지구·태양 중력으로 전이부터 접지까지 계산해 모델 검증 조건을 충족했습니다.",
+  "summary": {
+    "gravity_model": "grail",
+    "gravity_degree": 20,
+    "gravity_calls": 3044532,
+    "gravity_cpu_ms": 12243.125100001582,
+    "gravity_source": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml",
+    "gravity_static_tides_omitted": true,
+    "mission_elapsed_ms": 19662.922899999998,
+    "gravity_same_controls_status": "computed",
+    "gravity_same_controls_scope": "Same actual PDI state and inertial acceleration commands; compared at the GRAIL final epoch, not at a separately detected surface contact.",
+    "gravity_same_controls_baseline": "GL1800F GM degree 0 + same Earth/Sun",
+    "gravity_same_controls_baseline_gm_m3_s2": 4902800306330.2,
+    "gravity_same_controls_position_difference_m": 33.013280593664575,
+    "gravity_same_controls_velocity_difference_m_s": 0.23276974669786318,
+    "gravity_same_controls_mass_difference_kg": 2.909246177296154e-10,
+    "gravity_same_controls_elapsed_ms": 8.024500000003172,
+    "gravity_same_controls_terrain_validated": false,
+    "landing_success": true,
+    "landing_position_error_m": 2.8412116989504784e-7,
+    "touchdown_velocity_m_s": 0.49999999874020223,
+    "horizontal_touchdown_velocity_m_s": 0,
+    "vertical_touchdown_velocity_m_s": -0.4999999987402023,
+    "actual_latitude_deg": -89.44410000000038,
+    "actual_longitude_deg": -137.2910000009352,
+    "doi_delta_v_m_s": 19.455073826089574,
+    "powered_descent_delta_v_m_s": 1738.4075282521806,
+    "total_delta_v_m_s": 3883.421430699642,
+    "propellant_consumed_kg": 2096.2576193362365,
+    "remaining_propellant_kg": 206.67410836245108,
+    "initial_nrho_mass_kg": 2952.9317276986876,
+    "llo_initial_mass_kg": 1500.0000000000002,
+    "final_mass_kg": 856.6741083624511,
+    "maximum_thrust_n": 8148.637075891563,
+    "flight_duration_s": 157211.83607392083,
+    "transfer_duration_s": 142560,
+    "parking_duration_s": 0,
+    "nrho_coast_duration_s": 10800,
+    "departure_delta_v_m_s": 400.26945500834535,
+    "insertion_delta_v_m_s": 1725.289373613026,
+    "departure_utc": "2026-11-14T07:19:48.163Z",
+    "llo_insertion_utc": "2026-11-15T22:55:48.163Z",
+    "landing_time_utc": "2026-11-16T00:00:00.000Z",
+    "global_optimality_proven": false,
+    "transfer_search_timed_out": false
+  },
+  "validation": {
+    "contact": {
+      "passed": true,
+      "final_dem_clearance_m": 6.746950020897202e-8,
+      "vertical_speed_m_s": -0.4999999987402023,
+      "clearance_tolerance_m": 0.02
+    },
+    "position": {
+      "passed": true,
+      "actual_m": 2.8412116989504784e-7,
+      "limit_m": 100
+    },
+    "speed": {
+      "passed": true,
+      "actual_m_s": 0.49999999874020223,
+      "limit_m_s": 2
+    },
+    "horizontal_speed": {
+      "passed": true,
+      "actual_m_s": 0
+    },
+    "mass": {
+      "passed": true,
+      "final_kg": 856.6741083624511,
+      "dry_kg": 650
+    },
+    "thrust": {
+      "passed": true,
+      "maximum_n": 8148.637075891563,
+      "minimum_n": 6957.8188951342445
+    },
+    "terrain": {
+      "passed": true,
+      "unavailable_samples": 0,
+      "collision_samples": 0,
+      "low_resolution_below_12km": 0,
+      "minimum_prelanding_clearance_m": 0.04632098710089849,
+      "checked_samples": 10614,
+      "sampling": "Powered descent and coast below 20 km: time step limited to 120 m / inertial speed; powered step <=0.25s, other coast <=2s. DEM grid is 240m, unresolved obstacles excluded."
+    },
+    "continuity": {
+      "passed": true,
+      "landing_start_position_error_m": 0.000014936749055169234,
+      "position_was_reset": false
+    },
+    "forward_propagation": {
+      "passed": true,
+      "coast_refined_position_difference_m": 0.000004315381338558051,
+      "coast_refined_velocity_difference_m_s": 4.288521748863988e-9,
+      "refined_endpoint_difference_m": 3.9485536610154056e-7,
+      "refined_velocity_difference_m_s": 2.597837884603832e-9,
+      "method": "Coast: independent adaptive DOPRI from actual insertion through DOI. Powered descent: half-step RK4 from actual PDI."
+    },
+    "ephemeris_coverage": {
+      "passed": true,
+      "start_utc": "2026-11-14T04:19:48.163Z",
+      "end_utc": "2026-11-16T00:00:00.000Z",
+      "coverage_utc": [
+        "2026-11-01T00:00:00Z",
+        "2026-12-01T00:00:00Z"
+      ]
+    },
+    "nrho_reference": {
+      "passed": true,
+      "refined_position_difference_m": 0.0005634073324051562,
+      "source": "NASA reference epoch initial state, propagated with GL1800F degree 20 and DE440 Earth/Sun tides. No Jacobi/period closure criterion."
+    },
+    "nrho_coast": {
+      "passed": true,
+      "minimum_altitude_m": 49947544.578105964
+    },
+    "transfer_coast": {
+      "passed": true,
+      "position_error_m": 0.000014936749055169234,
+      "position_tolerance_m": 0.05,
+      "post_insertion_velocity_error_m_s": 2.842170943040401e-14,
+      "refined_position_difference_m": 0.000002190288938276788,
+      "post_insertion_eccentricity": 4.98772000685e-12,
+      "target_eccentricity": 1.18774731498903e-16,
+      "orbit_plane_error_rad": 6.419251732577419e-12,
+      "actual_llo_altitude_lola_km": 100.0000000035041,
+      "target_llo_altitude_lola_km": 100,
+      "minimum_moon_altitude_km": 100.0000000035041,
+      "minimum_earth_altitude_km": 396004.7122255337,
+      "collision_envelope_radius_km": 1749.4,
+      "position_was_reset": false,
+      "limit_total_delta_v_m_s": 2500,
+      "model": "Date-dependent GL1800F degree 20 DE440 PA lunar gravity plus geometric Earth/Sun differential accelerations, J2000 axes.",
+      "collision_check": "Accepted adaptive states; maximum step travel 2% of lunar radius vector. 12 km spherical margin, not terrain certification.",
+      "accepted_steps": 895,
+      "rejected_steps": 0
+    },
+    "llo_insertion": {
+      "passed": true,
+      "position_error_m": 0.000014936749055169234,
+      "velocity_error_m_s": 2.842170943040401e-14,
+      "eccentricity": 4.98772000685e-12,
+      "plane_error_rad": 6.419251732577419e-12,
+      "altitude_m": 100000.0000035041,
+      "position_was_reset": false
+    },
+    "total_fuel": {
+      "passed": true,
+      "initial_nrho_mass_kg": 2952.9317276986876,
+      "after_departure_mass_kg": 2599.315370574477,
+      "after_insertion_mass_kg": 1500.0000000000002,
+      "final_mass_kg": 856.6741083624511,
+      "departure_propellant_kg": 353.6163571242105,
+      "insertion_propellant_kg": 1099.315370574477,
+      "landing_propellant_kg": 643.3258916375491,
+      "mass_continuity_error_kg": 2.2737367544323206e-13
+    }
+  },
+  "events": [
+    {
+      "name": "NRHO_DEPARTURE",
+      "phase": "TRANSFER",
+      "time_s": 10800,
+      "fixed_position_m": [
+        -7208715.717926718,
+        -18693633.30008433,
+        -50357302.0984556
+      ],
+      "delta_v_m_s": 400.26945500834535,
+      "delta_v_fixed_m_s": [
+        66.12653713669928,
+        -36.80832532935255,
+        393.04969772973374
+      ],
+      "propellant_kg": 353.6163571242105
+    },
+    {
+      "name": "LLO_INSERTION",
+      "phase": "CIRCULAR",
+      "time_s": 153360,
+      "fixed_position_m": [
+        382511.95084023586,
+        -381104.561779187,
+        1756269.5352560147
+      ],
+      "delta_v_m_s": 1725.289373613026,
+      "delta_v_fixed_m_s": [
+        -1230.9682217707661,
+        -1132.8357742390594,
+        421.928629387514
+      ],
+      "propellant_kg": 1099.315370574477
+    },
+    {
+      "name": "DOI",
+      "phase": "COAST",
+      "time_s": 153540,
+      "fixed_position_m": [
+        186233.77573186922,
+        -172063.6354224811,
+        1819823.9851019983
+      ],
+      "delta_v_m_s": 19.455073826089578,
+      "delta_v_vector_m_s": [
+        2.140822898011655,
+        18.75581616793992,
+        4.704905394626786
+      ],
+      "propellant_kg": 9.270602547409226
+    },
+    {
+      "name": "PDI",
+      "phase": "POWERED_DESCENT",
+      "time_s": 156951.83607392083,
+      "fixed_position_m": [
+        -178085.79931262066,
+        167115.489260526,
+        -1735692.5186016932
+      ]
+    },
+    {
+      "name": "TOUCHDOWN",
+      "phase": "POWERED_DESCENT",
+      "time_s": 157211.83607392083,
+      "fixed_position_m": [
+        -12400.210327656358,
+        -11446.191687377985,
+        -1739271.8593265153
+      ]
+    }
+  ],
+  "reference": {
+    "mode": "EPHEMERIS",
+    "mode_b_implemented": true,
+    "gravity": {
+      "model": "grail",
+      "degree": 20,
+      "gm_m3_s2": 4902800306330.2,
+      "reference_radius_m": 1738000,
+      "frame": "MOON_PA_DE440",
+      "source_url": "https://pds-geosciences.wustl.edu/grail/grail-l-lgrs-5-rdr-v1/grail_1001/shadr/jggrx_1800f_sha.xml"
+    },
+    "inertial_frame": "Moon-centered J2000 axes",
+    "surface_frame": "MOON_ME",
+    "time": "ET/TDB seconds internally; UTC converted using packaged SPICE mapping",
+    "epoch_utc": "2026-11-01T00:00:00Z",
+    "epoch_et": 846763269.1825113,
+    "start_time_utc": "2026-11-14T04:19:48.163Z",
+    "start_et_offset_s": 1138788.1641641164,
+    "landing_time_utc": "2026-11-16T00:00:00.000Z",
+    "controls_time_origin": "Full mission start",
+    "dynamics": "GL1800F degree 20 DE440 PA full lunar gravity + differential Earth/Sun point masses from DE440 for ALL phases; commanded acceleration and rocket-equation mass",
+    "units": "metres, seconds, kilograms, newtons",
+    "gm_m3_s2": {
+      "moon": 4902800306330.2,
+      "earth": 398600435507022.6,
+      "sun": 132712440041279390000
+    },
+    "reference_seed": {
+      "epoch_utc": "2026-11-12T00:00:00Z",
+      "epoch_et": 847713669.1826764,
+      "epoch_t_s": 950400.0001651049,
+      "state": [
+        -15396776.335926581,
+        14980114.0322024,
+        -34298811.812279515,
+        -4.990768684717262,
+        -134.12768567411848,
+        331.95071867967533
+      ],
+      "source_url": "https://naif.jpl.nasa.gov/pub/naif/misc/MORE_PROJECTS/DSG/receding_horiz_3189_1burnApo_DiffCorr_15yr.bsp",
+      "object_id": -60000,
+      "origin_id": 301,
+      "frame": "J2000",
+      "units": "m, m/s",
+      "label": "NASA/JSC 2018 reference NRHO state; browser repropagation in simplified DE440 Earth-Moon-Sun model",
+      "provenance": "Geometric spkezr(-60000, epoch, J2000, NONE, MOON). SPK original origin is Earth, transformed using DE440s. Not a flown/operational ephemeris.",
+      "source_force_model": "Published reference uses DE430, DE431 GMs, Earth/Moon/Sun/Jupiter and lunar 8x8 gravity plus small stationkeeping impulses.",
+      "runtime_force_model": "The browser starts only from this state and propagates lunar monopole plus differential Earth/Sun attraction. No source stationkeeping impulses are imported; no exact periodicity is assumed."
+    },
+    "reference_preview_span_s": 561600,
+    "reference_preview_minimum_altitude_m": 1723798.2789342944,
+    "reference_preview_maximum_altitude_m": 70036816.3175862
+  },
+  "transfer": {
+    "arrival_time_s": 1292148.1641641164,
+    "candidates": [
+      {
+        "departure_time_s": 1266228.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.3,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 4,
+        "position_error_m": 0.000009061392990047458,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1266228.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 3,
+        "position_error_m": 2100127.0851788973
+      },
+      {
+        "departure_time_s": 1237068.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.6375,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 1.8141207846126458e-7,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1237068.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.6375,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 6,
+        "position_error_m": 1.9056346562423787e-7,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1207908.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.9750000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 7,
+        "position_error_m": 0.0000013616209374885475,
+        "departure_delta_v_m_s": 755.841107348777,
+        "insertion_delta_v_m_s": 1624.1728591027058,
+        "total_delta_v_m_s": 2380.0139664514827,
+        "min_altitude_km": 93.39821341801458
+      },
+      {
+        "departure_time_s": 1207908.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 0.9750000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 7,
+        "position_error_m": 3.6955997615508455e-8,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1178748.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.3125000000000002,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 9,
+        "position_error_m": 7.914078371488766e-7,
+        "departure_delta_v_m_s": 528.5775126411484,
+        "insertion_delta_v_m_s": 1649.6406267627535,
+        "total_delta_v_m_s": 2178.2181394039017,
+        "min_altitude_km": 99.99999999972363
+      },
+      {
+        "departure_time_s": 1178748.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.3125000000000002,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 2,
+        "position_error_m": 934119.153164405
+      },
+      {
+        "departure_time_s": 1149588.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.6500000000000001,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.000014936749055169234,
+        "departure_delta_v_m_s": 400.26945500834535,
+        "insertion_delta_v_m_s": 1725.289373613026,
+        "total_delta_v_m_s": 2125.5588286213715,
+        "min_altitude_km": 100.0000000035041
+      },
+      {
+        "departure_time_s": 1149588.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.6500000000000001,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 14,
+        "position_error_m": 0.000006893099404996635,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1120428.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.9875,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 8,
+        "position_error_m": 0.00004151555887724329,
+        "departure_delta_v_m_s": 328.35674293740476,
+        "insertion_delta_v_m_s": 1827.9295083722554,
+        "total_delta_v_m_s": 2156.28625130966,
+        "min_altitude_km": 99.99999998235516
+      },
+      {
+        "departure_time_s": 1120428.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 1.9875,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 8,
+        "position_error_m": 0.000004640481922809987,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1091268.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.325,
+        "branch": "short",
+        "converged": true,
+        "valid": true,
+        "iterations": 10,
+        "position_error_m": 0.000013250892670580062,
+        "departure_delta_v_m_s": 306.04465093308056,
+        "insertion_delta_v_m_s": 1959.8337913955538,
+        "total_delta_v_m_s": 2265.8784423286343,
+        "min_altitude_km": 99.99999998974543
+      },
+      {
+        "departure_time_s": 1091268.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.325,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 9,
+        "position_error_m": 0.0000023660586939394884,
+        "error": "Mode B trajectory intersects the Moon collision envelope."
+      },
+      {
+        "departure_time_s": 1062108.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.6625,
+        "branch": "short",
+        "converged": true,
+        "valid": false,
+        "iterations": 12,
+        "position_error_m": 0.00011743596883241524,
+        "departure_delta_v_m_s": 367.4065716640106,
+        "insertion_delta_v_m_s": 2149.5665550421236,
+        "total_delta_v_m_s": 2516.9731267061343,
+        "min_altitude_km": 100.00000005893084
+      },
+      {
+        "departure_time_s": 1062108.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 2.6625,
+        "branch": "long",
+        "converged": true,
+        "valid": false,
+        "iterations": 19,
+        "position_error_m": 0.00002152686543925894,
+        "departure_delta_v_m_s": 367.4065716638273,
+        "insertion_delta_v_m_s": 2149.56655507584,
+        "total_delta_v_m_s": 2516.9731267396674,
+        "min_altitude_km": 100.00000000797817
+      },
+      {
+        "departure_time_s": 1032948.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 3,
+        "branch": "short",
+        "converged": false,
+        "valid": false,
+        "iterations": 0,
+        "error": "Mode B adaptive integration minimum step reached."
+      },
+      {
+        "departure_time_s": 1032948.1641641164,
+        "arrival_time_s": 1292148.1641641164,
+        "tof_days": 3,
+        "branch": "long",
+        "converged": false,
+        "valid": false,
+        "iterations": 20,
+        "position_error_m": 217130.68407626892
+      }
+    ],
+    "timed_out": false,
+    "elapsed_ms": 14127.2238,
+    "status": "TRANSFER VALIDATED",
+    "message": "Date-specific transfer passed the declared ephemeris force-model checks.",
+    "departure_state": [
+      19234143.37692917,
+      18266754.059083488,
+      -47261493.920481555,
+      -17.700181617647264,
+      82.81396921586548,
+      -230.97388557953062
+    ],
+    "post_departure_state": [
+      19234143.37692917,
+      18266754.059083488,
+      -47261493.920481555,
+      2.2531674541333455,
+      3.698273438488716,
+      160.89115133389322
+    ],
+    "pre_insertion_state": [
+      70316.78720730776,
+      -163129.53307912967,
+      1828792.7889422313,
+      -1838.2795459910797,
+      -1277.719576332568,
+      -427.09109210710494
+    ],
+    "departure_dv_m_s": [
+      19.953349071780607,
+      -79.11569577737677,
+      391.86503691342386
+    ],
+    "insertion_dv_m_s": [
+      1666.3524464335856,
+      -340.85911634105537,
+      289.3233654132122
+    ],
+    "total_delta_v_m_s": 2125.5588286213715,
+    "departure_time_s": 1149588.1641641164,
+    "tof_s": 142560,
+    "validation": {
+      "passed": true,
+      "position_error_m": 0.000014936749055169234,
+      "position_tolerance_m": 0.05,
+      "post_insertion_velocity_error_m_s": 2.842170943040401e-14,
+      "refined_position_difference_m": 0.000002190288938276788,
+      "post_insertion_eccentricity": 4.98772000685e-12,
+      "target_eccentricity": 1.18774731498903e-16,
+      "orbit_plane_error_rad": 6.419251732577419e-12,
+      "actual_llo_altitude_lola_km": 100.0000000035041,
+      "target_llo_altitude_lola_km": 100,
+      "minimum_moon_altitude_km": 100.0000000035041,
+      "minimum_earth_altitude_km": 396004.7122255337,
+      "collision_envelope_radius_km": 1749.4,
+      "position_was_reset": false,
+      "limit_total_delta_v_m_s": 2500,
+      "model": "Date-dependent GL1800F degree 20 DE440 PA lunar gravity plus geometric Earth/Sun differential accelerations, J2000 axes.",
+      "collision_check": "Accepted adaptive states; maximum step travel 2% of lunar radius vector. 12 km spherical margin, not terrain certification.",
+      "accepted_steps": 895,
+      "rejected_steps": 0
+    }
+  },
+  "landing_trials": [
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.49359643578889e-7,
+      "velocity_residual_m_s": 1.1853430931458718e-9,
+      "max_thrust_n": 9435.637778570968,
+      "min_thrust_n": 6562.355792267916,
+      "final_mass_kg": 854.6192851774599,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 2.838408702156756e-7,
+      "velocity_residual_m_s": 1.215918564740498e-9,
+      "max_thrust_n": 12136.806771783524,
+      "min_thrust_n": 5161.4714624769895,
+      "final_mass_kg": 851.7051748784706,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.1936100850008505e-7,
+      "velocity_residual_m_s": 1.2228596114884577e-9,
+      "max_thrust_n": 8336.482359608315,
+      "min_thrust_n": 6698.064492036419,
+      "final_mass_kg": 856.2541620665909,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.5222787002471693e-7,
+      "velocity_residual_m_s": 1.202652408292564e-9,
+      "max_thrust_n": 9726.897513355867,
+      "min_thrust_n": 6363.766004770484,
+      "final_mass_kg": 854.9044725783447,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 2.913447057551416e-7,
+      "velocity_residual_m_s": 1.2435597761326689e-9,
+      "max_thrust_n": 12437.627259089892,
+      "min_thrust_n": 4967.488474960461,
+      "final_mass_kg": 851.8956518095164,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.3020034241002584e-7,
+      "velocity_residual_m_s": 1.2347658085294842e-9,
+      "max_thrust_n": 8148.637074431084,
+      "min_thrust_n": 6957.818897370692,
+      "final_mass_kg": 856.6741083643866,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.5280525179008706e-7,
+      "velocity_residual_m_s": 1.1921949428623875e-9,
+      "max_thrust_n": 9605.52809295147,
+      "min_thrust_n": 6447.842351939038,
+      "final_mass_kg": 854.769326952112,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 2.8360072635355215e-7,
+      "velocity_residual_m_s": 1.2286623721949436e-9,
+      "max_thrust_n": 12311.299685986238,
+      "min_thrust_n": 5050.327803277228,
+      "final_mass_kg": 851.7978118272312,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.243983838587448e-7,
+      "velocity_residual_m_s": 1.224984285621335e-9,
+      "max_thrust_n": 8226.868165876003,
+      "min_thrust_n": 6850.493797046094,
+      "final_mass_kg": 856.4848297360727,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 2.452915706298363e-7,
+      "velocity_residual_m_s": 1.1857523933139048e-9,
+      "max_thrust_n": 9446.630460389999,
+      "min_thrust_n": 6553.369246634339,
+      "final_mass_kg": 854.6318962026518,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 2.842008846205864e-7,
+      "velocity_residual_m_s": 1.2161237132368284e-9,
+      "max_thrust_n": 12152.400255291031,
+      "min_thrust_n": 5150.17165016507,
+      "final_mass_kg": 851.7151738938176,
+      "engine_constraints_passed": false
+    },
+    {
+      "duration_s": 260,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.263406092154356e-7,
+      "velocity_residual_m_s": 1.2262324315594469e-9,
+      "max_thrust_n": 8329.971478941407,
+      "min_thrust_n": 6704.0567916977725,
+      "final_mass_kg": 856.2716297704853,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.4115683672214126e-7,
+      "velocity_residual_m_s": 8.90630366684823e-10,
+      "max_thrust_n": 7309.757863287149,
+      "min_thrust_n": 5047.744029498955,
+      "final_mass_kg": 851.0672740416612,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 2.7147252877548857e-7,
+      "velocity_residual_m_s": 9.177187991513029e-10,
+      "max_thrust_n": 9387.801552435294,
+      "min_thrust_n": 4010.2557707797628,
+      "final_mass_kg": 847.0080279225201,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.1183223660202207e-7,
+      "velocity_residual_m_s": 9.103532384345045e-10,
+      "max_thrust_n": 6381.977244250641,
+      "min_thrust_n": 5192.461270929614,
+      "final_mass_kg": 853.732228525353,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.3984370578576923e-7,
+      "velocity_residual_m_s": 8.957444825678994e-10,
+      "max_thrust_n": 7493.872363805041,
+      "min_thrust_n": 4927.9513036542885,
+      "final_mass_kg": 851.1167594954599,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 2.782227341342916e-7,
+      "velocity_residual_m_s": 9.285589002326773e-10,
+      "max_thrust_n": 9577.043169126968,
+      "min_thrust_n": 3894.6429695442844,
+      "final_mass_kg": 846.9730222015085,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.10214098748142e-7,
+      "velocity_residual_m_s": 9.142994639962266e-10,
+      "max_thrust_n": 6266.854161713282,
+      "min_thrust_n": 5358.839307946763,
+      "final_mass_kg": 853.8819769689607,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.3697225674542808e-7,
+      "velocity_residual_m_s": 8.896435372839453e-10,
+      "max_thrust_n": 7418.18377252707,
+      "min_thrust_n": 4978.181539199086,
+      "final_mass_kg": 851.0818150448096,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 2.7123209426091114e-7,
+      "velocity_residual_m_s": 9.212834537944854e-10,
+      "max_thrust_n": 9498.326274474764,
+      "min_thrust_n": 3943.7608859945944,
+      "final_mass_kg": 846.9707795739187,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.1758246374758782e-7,
+      "velocity_residual_m_s": 9.107548519056539e-10,
+      "max_thrust_n": 6313.684714940661,
+      "min_thrust_n": 5291.596456990096,
+      "final_mass_kg": 853.8077465407231,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 2.426567882848339e-7,
+      "velocity_residual_m_s": 8.903160203442517e-10,
+      "max_thrust_n": 7311.828697995161,
+      "min_thrust_n": 5045.042239114311,
+      "final_mass_kg": 851.0679458695885,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 2.682353337104076e-7,
+      "velocity_residual_m_s": 9.145306659980283e-10,
+      "max_thrust_n": 9391.979764869275,
+      "min_thrust_n": 4006.4847646213448,
+      "final_mass_kg": 847.0076149854905,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 340,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.137423763232622e-7,
+      "velocity_residual_m_s": 9.124245522629934e-10,
+      "max_thrust_n": 6380.0342478775665,
+      "min_thrust_n": 5192.927487293515,
+      "final_mass_kg": 853.7361585288708,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 2.819541030012726e-7,
+      "velocity_residual_m_s": 8.546329556569332e-10,
+      "max_thrust_n": 5740.393890406605,
+      "min_thrust_n": 3989.950054945021,
+      "final_mass_kg": 844.2116689220132,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 3.2274713850806846e-7,
+      "velocity_residual_m_s": 8.86809959183725e-10,
+      "max_thrust_n": 7350.424924892504,
+      "min_thrust_n": 3229.92050069091,
+      "final_mass_kg": 838.4981896702238,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 2.5651276225775363e-7,
+      "velocity_residual_m_s": 8.664777583990342e-10,
+      "max_thrust_n": 4988.849042129265,
+      "min_thrust_n": 4095.621721754994,
+      "final_mass_kg": 848.3024674723174,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 2.821489633468498e-7,
+      "velocity_residual_m_s": 8.555317943879129e-10,
+      "max_thrust_n": 5857.551281417497,
+      "min_thrust_n": 3917.036733200138,
+      "final_mass_kg": 844.0849944679633,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 3.2271261496517055e-7,
+      "velocity_residual_m_s": 8.864968126424173e-10,
+      "max_thrust_n": 7470.769515565208,
+      "min_thrust_n": 3160.808429896524,
+      "final_mass_kg": 838.2848340921057,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 2.5158122064274677e-7,
+      "velocity_residual_m_s": 8.667599794859914e-10,
+      "max_thrust_n": 4914.69191785021,
+      "min_thrust_n": 4201.868259258541,
+      "final_mass_kg": 848.2644100781646,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 2.82784948630871e-7,
+      "velocity_residual_m_s": 8.562648325646892e-10,
+      "max_thrust_n": 5811.428752313005,
+      "min_thrust_n": 3946.4781388550036,
+      "final_mass_kg": 844.1227729292013,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 3.242297276012499e-7,
+      "velocity_residual_m_s": 8.857556322453198e-10,
+      "max_thrust_n": 7421.861577017476,
+      "min_thrust_n": 3189.636955094979,
+      "final_mass_kg": 838.3567887165266,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 2.525135225981724e-7,
+      "velocity_residual_m_s": 8.668379510324296e-10,
+      "max_thrust_n": 4943.294101227357,
+      "min_thrust_n": 4161.982640029656,
+      "final_mass_kg": 848.268006604539,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 2.808380936294041e-7,
+      "velocity_residual_m_s": 8.545340471521719e-10,
+      "max_thrust_n": 5742.195313046506,
+      "min_thrust_n": 3987.641908104547,
+      "final_mass_kg": 844.2078630208401,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 3.221166175489967e-7,
+      "velocity_residual_m_s": 8.854612839135903e-10,
+      "max_thrust_n": 7351.680485113183,
+      "min_thrust_n": 3228.0552470709245,
+      "final_mass_kg": 838.4958604981869,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 440,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 2.4925946691421994e-7,
+      "velocity_residual_m_s": 8.661687650975374e-10,
+      "max_thrust_n": 4985.556499434701,
+      "min_thrust_n": 4098.512758449679,
+      "final_mass_kg": 848.30103510951,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 1,
+      "position_error_m": 3.776901738674344e-7,
+      "velocity_residual_m_s": 9.470590747505506e-10,
+      "max_thrust_n": 4600.933912463504,
+      "min_thrust_n": 3259.888306873807,
+      "final_mass_kg": 833.4796507841913,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 0.9,
+      "position_error_m": 4.3303295638595393e-7,
+      "velocity_residual_m_s": 9.874585405349668e-10,
+      "max_thrust_n": 5866.128240197196,
+      "min_thrust_n": 2705.345640040806,
+      "final_mass_kg": 825.5992104858713,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 0,
+      "phase_factor": 1.1,
+      "position_error_m": 3.2818858182313605e-7,
+      "velocity_residual_m_s": 9.428356457715597e-10,
+      "max_thrust_n": 4012.597068119373,
+      "min_thrust_n": 3292.093377534962,
+      "final_mass_kg": 839.4673624152764,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 1,
+      "position_error_m": 3.74497246920312e-7,
+      "velocity_residual_m_s": 9.543755233042735e-10,
+      "max_thrust_n": 4676.970063846986,
+      "min_thrust_n": 3214.641068883632,
+      "final_mass_kg": 833.2109918630761,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 0.9,
+      "position_error_m": 4.3013981030420496e-7,
+      "velocity_residual_m_s": 9.890823526429163e-10,
+      "max_thrust_n": 5944.492172337413,
+      "min_thrust_n": 2663.323320883039,
+      "final_mass_kg": 825.2391293449588,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 90,
+      "phase_factor": 1.1,
+      "position_error_m": 3.3735020712234046e-7,
+      "velocity_residual_m_s": 9.624859864949555e-10,
+      "max_thrust_n": 3963.95242218836,
+      "min_thrust_n": 3350.197809415254,
+      "final_mass_kg": 839.2871027450983,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 1,
+      "position_error_m": 3.8047598618767675e-7,
+      "velocity_residual_m_s": 9.545244457746404e-10,
+      "max_thrust_n": 4650.803512576519,
+      "min_thrust_n": 3230.888896214527,
+      "final_mass_kg": 833.295345069215,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 0.9,
+      "position_error_m": 4.226196034238187e-7,
+      "velocity_residual_m_s": 9.872459868209886e-10,
+      "max_thrust_n": 5915.083227466228,
+      "min_thrust_n": 2679.6834400136017,
+      "final_mass_kg": 825.3627395480221,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 180,
+      "phase_factor": 1.1,
+      "position_error_m": 3.3609971659324586e-7,
+      "velocity_residual_m_s": 9.528742105248928e-10,
+      "max_thrust_n": 3979.657958689804,
+      "min_thrust_n": 3332.160814405836,
+      "final_mass_kg": 839.3360996784437,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 1,
+      "position_error_m": 3.7525182104461287e-7,
+      "velocity_residual_m_s": 9.46000698714253e-10,
+      "max_thrust_n": 4607.094182214831,
+      "min_thrust_n": 3255.4017243252842,
+      "final_mass_kg": 833.4553617915233,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 0.9,
+      "position_error_m": 4.313536930674469e-7,
+      "velocity_residual_m_s": 9.876468977755743e-10,
+      "max_thrust_n": 5869.756126895733,
+      "min_thrust_n": 2702.4859001856635,
+      "final_mass_kg": 825.5817756678673,
+      "engine_constraints_passed": true
+    },
+    {
+      "duration_s": 560,
+      "heading_deg": 270,
+      "phase_factor": 1.1,
+      "position_error_m": 3.316481678738885e-7,
+      "velocity_residual_m_s": 9.463035669127503e-10,
+      "max_thrust_n": 4005.8809712555385,
+      "min_thrust_n": 3299.498200420753,
+      "final_mass_kg": 839.443587794726,
+      "engine_constraints_passed": true
+    }
+  ],
+  "replay_initial": {
+    "post_insertion_state_m_m_s_kg": [
+      70316.78720730776,
+      -163129.53307912967,
+      1828792.7889422313,
+      -171.9270995574941,
+      -1618.5786926736234,
+      -137.76772669389277,
+      1500.0000000000002
+    ],
+    "arrival_et_offset_s": 1292148.1641641164,
+    "final_state_m_m_s_kg": [
+      -9856.265657664873,
+      653841.2294316182,
+      -1611752.4257428818,
+      0.009583997792114454,
+      -0.14550983940056528,
+      0.48049691335594563,
+      856.6741083624511
+    ],
+    "doi_et_offset_s": 1292328.1641641164,
+    "pdi_et_offset_s": 1295740.0002380372,
+    "doi_delta_v_m_s": 19.455073826089574,
+    "pdi_state_m_m_s_kg": [
+      -36586.77051253071,
+      428071.15515137766,
+      -1699319.6144776053,
+      186.29071141324457,
+      1631.456758643218,
+      407.20624507180776,
+      1490.729397452591
+    ]
+  },
+  "gravity_stats": {
+    "calls": 3044532,
+    "hessian_calls": 733397,
+    "cpu_ms": 12243.125100001582
+  }
+}
