@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { HOUR_MS } from '../core/constants';
 import { reportText, toCsv } from '../core/export';
-import { Toast, toast, utc, pct, LayerPopover } from '../components/kit';
+import { gridLabel, Toast, toast, utc, pct, LayerPopover } from '../components/kit';
 import { useData } from '../state/data';
 import { useSiteWarnings, useEval, usePower, useSim } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
@@ -81,7 +81,7 @@ export function Masthead() {
     const s = rs?.site;
     const txt = reportText('착륙지 평가 보고서', [
       { title: '조건', lines: [`- 프로파일: ${PROFILE_UI[app.profile].name}`, `- 착륙 시각: ${utc(app.landing)} UTC`, `- 임무 기간: ${app.duration_h} h · 통신 여유각 ${app.margin_deg}°`, `- 필수 조건: ${JSON.stringify(app.filters)}`] },
-      { title: '선택 착륙지', lines: s && ev ? [`- ${s.name} (${s.lat_deg.toFixed(3)}, ${s.lon_deg.toFixed(3)}) · ${rs?.terrain === 'site' ? '지형 반영' : rs?.terrain === 'grid' ? '격자 근사' : '지형 미반영'}`, `- 점수 ${Math.round(ev.score.total)} · ${ev.score.meets_requirements ? '요구 조건 충족' : '요건 미달'} · 일조율 ${pct(ev.summary.illum_frac)} · 교신율 ${pct(ev.summary.comm_frac)} · 최장 암흑 ${Math.round(ev.summary.longest_dark_h)} h`] : ['- 없음'] },
+      { title: '선택 착륙지', lines: s && ev ? [`- ${s.name} (${s.lat_deg.toFixed(3)}, ${s.lon_deg.toFixed(3)}) · ${rs?.terrain === 'site' ? '지형 반영' : rs?.terrain === 'grid' ? `격자 근사${rs.gridRegion ? ` (${gridLabel(rs.gridRegion, rs.gridKm)})` : ''}` : '지형 미반영'}`, `- 점수 ${Math.round(ev.score.total)} · ${ev.score.meets_requirements ? '요구 조건 충족' : '요건 미달'} · 일조율 ${pct(ev.summary.illum_frac)} · 교신율 ${pct(ev.summary.comm_frac)} · 최장 암흑 ${Math.round(ev.summary.longest_dark_h)} h`] : ['- 없음'] },
       { title: '상위 후보', lines: (res?.top ?? []).slice(0, 5).map((c, i) => `${i + 1}. cell_${c.cell} (${c.lat_deg.toFixed(3)}, ${c.lon_deg.toFixed(3)}) ${Math.round(c.score * 100)}`) },
       { title: '경고', lines: [...warns.map((w) => `- 경고: ${w.target_name} (${w.distance_km.toFixed(1)} km)`), unverified ? '- 일부 수치 미검증' : ''] },
       { title: '', lines: ['점수는 후보 간 상대 비교용 지표이며 확률이 아님.'] },

@@ -10,7 +10,8 @@ import numpy as np
 
 from luna.constants import R_MOON_M
 from luna.geo.crs import CrsInfo, from_pds_label
-from luna.geo.polar import stereo_forward, stereo_inverse
+from luna.geo.frames import norm_lon
+from luna.geo.polar import NORTH, SOUTH, stereo_forward, stereo_inverse
 
 _UNIT = re.compile(r"^(.*?)\s*<([^>]*)>\s*$")
 
@@ -176,10 +177,15 @@ class PolarPdsSampler:
         self.s0 = num(mp["SAMPLE_PROJECTION_OFFSET"])
         self.l0 = num(mp["LINE_PROJECTION_OFFSET"])
         self.lon0 = num(mp["CENTER_LONGITUDE"])
+        # 극: CENTER_LATITUDE +90 이면 북극 (y 부호가 반대, luna.geo.polar 참고). 없으면 남극(기존 자료)
+        clat = num(mp.get("CENTER_LATITUDE", -90))
+        if abs(abs(clat) - 90.0) > 1e-6:
+            raise ValueError(f"극평사 중심 위도가 ±90° 가 아니다: {clat}")
+        self.pole = NORTH if clat > 0 else SOUTH
         self.lines, self.samples = img.data.shape
 
     def latlon_to_pix(self, lat, lon):
-        x, y = stereo_forward(lat, lon, self.lon0, self.r_km)
+        x, y = stereo_forward(lat, lon, self.lon0, self.r_km, self.pole)
         col = x / self.scale_km + self.s0  # 0 기준 = sample − 1
         row = self.l0 - y / self.scale_km  # 0 기준 = line − 1
         return row, col
@@ -187,18 +193,74 @@ class PolarPdsSampler:
     def pix_to_latlon(self, row, col):
         x = (np.asarray(col) - self.s0) * self.scale_km
         y = (self.l0 - np.asarray(row)) * self.scale_km
-        return stereo_inverse(x, y, self.lon0, self.r_km)
+        return stereo_inverse(x, y, self.lon0, self.r_km, self.pole)
 
     def __call__(self, lat, lon) -> np.ndarray:
         row, col = self.latlon_to_pix(np.asarray(lat, float), np.asarray(lon, float))
-        r0 = np.floor(row).astype(np.int64)
-        c0 = np.floor(col).astype(np.int64)
-        ok = (r0 >= 0) & (c0 >= 0) & (r0 < self.lines - 1) & (c0 < self.samples - 1)
-        out = np.full(np.shape(row), np.nan)
-        if ok.any():
-            rr, cc = r0[ok], c0[ok]
-            fr, fc = row[ok] - rr, col[ok] - cc
-            h = self.img.heights_m
-            v = (h(rr, cc) * (1 - fr) * (1 - fc) + h(rr + 1, cc) * fr * (1 - fc) + h(rr, cc + 1) * (1 - fr) * fc + h(rr + 1, cc + 1) * fr * fc)
-            out[ok] = v
-        return out
+        return _bilinear(self.img, row, col, self.lines, self.samples)
+
+
+def _bilinear(img: PdsImage, row, col, lines: int, samples: int, wrap_cols: bool = False) -> np.ndarray:
+    """0 기준 화소 중심 좌표 (row, col) 의 쌍선형 보간. 범위 밖 NaN. wrap_cols 이면 경도 방향을 이어 붙인다."""
+    row = np.asarray(row, dtype=float)
+    col = np.asarray(col, dtype=float)
+    r0 = np.floor(row).astype(np.int64)
+    c0 = np.floor(col).astype(np.int64)
+    if wrap_cols:
+        ok = (r0 >= 0) & (r0 < lines - 1) & np.isfinite(col)
+    else:
+        ok = (r0 >= 0) & (c0 >= 0) & (r0 < lines - 1) & (c0 < samples - 1)
+    out = np.full(np.shape(row), np.nan)
+    if ok.any():
+        rr, cc = r0[ok], c0[ok]
+        fr, fc = row[ok] - rr, col[ok] - cc
+        c1 = cc + 1
+        if wrap_cols:
+            cc, c1 = cc % samples, c1 % samples
+        h = img.heights_m
+        out[ok] = (h(rr, cc) * (1 - fr) * (1 - fc) + h(rr + 1, cc) * fr * (1 - fc) + h(rr, c1) * (1 - fr) * fc + h(rr + 1, c1) * fr * fc)
+    return out
+
+
+class CylindricalPdsSampler:
+    """전역 단순 원통(등장방형) PDS DEM 쌍선형 표본기 (LOLA GDR ldem_64·ldem_128).
+
+    PDS 관례 (0 기준 화소 중심): col = SAMPLE_PROJECTION_OFFSET + RES·(λ − CENTER_LONGITUDE),
+    row = LINE_PROJECTION_OFFSET − RES·(φ − CENTER_LATITUDE). 경도는 360° 로 이어 붙이고, 극 바로 옆 반 화소는 NaN.
+    """
+
+    def __init__(self, img: PdsImage):
+        mp = img.label["IMAGE_MAP_PROJECTION"]
+        self.img = img
+        self.res = num(mp["MAP_RESOLUTION"])  # 화소/도
+        self.s0 = num(mp["SAMPLE_PROJECTION_OFFSET"])
+        self.l0 = num(mp["LINE_PROJECTION_OFFSET"])
+        self.lon0 = num(mp["CENTER_LONGITUDE"])
+        self.lat0 = num(mp.get("CENTER_LATITUDE", 0))
+        self.lines, self.samples = img.data.shape
+        if abs(self.samples / self.res - 360.0) > 1e-6:
+            raise ValueError(f"전역 원통 DEM 이 아니다: {self.samples} 화소 / {self.res} 화소/도")
+        r = num(mp["A_AXIS_RADIUS"])
+        self.scale_km = (r / 1000.0 if unit(mp["A_AXIS_RADIUS"]) in ("M", "METER", "METERS") else r) * np.pi / 180.0 / self.res
+
+    def latlon_to_pix(self, lat, lon):
+        dlon = norm_lon(np.asarray(lon, dtype=float) - self.lon0)
+        col = self.s0 + self.res * dlon
+        row = self.l0 - self.res * (np.asarray(lat, dtype=float) - self.lat0)
+        return row, col
+
+    def pix_to_latlon(self, row, col):
+        lat = self.lat0 + (self.l0 - np.asarray(row, dtype=float)) / self.res
+        lon = norm_lon(self.lon0 + (np.asarray(col, dtype=float) - self.s0) / self.res)
+        return lat, lon
+
+    def __call__(self, lat, lon) -> np.ndarray:
+        row, col = self.latlon_to_pix(lat, lon)
+        return _bilinear(self.img, row, col, self.lines, self.samples, wrap_cols=True)
+
+
+def sampler_for(img: PdsImage):
+    """라벨 투영에 맞는 표본기."""
+    if img.crs.kind == "simple_cylindrical":
+        return CylindricalPdsSampler(img)
+    return PolarPdsSampler(img)

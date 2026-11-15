@@ -23,6 +23,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--only", default="", help="일부 착륙지만 (쉼표 구분 id)")
     ap.add_argument("--force", action="store_true", help="건너뛰기 무시")
     ap.add_argument("--workers", type=int, default=1, help="s40 병렬 작업자 수")
+    ap.add_argument("--regions", default="south", help="s20·s40 지역 (쉼표 구분): south, north, global. 기본 south")
     a = ap.parse_args(argv)
 
     st = load_settings()
@@ -33,7 +34,11 @@ def main(argv: list[str] | None = None) -> int:
     from luna.stages.common import Ctx
 
     qi = QualityIndex.from_xlsx(find_inventory(st.data_dir))
-    ctx = Ctx(st, DataDir(st.data_dir), qi, force=a.force, only=[x for x in a.only.split(",") if x], workers=a.workers)
+    regions = tuple(x.strip() for x in a.regions.split(",") if x.strip())
+    bad = [r for r in regions if r not in ("south", "north", "global")]
+    if bad or not regions:
+        ap.error(f"알 수 없는 지역: {bad or a.regions}")
+    ctx = Ctx(st, DataDir(st.data_dir), qi, force=a.force, only=[x for x in a.only.split(",") if x], workers=a.workers, regions=regions)
     want = ALIASES.get(a.stage, a.stage)
     todo = [s for s in STAGES if want in ("all", s[0])]
     if not todo:

@@ -1,5 +1,5 @@
 // 3순위 분석: 빛 쌍둥이(P3-04), 빛 릴레이(P3-02), 착륙 오차 확률(P3-05), 마스트 높이 비교(P3-01)
-import type { GridGeometry } from './gridScore';
+import { cellDistKm, type GridGeometry } from './gridScore';
 import { powerPlan } from './power';
 import { evaluateWindow, failedRequirements } from './scenario';
 import type { SiteContext } from './timeline';
@@ -19,7 +19,7 @@ export function lightTwins(g: GridGeometry, lit: Uint8Array, comm: Uint8Array, m
   const out: Array<{ cell: number; distance: number; km: number }> = [];
   for (let i = 0; i < g.cells.length; i++) {
     if (i === cell) continue;
-    const km = Math.hypot(g.x_km[i] - g.x_km[cell], g.y_km[i] - g.y_km[cell]);
+    const km = cellDistKm(g, i, cell);
     if (km < min_km) continue;
     out.push({ cell: i, distance: (hamming(lit, m, cell, i) + hamming(comm, m, cell, i)) / 2, km });
   }
@@ -45,7 +45,7 @@ export function relayCandidates(g: GridGeometry, lit: Uint8Array, m: number, cel
   const out: Array<{ cell: number; km: number; either_lit_frac: number; longest_both_dark_h: number }> = [];
   for (let i = 0; i < g.cells.length; i++) {
     if (i === cell) continue;
-    const km = Math.hypot(g.x_km[i] - g.x_km[cell], g.y_km[i] - g.y_km[cell]);
+    const km = cellDistKm(g, i, cell);
     if (km > radius_km) continue;
     out.push({ cell: i, km, ...relayPair(lit, m, cell, i, hours) });
   }

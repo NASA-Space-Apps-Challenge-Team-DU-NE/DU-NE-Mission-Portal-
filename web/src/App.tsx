@@ -4,6 +4,7 @@ import { Masthead, Overlays, PageFrame, Resizers, Sidebar } from './layout/Shell
 import { Rail } from './layout/Rail';
 import { useData } from './state/data';
 import { useGridRunner } from './state/gridRun';
+import { useGlobeRunner } from './state/globeRuns';
 import { useApp, type PageId } from './state/store';
 import { useUi } from './state/ui';
 import { useLang } from './i18n';
@@ -74,6 +75,7 @@ export default function App() {
   useShortcuts();
   useDefaults();
   useGridRunner();
+  useGlobeRunner();
   return (
     <>
       <Masthead />

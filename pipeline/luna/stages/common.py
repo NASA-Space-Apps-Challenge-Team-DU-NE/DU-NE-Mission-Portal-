@@ -24,6 +24,8 @@ class Ctx:
     force: bool = False
     only: list[str] = field(default_factory=list)
     workers: int = 1
+    #: 지평선 격자를 만들 지역 (s20·s40). 기본은 남극만. 전역 확장 안 B: south, north, global
+    regions: tuple[str, ...] = ("south",)
     # 이번 단계에서 쓴 산출물 (mark_done 이 크기·해시를 도장에 남긴다)
     _written: list[Path] = field(default_factory=list)
     _inputs: dict[tuple[str, str, str], Provenance] = field(default_factory=dict)

@@ -716,6 +716,29 @@ def extra_south(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
 
 
 def run(ctx: Ctx) -> int:
+    """남극(기존) → 북극·전역 (--regions). 남극을 빼면 북극·전역만 다시 만든다."""
+    rc = 0
+    if "south" in ctx.regions:
+        rc |= _south(ctx)
+    for region in ("north", "global"):
+        if region in ctx.regions:
+            from luna.stages.s50_regions import run_region, slope_cross_check, slope_method_check
+
+            rc |= run_region(ctx, region)
+            if region == "global":
+                # 교차검증 (차이만 기록, 합격 판정 없음): 중앙차분법 자체 vs LDSM, SLDEM2015 vs 60–90° 경사
+                for fn, fname in ((slope_method_check, "slope_method_check"), (slope_cross_check, "slope_cross_check")):
+                    try:
+                        chk = fn(ctx)
+                    except Exception as e:  # noqa: BLE001
+                        chk = {"error": str(e)}
+                    if chk is not None:
+                        log.info(NAME, f"{fname}: {json.dumps(chk, ensure_ascii=False, default=str)}")
+                        ctx.build_path(f"s50_global/{fname}.json").write_text(json.dumps(chk, ensure_ascii=False, indent=1, default=str), encoding="utf-8")
+    return rc
+
+
+def _south(ctx: Ctx) -> int:
     ctx._inputs = {}
     gm = ctx.out / "grid" / "manifest.json"
     if not gm.exists():

@@ -7,10 +7,12 @@ import { siteContext } from '../core/scenario';
 import { nextEvents, sampleTimeline, summarize, type SiteContext } from '../core/timeline';
 import type { HorizonMask, Site, TerrainKind } from '../core/types';
 import { nearestCell } from '../core/gridScore';
+import { terrainMaskAt, type TerrainRegion } from '../core/terrainGrids';
 import { HOUR_MS } from '../core/constants';
 import { t as tr } from '../strings';
 import { useApp, type SiteRef } from './store';
-import { useData } from './data';
+import { siteRegionAt, useData, type RegionData } from './data';
+import type { GridRegion } from '../core/gridScore';
 
 export interface ResolvedSite {
   site: Site;
@@ -18,20 +20,36 @@ export interface ResolvedSite {
   terrain: TerrainKind;
   maskEnv: HorizonMask | null;
   groundElev: number;
+  /** terrain 'grid' 일 때 어느 격자인지 (남극 5 km · 북극 5 km · 전역 15 km) */
+  gridRegion?: 'south' | TerrainRegion;
+  gridKm?: number;
 }
 
 export function cellSite(cell: number, lat: number, lon: number): Site {
   return { id: `cell_${cell}`, name: `${tr('site.cell')} ${cell}`, category: 'cell', lat_deg: lat, lon_deg: lon, terrain: 'grid', source_keys: ['lola_dem_240m'], verified: true };
 }
 
-/** SiteRef → 지점·마스크 (카탈로그 마스크 → 75°S 이남 격자 마스크 → 구면 지평선) */
+/** 지점 마스크 파일이 없는 곳의 격자 지평선 (남극 5 km → 북극 5 km → 전역 15 km). 없으면 null = 구면 지평선 */
+export function gridMaskAt(lat: number, lon: number): { mask: MaskLike; region: 'south' | TerrainRegion; km: number } | null {
+  const { southGrid: grid, southApprox: gridApprox, terrainGrids } = useData.getState();
+  if (grid && !gridApprox) {
+    const cell = nearestCell(grid, lat, lon, grid.manifest.cell_km);
+    if (cell >= 0) return { mask: cellMask(grid, cell), region: 'south', km: grid.manifest.cell_km };
+  }
+  const hit = terrainMaskAt(terrainGrids, lat, lon);
+  return hit ? { mask: hit.mask, region: hit.region, km: hit.cell_km } : null;
+}
+
+/** SiteRef → 지점·마스크 (카탈로그 마스크 → 75°S 이남 격자 → 북극·전역 지평선 격자 → 구면 지평선) */
 export function useResolvedSite(ref?: SiteRef | null): ResolvedSite | null {
   const appRef = useApp((s) => s.siteRef);
   const r = ref === undefined ? appRef : ref;
   const sites = useData((s) => s.sites.items);
-  const grid = useData((s) => s.grid);
-  const approx = useData((s) => s.gridApprox);
-  const layers = useData((s) => s.layers);
+  // 지점 해석은 지도 지역과 무관: 남극 격자 → 북극·전역 지평선 격자. 'cell' 은 남극 칸 (다른 지역 칸은 setSite 가 좌표로 바꾼다)
+  const grid = useData((s) => s.southGrid);
+  const approx = useData((s) => s.southApprox);
+  const layers = useData((s) => s.southLayers);
+  const terrainGrids = useData((s) => s.terrainGrids);
   const ensureMask = useData((s) => s.ensureMask);
   const masks = useData((s) => s.masks);
   const [, bump] = useState(0);
@@ -61,11 +79,13 @@ export function useResolvedSite(ref?: SiteRef | null): ResolvedSite | null {
       const cell = r?.kind === 'cell' ? r.cell : nearestCell(grid, base.lat_deg, base.lon_deg, grid.manifest.cell_km);
       if (cell >= 0) {
         const el = layers.elev_m?.[cell];
-        return { site: base, mask: cellMask(grid, cell), terrain: 'grid', maskEnv: null, groundElev: Number.isFinite(el) ? (el as number) : base.elevation_m ?? 0 };
+        return { site: base, mask: cellMask(grid, cell), terrain: 'grid', maskEnv: null, groundElev: Number.isFinite(el) ? (el as number) : base.elevation_m ?? 0, gridRegion: 'south', gridKm: grid.manifest.cell_km };
       }
     }
+    const hit = r?.kind === 'cell' ? null : terrainMaskAt(terrainGrids, base.lat_deg, base.lon_deg);
+    if (hit) return { site: base, mask: hit.mask, terrain: 'grid', maskEnv: null, groundElev: base.elevation_m ?? 0, gridRegion: hit.region, gridKm: hit.cell_km };
     return { site: base, mask: flatMask(base.id, base.lat_deg, base.lon_deg, DEFAULTS.observer_height_m), terrain: 'flat', maskEnv: null, groundElev: base.elevation_m ?? 0 };
-  }, [base, masks, grid, layers, r, approx]);
+  }, [base, masks, grid, layers, r, approx, terrainGrids]);
 }
 
 export function useSiteCtx(rs: ResolvedSite | null): SiteContext | null {
@@ -97,4 +117,22 @@ export function useTrack(ctx: SiteContext | null, from: number, days = DEFAULTS.
 export function useNextEvents(ctx: SiteContext | null, t: number) {
   const key = Math.floor(t / HOUR_MS);
   return useMemo(() => (ctx ? nextEvents(ctx, key * HOUR_MS) : null), [ctx, key]);
+}
+
+/** 선택 지점을 덮는 지역의 격자·레이어 (지도 지역과 무관). 단층애 검사·패널 추천처럼 "그 지점의 레이어 값"을 읽는 곳이 쓴다.
+ *  그 지역 레이어를 아직 안 읽었으면 화면 지역은 그대로 두고 불러온다 (loading). */
+export function useSiteLayers(rs: ResolvedSite | null): { region: GridRegion | null; rd: RegionData | null; cell: number; loading: boolean } {
+  const southGrid = useData((s) => s.southGrid);
+  const terrainGrids = useData((s) => s.terrainGrids);
+  const regionData = useData((s) => s.regionData);
+  const regionRaw = useData((s) => s.regionRaw);
+  const ensureRegion = useData((s) => s.ensureRegion);
+  const lat = rs?.site.lat_deg, lon = rs?.site.lon_deg;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const region = useMemo(() => (lat == null || lon == null ? null : siteRegionAt(lat, lon)), [lat, lon, southGrid, terrainGrids]);
+  const rd = region ? regionData[region] ?? null : null;
+  const canLoad = !!region && !rd && !!regionRaw[region];
+  useEffect(() => { if (canLoad && region) void ensureRegion(region); }, [canLoad, region, ensureRegion]);
+  const cell = useMemo(() => (rd && lat != null && lon != null ? nearestCell(rd.geo, lat, lon, rd.geo.manifest.cell_km) : -1), [rd, lat, lon]);
+  return { region, rd, cell, loading: canLoad };
 }

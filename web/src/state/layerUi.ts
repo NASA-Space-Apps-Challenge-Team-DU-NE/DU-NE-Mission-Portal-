@@ -47,3 +47,39 @@ const L: LayerUi[] = [
 
 export const LAYER_UI = Object.fromEntries(L.map((l) => [l.id, l])) as Record<string, LayerUi>;
 export const HUD_LAYERS: LayerName[] = ['composite', 'illum_mission', 'sun_now', 'comm_mission', 'safety', 'water'];
+
+/** 북극·전역 격자에서 바뀌는 해상도·출처 문구 (s50_regions, 2026-11-15). 없는 항목은 남극 문구를 그대로 쓴다 */
+const REGION_UI: Record<'north' | 'global', Partial<Record<string, Partial<LayerUi>>>> = {
+  north: {
+    illum_avg: { res: '60–120 m → 5 km' },
+    earth_vis_avg: { res: '60–120 m → 5 km' },
+    safety: { res: '120 m → 5 km', src: 'LOLA 북극 경사 LDSM 120 m' },
+    slope_p90_deg: { res: '120 m → 5 km', src: 'LOLA 북극 경사 LDSM 120 m' },
+    geo_hazard: { src: 'LROC 극지 단층애 점(Watters 외 2015), Bickel 외 2020 낙석 검출 (80°N 이북은 검출 범위 밖)' },
+    water: { res: '60–120 m → 5 km', src: 'PGDA 69 북극 영구음영 지도' },
+    psr_dist_km: { res: '60–120 m → 5 km', src: 'PGDA 69 북극 영구음영 지도' },
+    h_ppm: { res: '2° 등면적 셀 (약 60 km)', src: 'Lunar Prospector NS (Hydrogen_low)' },
+    metal: { res: '2° 셀 (원 격자 거침)' },
+    feo_wt: { name: 'FeO · LP 2° 셀', res: '2° 셀 (약 60 km)' },
+  },
+  global: {
+    illum_avg: { res: '240 m → 15 km', tag: '|위도| 55.2° 이상만' },
+    earth_vis_avg: { res: '240 m → 15 km', tag: '|위도| 55.2° 이상만' },
+    safety: { res: '약 237 m → 15 km', src: 'SLDEM2015 경사 128 화소/도 (60° 밖은 LOLA 단독)' },
+    slope_p90_deg: { res: '약 237 m → 15 km', src: 'SLDEM2015 경사 128 화소/도 (60° 밖은 LOLA 단독)' },
+    geo_hazard: { res: '목록 → 15 km', src: 'LROC 단층애 선(60°S–60°N, Watters 외) + 극지 점, Bickel 외 2020 낙석 검출' },
+    water: { res: '240 m → 15 km', tag: '|위도| 55.2° 이상만', src: 'PGDA 69 65° 영구음영 지도' },
+    psr_dist_km: { res: '240 m → 15 km', tag: '|위도| 55.2° 이상만', src: 'PGDA 69 65° 영구음영 지도' },
+    h_ppm: { res: '2° 등면적 셀 (약 60 km)', src: 'Lunar Prospector NS (Hydrogen_low)' },
+    metal: { res: '2° 셀 (원 격자 거침)' },
+    feo_wt: { name: 'FeO · LP 2° 셀', res: '2° 셀 (약 60 km)' },
+  },
+};
+
+/** 지역에 맞춘 레이어 설명 */
+export function layerUiFor(id: string, region: 'south' | 'north' | 'global'): LayerUi {
+  const base = LAYER_UI[id] ?? LAYER_UI.composite;
+  if (region === 'south') return base;
+  const o = REGION_UI[region][id];
+  return o ? { ...base, ...o } : base;
+}

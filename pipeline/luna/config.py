@@ -38,6 +38,10 @@ class GridConfig:
     observer_height_m: float = 2.0  # PROVISIONAL
     max_range_km: float = 250.0  # PROVISIONAL
     horizon_scale_deg: float = 0.01
+    # 전역 확장 안 B (2026-11-15 사용자 결정): 북극 5 km AEQD + 75°S–75°N 위도 띠 격자
+    north_lat_limit_deg: float = 75.0  # PROVISIONAL
+    global_cell_km: float = 15.0  # PROVISIONAL
+    global_lat_max_deg: float = 75.0  # PROVISIONAL
 
 
 @dataclass(frozen=True)
@@ -74,7 +78,7 @@ class Settings:
     mask: MaskConfig = field(default_factory=MaskConfig)
     eph: EphemerisConfig = field(default_factory=EphemerisConfig)
     #: 웹 산출물 용량 예산 (ARCHITECTURE 8절)
-    budget_total_mb: float = 60.0
+    budget_total_mb: float = 100.0  # 2026-11-15 전역 확장(안 B) 60 → 80 MB, 3D 지형 음영 텍스처·국지 고도 PNG 로 80 → 100 MB
     budget_file_mb: float = 25.0
 
 

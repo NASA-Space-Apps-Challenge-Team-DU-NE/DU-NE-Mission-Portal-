@@ -3,7 +3,6 @@ import { useMemo } from 'react';
 import { DEFAULTS, POWER_KINDS } from '../config';
 import { DAY_MS, HOUR_MS } from '../core/constants';
 import { simulate, systemFromLander, type SimResult } from '../core/energy';
-import { nearestCell } from '../core/gridScore';
 import type { DustWarning } from '../core/hazards';
 import { powerPlan, type PowerPlan } from '../core/power';
 import { scoreScenario, type ScenarioEval } from '../core/scenario';
@@ -11,7 +10,7 @@ import { sampleTimeline, type SiteContext } from '../core/timeline';
 import type { Lander, TimelineSample } from '../core/types';
 import { t } from '../strings';
 import { useData } from './data';
-import { useResolvedSite, useSiteCtx, type ResolvedSite } from './hooks';
+import { useResolvedSite, useSiteCtx, useSiteLayers, type ResolvedSite } from './hooks';
 import { useUi } from './ui';
 import { scoreWeights, useApp } from './store';
 
@@ -118,29 +117,29 @@ const NO_BASES: never[] = [];
  *  착륙 먼지 반경 검사(보호 대상·기지 충돌)는 공개 근거가 없어 뺐다 (2026-11-15). */
 export function useSiteWarnings(): DustWarning[] {
   const rs = useResolvedSite();
-  const grid = useData((d) => d.grid);
-  const layers = useData((d) => d.layers);
+  // 지도 지역과 무관하게 지점을 덮는 지역 격자의 단층애 거리를 본다
+  const { rd, cell } = useSiteLayers(rs);
   return useMemo(() => {
-    if (!rs || !grid || !layers.scarp_dist_km) return [];
-    const c = nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km);
-    const d = c >= 0 ? layers.scarp_dist_km[c] : NaN;
+    const sd = rd?.layers.scarp_dist_km;
+    if (!rs || !sd) return [];
+    const d = cell >= 0 ? sd[cell] : NaN;
     return Number.isFinite(d) && d <= DEFAULTS.fault_warn_km ? [{ kind: 'fault', target_id: 'scarp', target_name: t('map.geo_hazard'), distance_km: d, limit_km: DEFAULTS.fault_warn_km }] : [];
-  }, [rs, grid, layers]);
+  }, [rs, rd, cell]);
 }
 
 /** 단층애 검사 상태: unknown(자료 없음·격자 밖·NaN) 과 checked(검사함) 를 구분한다 */
 export function useFaultCheck(): { state: 'unknown' | 'checked'; reason: string | null } {
   const rs = useResolvedSite();
-  const grid = useData((d) => d.grid);
-  const layers = useData((d) => d.layers);
-  const lr = useData((d) => d.layerReasons);
+  const { region, rd, cell, loading } = useSiteLayers(rs);
   return useMemo(() => {
     if (!rs) return { state: 'unknown', reason: null };
-    if (!grid || !layers.scarp_dist_km) return { state: 'unknown', reason: lr.scarp_dist_km ?? '단층애 거리 자료 없음' };
-    const c = nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km);
-    if (c < 0) return { state: 'unknown', reason: '격자 밖 지점' };
-    return Number.isFinite(layers.scarp_dist_km[c]) ? { state: 'checked', reason: null } : { state: 'unknown', reason: '이 칸의 단층애 거리 값 없음' };
-  }, [rs, grid, layers, lr]);
+    if (!region) return { state: 'unknown', reason: '격자 밖 지점' };
+    if (loading) return { state: 'unknown', reason: '이 지역 레이어를 불러오는 중' };
+    const sd = rd?.layers.scarp_dist_km;
+    if (!rd || !sd) return { state: 'unknown', reason: rd?.layerReasons.scarp_dist_km ?? '단층애 거리 자료 없음' };
+    if (cell < 0) return { state: 'unknown', reason: '격자 밖 지점' };
+    return Number.isFinite(sd[cell]) ? { state: 'checked', reason: null } : { state: 'unknown', reason: '이 칸의 단층애 거리 값 없음' };
+  }, [rs, region, rd, cell, loading]);
 }
 
 export const DAY = DAY_MS;

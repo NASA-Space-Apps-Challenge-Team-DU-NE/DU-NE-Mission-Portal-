@@ -4,19 +4,29 @@ import type { Ephemeris } from './ephemeris';
 import { diskFraction } from './horizon';
 import { fastFrame, fastTopo, type FastFrame } from './sky';
 import { intervalHours, sampleTimes } from './timeline';
-import type { Criterion, GridManifest, HardFilters, MapWeights, StaticLayerName, TimeMs, Vec3 } from './types';
-import { aeqdForward, aeqdInverse, clamp, greatCircleKm, localFrame } from './vec';
+import type { Criterion, Deg, GridManifest, HardFilters, MapWeights, StaticLayerName, TimeMs, Vec3 } from './types';
+import { aeqdForward, aeqdInverse, clamp, greatCircleKm, localFrame, normLon } from './vec';
+import type { BandTerrainManifest, PolarTerrainManifest } from './terrainGrids';
+
+/** 지도·점수 격자 지역: 남극 5 km AEQD, 북극 5 km AEQD, 75°S–75°N 15 km 위도 띠 */
+export type GridRegion = 'south' | 'north' | 'global';
 
 export interface GridGeometry {
+  region: GridRegion;
+  /** 극 격자는 실제 manifest. 위도 띠 격자는 nx=ny=0 인 요약(cell_km·horizon·observer_height_m 만 의미 있음) — 원본은 band */
   manifest: GridManifest;
+  band?: BandTerrainManifest;
   /** 유효 칸 → row*nx+col */
   cells: Uint32Array;
   /** int16 [n_cells][n_az] × scale */
   horizon: Int16Array;
   lat: Float32Array;
   lon: Float32Array;
+  /** 극 격자의 평면 좌표 (남극 y=ρ·cosλ, 북극 y=−ρ·cosλ). 위도 띠 격자는 NaN — 거리는 cellDistKm 로 */
   x_km: Float32Array;
   y_km: Float32Array;
+  /** 위경도 → 칸 순번 (밖이면 −1) */
+  locate(lat: Deg, lon: Deg): number;
 }
 
 export function buildGeometry(manifest: GridManifest, cells: Uint32Array, horizon: Int16Array): GridGeometry {
@@ -33,7 +43,109 @@ export function buildGeometry(manifest: GridManifest, cells: Uint32Array, horizo
     x[i] = cx;
     y[i] = cy;
   }
-  return { manifest, cells, horizon, lat, lon, x_km: x, y_km: y };
+  const slot = slotsOf(manifest.nx * manifest.ny, cells);
+  const locate = (la: Deg, lo: Deg) => {
+    if (!(la <= manifest.lat_limit_deg)) return -1;
+    const p = aeqdForward(la, lo);
+    return polarSlot(manifest, slot, p.x_km, p.y_km);
+  };
+  return { region: 'south', manifest, cells, horizon, lat, lon, x_km: x, y_km: y, locate };
+}
+
+function slotsOf(size: number, cells: Uint32Array): Int32Array {
+  const s = new Int32Array(size).fill(-1);
+  for (let i = 0; i < cells.length; i++) if (cells[i] < size) s[cells[i]] = i;
+  return s;
+}
+function polarSlot(m: { nx: number; ny: number; x0_km: number; y0_km: number; cell_km: number }, slot: Int32Array, x: number, y: number): number {
+  const col = Math.floor((x - m.x0_km) / m.cell_km), row = Math.floor((m.y0_km - y) / m.cell_km);
+  if (!(col >= 0 && col < m.nx && row >= 0 && row < m.ny)) return -1;
+  return slot[row * m.nx + col];
+}
+
+/** 북극 5 km AEQD (x=ρ·sinλ, y=−ρ·cosλ). 칸 번호 규칙은 파이프라인 GridSpec(pole=NORTH) 과 같다 */
+export function buildNorthGeometry(m: PolarTerrainManifest, cells: Uint32Array, horizon: Int16Array): GridGeometry {
+  const n = cells.length;
+  const lat = new Float32Array(n), lon = new Float32Array(n), x = new Float32Array(n), y = new Float32Array(n);
+  for (let i = 0; i < n; i++) {
+    const row = Math.floor(cells[i] / m.nx), col = cells[i] % m.nx;
+    const cx = m.x0_km + (col + 0.5) * m.cell_km, cy = m.y0_km - (row + 0.5) * m.cell_km;
+    const rho = Math.hypot(cx, cy);
+    lat[i] = 90 - (rho / R_MOON_KM) * RAD;
+    lon[i] = rho === 0 ? 0 : normLon(Math.atan2(cx, -cy) * RAD);
+    x[i] = cx;
+    y[i] = cy;
+  }
+  const slot = slotsOf(m.nx * m.ny, cells);
+  const locate = (la: Deg, lo: Deg) => {
+    if (!(la >= m.lat_limit_deg)) return -1;
+    const rho = R_MOON_KM * (90 - la) * DEG;
+    return polarSlot(m, slot, rho * Math.sin(lo * DEG), -rho * Math.cos(lo * DEG));
+  };
+  return { region: 'north', manifest: { ...m }, cells, horizon, lat, lon, x_km: x, y_km: y, locate };
+}
+
+/** 75°S–75°N 위도 띠 격자 (남쪽 띠부터, 경도 −180° 부터). 칸 번호 규칙은 파이프라인 BandGridSpec 과 같다 */
+export function buildBandGeometry(m: BandTerrainManifest, cells: Uint32Array, horizon: Int16Array): GridGeometry {
+  const n = cells.length;
+  const rowOffset = new Int32Array(m.n_rows + 1);
+  for (let r = 0; r < m.n_rows; r++) rowOffset[r + 1] = rowOffset[r] + m.n_lon[r];
+  const lat = new Float32Array(n), lon = new Float32Array(n);
+  const x = new Float32Array(n).fill(NaN), y = new Float32Array(n).fill(NaN);
+  for (let i = 0; i < n; i++) {
+    const id = cells[i];
+    let lo = 0, hi = m.n_rows - 1;
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (rowOffset[mid] <= id) lo = mid; else hi = mid - 1; }
+    const col = id - rowOffset[lo];
+    lat[i] = -m.lat_max_deg + (lo + 0.5) * m.dlat_deg;
+    lon[i] = -180 + ((col + 0.5) * 360) / m.n_lon[lo];
+  }
+  const slot = slotsOf(m.n_cells_total, cells);
+  const locate = (la: Deg, lo: Deg) => {
+    if (!Number.isFinite(la) || !Number.isFinite(lo)) return -1;
+    const row = Math.floor((la + m.lat_max_deg) / m.dlat_deg);
+    if (row < 0 || row >= m.n_rows) return -1;
+    const k = m.n_lon[row];
+    const col = Math.min(k - 1, Math.floor((((normLon(lo) + 180) % 360) / 360) * k));
+    return slot[rowOffset[row] + col];
+  };
+  const manifest: GridManifest = {
+    projection: m.projection, cell_km: m.cell_km, nx: 0, ny: 0, x0_km: 0, y0_km: 0, lat_limit_deg: m.lat_max_deg,
+    n_cells: m.n_cells, cells: m.cells, horizon: m.horizon, observer_height_m: m.observer_height_m,
+  };
+  return { region: 'global', manifest, band: m, cells, horizon, lat, lon, x_km: x, y_km: y, locate };
+}
+
+/** 지역별 manifest → 격자 기하 */
+export function geometryFor(region: GridRegion, manifest: GridManifest | PolarTerrainManifest | BandTerrainManifest, cells: Uint32Array, horizon: Int16Array): GridGeometry {
+  if (region === 'global') return buildBandGeometry(manifest as BandTerrainManifest, cells, horizon);
+  if (region === 'north') return buildNorthGeometry(manifest as PolarTerrainManifest, cells, horizon);
+  return buildGeometry(manifest as GridManifest, cells, horizon);
+}
+
+/** 두 칸 사이 거리 (km): 극 격자는 평면 거리(기존 동작), 위도 띠는 대권 거리 */
+export function cellDistKm(g: GridGeometry, i: number, j: number): number {
+  if (g.region === 'global') return greatCircleKm(g.lat[i], g.lon[i], g.lat[j], g.lon[j]);
+  return Math.hypot(g.x_km[i] - g.x_km[j], g.y_km[i] - g.y_km[j]);
+}
+
+/** 패널 추천 후보: 중심 칸 반경 안의 칸 (경사 상한 적용). x/y 는 후보 간 간격 판정용 평면 좌표:
+ *  극 격자는 격자 평면, 위도 띠는 중심 칸 기준 국지 평면 (반경 수십 km) */
+export interface PanelCand { cell: number; lat_deg: Deg; lon_deg: Deg; distance_km: number; x_km: number; y_km: number; elev_m: number; mask: { az_step_deg: number; elevation_deg: number[] } }
+export function panelCandidates(g: GridGeometry, st: StaticLayers, c0: number, radius_km: number, max_slope_deg: number | null): PanelCand[] {
+  const out: PanelCand[] = [];
+  if (!(c0 >= 0 && c0 < g.cells.length)) return out;
+  for (let i = 0; i < g.cells.length; i++) {
+    const d = cellDistKm(g, i, c0);
+    if (!(d <= radius_km)) continue;
+    if (max_slope_deg !== null && st.slope_p90_deg && !(st.slope_p90_deg[i] <= max_slope_deg)) continue;
+    const [x, y] = g.region === 'global'
+      ? [R_MOON_KM * normLon(g.lon[i] - g.lon[c0]) * DEG * Math.cos(g.lat[c0] * DEG), R_MOON_KM * (g.lat[i] - g.lat[c0]) * DEG]
+      : [g.x_km[i], g.y_km[i]];
+    const e = st.elev_m?.[i];
+    out.push({ cell: i, lat_deg: g.lat[i], lon_deg: g.lon[i], distance_km: d, x_km: x, y_km: y, elev_m: e != null && Number.isFinite(e) ? e : 0, mask: cellMask(g, i) });
+  }
+  return out;
 }
 
 export function cellHorizonAt(g: GridGeometry, cell: number, az: number): number {
@@ -317,9 +429,10 @@ export function scoreGrid(inp: ScoreInput): ScoreResult {
   const pass = new Uint8Array(n);
   let passCount = 0;
   const artR = inp.artemisRadiusKm ?? 15;
-  const regionRings = (inp.artemisRegions ?? []).flatMap((r) => r.rings.map(ringToAeqd));
+  // 아르테미스 후보 경계·지점은 남극에만 있다 (평면 판정도 남극 AEQD)
+  const regionRings = inp.g.region === 'south' ? (inp.artemisRegions ?? []).flatMap((r) => r.rings.map(ringToAeqd)) : [];
   const inArtemis = (i: number) =>
-    regionRings.length
+    inp.g.region !== 'south' ? false : regionRings.length
       ? regionRings.some((ring) => pointInRing(inp.g.x_km[i], inp.g.y_km[i], ring))
       : inp.artemisPoints!.some((p) => greatCircleKm(p.lat_deg, p.lon_deg, inp.g.lat[i], inp.g.lon[i]) <= artR);
   for (let i = 0; i < n; i++) {
@@ -353,7 +466,7 @@ export function rankCells(g: GridGeometry, r: ScoreResult, k = 15, min_sep_km = 
   const out: RankedCell[] = [];
   for (const i of idx) {
     if (out.length >= k) break;
-    if (out.some((o) => Math.hypot(g.x_km[i] - g.x_km[o.cell], g.y_km[i] - g.y_km[o.cell]) < min_sep_km)) continue;
+    if (out.some((o) => cellDistKm(g, i, o.cell) < min_sep_km)) continue;
     out.push({ cell: i, score: r.composite[i], lat_deg: g.lat[i], lon_deg: g.lon[i] });
   }
   return out;
@@ -390,6 +503,8 @@ export function explainCell(inp: ScoreInput, cell: number): { contributions: Con
 
 /** 위경도에서 가장 가까운 유효 칸 (없으면 -1) */
 export function nearestCell(g: GridGeometry, lat: number, lon: number, maxKm = 10): number {
+  // 북극·위도 띠: 지점을 덮는 칸 (칸 크기 이내)
+  if (g.region !== 'south') return g.locate(lat, lon);
   if (lat > g.manifest.lat_limit_deg) return -1;
   const rho = R_MOON_KM * (90 + lat) * DEG;
   const x = rho * Math.sin(lon * DEG), y = rho * Math.cos(lon * DEG);

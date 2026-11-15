@@ -8,7 +8,7 @@ import { siteContext } from '../core/scenario';
 import { featuresAt, matchTemplate, similarMissions, type MissionFeatures } from '../core/similarity';
 import type { Mission } from '../core/types';
 import { useData } from '../state/data';
-import { useResolvedSite, useSiteCtx } from '../state/hooks';
+import { gridMaskAt, useResolvedSite, useSiteCtx } from '../state/hooks';
 import { makeScenario } from '../state/scenario';
 import { useApp } from '../state/store';
 
@@ -28,15 +28,18 @@ export default function Missions() {
   const eph = useData((d) => d.eph);
   const ensureEph = useData((d) => d.ensureMissionEph);
   const missionEph = useData((d) => d.missionEph);
+  const terrainGrids = useData((d) => d.terrainGrids);
+  const southGrid = useData((d) => d.grid);
   const rs = useResolvedSite();
   const ctx = useSiteCtx(rs);
   const [, bump] = useState(0);
   useEffect(() => { Promise.all(missions.items.map((m) => ensureEph(m))).then(() => bump((x) => x + 1)); }, [missions.items, ensureEph]);
 
   const feats = useMemo(() => missions.items.map((m) => {
-    const c = siteContext(missionSite(m), flatMask(m.id, m.lat_deg, m.lon_deg, DEFAULTS.observer_height_m), eph, app.margin_deg);
+    // 내 계획과 같은 기준으로 비교: 격자 지평선이 있으면 그것을, 없으면 구면 지평선
+    const c = siteContext(missionSite(m), gridMaskAt(m.lat_deg, m.lon_deg)?.mask ?? flatMask(m.id, m.lat_deg, m.lon_deg, DEFAULTS.observer_height_m), eph, app.margin_deg);
     return { m, f: featuresAt(c, m.lat_deg, Date.parse(m.landing_utc), m.duration_h, { power: m.power, comm: m.comm, approach: m.approach }) };
-  }), [missions.items, eph, app.margin_deg, missionEph]);
+  }), [missions.items, eph, app.margin_deg, missionEph, terrainGrids, southGrid]);
   const mine: MissionFeatures | null = useMemo(() => (ctx && rs ? featuresAt(ctx, rs.site.lat_deg, app.landing, app.duration_h, { power: 'solar', comm: 'dte', approach: 'lunar_orbit' }) : null), [ctx, rs, app.landing, app.duration_h]);
   const refs = useMemo(() => (mine ? similarMissions(mine, feats.map((x) => ({ mission: x.m, f: x.f })), 3) : []), [mine, feats]);
   const [match, setMatch] = useState<Record<string, number | null>>({});
