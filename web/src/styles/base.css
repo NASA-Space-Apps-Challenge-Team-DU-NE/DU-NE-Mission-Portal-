@@ -609,3 +609,13 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 @media (max-width:760px){.sidetog{display:none}}
 /* 마우스를 배지에서 창으로 옮기는 동안 닫히지 않게 사이 틈을 메운다 */
 .unv-pop::before{content:'';position:absolute;left:0;right:0;top:-12px;height:12px}
+
+/* 맨 위 띠가 좁아져도 EN/KR 이 밀려나지 않게: 언어 전환은 줄지 않고, 나머지가 차례로 줄어든다 */
+.mast{min-width:0;overflow:hidden}
+.mast .lang{flex:0 0 auto}
+.mnav,.macts{min-width:0;flex-shrink:1}
+.macts .btn,.macts .badge,.macts .unv{flex-shrink:0;white-space:nowrap}
+@media (max-width:1500px){.mast{gap:18px;padding-right:16px}.mnav{gap:20px}.macts{gap:6px;padding-left:14px}.mast .lang{padding-left:12px}}
+@media (max-width:1280px){.mast .logo img{height:60px}.mnav{gap:14px}.mnav button,.mnav a{letter-spacing:.08em}.mast{padding-left:12px}}
+@media (max-width:1120px){.macts .badge.ok{display:none}.mast .logo img{height:52px}.mast{gap:12px}}
+@media (max-width:980px){.macts .mast-csv{display:none}}

@@ -145,7 +145,7 @@ export function EarthGlobe({ stations }: { stations: Array<Station & { custom?: 
       <canvas ref={cvs} />
       <div className="ovl" ref={ovl} />
       <div className="hint">드래그 회전 · 휠 확대 · <b>클릭 = 지상국 추가</b></div>
-      <div className="vtools"><button onClick={() => earthView('korea')}>한국</button><button onClick={() => earthView('moon')}>달 쪽</button><button onClick={() => earthView('all')}>전체</button></div>
+      <div className="vtools"><button onClick={() => earthView('korea')}>대한민국</button><button onClick={() => earthView('moon')}>달 쪽</button><button onClick={() => earthView('all')}>전체</button></div>
       <div className="vleg"><span style={{ color: 'var(--earth)' }}>■</span> 카탈로그 지상국 · <span style={{ color: 'var(--amber)' }}>■</span> 가정 지상국 · <span style={{ color: '#F2E6B0' }}>☾</span> 달 바로 아래</div>
     </div>
   );

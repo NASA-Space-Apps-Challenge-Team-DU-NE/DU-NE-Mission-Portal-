@@ -133,7 +133,7 @@ export function Masthead() {
         <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? (gridApprox ? '데이터 일부 근사' : '데이터 준비됨') : status === 'loading' || status === 'idle' ? '불러오는 중' : status === 'degraded' ? `일부 자료 없음 (${reasons.length})` : status === 'failed' ? '불러오기 실패' : '자료 없음'}</span>
         {unverified ? <UnverifiedBadge /> : null}
         <button className="btn sm" onClick={report}>보고서 복사</button>
-        <button className="btn sm" onClick={csv} disabled={!res}>순위 CSV</button>
+        <button className="btn sm mast-csv" onClick={csv} disabled={!res}>순위 CSV</button>
         <button className="ibtn" aria-label="도움말" onClick={() => ui.set({ help: true })}>?</button>
       </div>
       <div className="lang" aria-label="Language">

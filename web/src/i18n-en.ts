@@ -1114,4 +1114,5 @@ export const EN: Record<string, string> = {
  "단계 목록 너비": "Step list width",
  "달 영역 너비": "Moon panel width",
  "끌어서 너비 조절 · 두 번 누르면 기본값": "Drag to resize · double-click to reset",
+ "대한민국": "S. Korea",
 };
