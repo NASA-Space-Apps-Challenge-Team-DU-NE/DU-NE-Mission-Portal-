@@ -136,7 +136,8 @@ def load_missions(seed_json: Path | None, coords_csv: Path | None) -> tuple[list
             "landing_utc": normalize_utc(str(landing)),
             "lat_deg": float(lat),
             "lon_deg": float(norm_lon(float(lon))),
-            "duration_h": _get(s, "actual_duration_h", "duration_h", "planned_duration_h", default=None),
+            # 실제 운용 기간만. 비어 있으면(근거 없음) 계획 기간으로 대신하지 않는다 (2026-11-15 대조)
+            "duration_h": s.get("actual_duration_h") if "actual_duration_h" in s else s.get("duration_h"),
             "outcome": _code(_get(s, "outcome", default=""), OUTCOME, "partial"),
             "outcome_reason": " · ".join(str(x) for x in (_get(s, "failure_cause"), _get(s, "outcome_reason", "summary")) if x and x != "없음"),
             "power": _code(_get(s, "power", "power_type", default=""), POWER, "unknown"),

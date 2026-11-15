@@ -44,7 +44,7 @@ def sites(ctx: Ctx) -> int:
         out.append(Site(
             id=s["id"], name=s["name"], name_en=s.get("name_en"), category=s["category"], lat_deg=s["lat_deg"], lon_deg=s["lon_deg"],
             elevation_m=elev, terrain=terrain, mask=f"masks/{s['id']}.json" if mask.exists() else None,
-            source_keys=["drive_catalog"] + (["nasa_artemis_2024"] if s["category"] == "artemis" else []),
+            source_keys=["drive_catalog"] + (["nasa_artemis_2024"] if s["category"] == "artemis" else []) + (["wueller_2026"] if c and c.coord_kind == "candidate_point" else []),
             verified=s["verified"], note=s.get("note"),
             coord_kind=c.coord_kind if c else "unknown", coord_evidence=ev,
             coord_source_url=(c.ref_url if c else None) or s.get("source"),
@@ -268,9 +268,14 @@ def artemis_regions(ctx: Ctx) -> int:
 
 
 def run(ctx: Ctx) -> int:
+    failed = []
     for fn in (sites, missions, landers, stations, power_refs, artemis_regions):
         try:
             fn(ctx)
         except Exception as e:  # noqa: BLE001
             log.warn(NAME, f"{fn.__name__} 실패: {e}")
+            failed.append(fn.__name__)
+    if failed:
+        log.warn(NAME, f"카탈로그 실패 {len(failed)}종: {', '.join(failed)} (이전 산출물이 남아 있을 수 있음)")
+        return 1
     return 0

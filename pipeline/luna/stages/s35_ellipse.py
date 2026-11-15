@@ -13,6 +13,8 @@
 
 from __future__ import annotations
 
+import json
+
 import math
 
 import numpy as np
@@ -130,6 +132,15 @@ def run(ctx: Ctx) -> int:
             v[0].close()
             if v[1]:
                 v[1].close()
+    # --only 로 일부만 다시 만들면 기존 인덱스의 다른 지점 항목을 지우지 않고 합친다
+    old_idx = ctx.out / "ellipse" / "index.json"
+    if ctx.only and old_idx.exists():
+        try:
+            prev = json.loads(old_idx.read_text(encoding="utf-8"))["data"]["sites"]
+            done = {e["id"] for e in index}
+            index = [e for e in prev if e.get("id") not in done and (ctx.out / e.get("file", "")).exists()] + index
+        except (ValueError, KeyError, TypeError) as e:
+            log.warn(NAME, f"기존 ellipse/index.json 을 읽지 못해 병합하지 않음: {e}")
     if index:
         write_envelope(ctx, "ellipse/index.json", Envelope(
             "luna.ellipse.v1",

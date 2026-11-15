@@ -258,6 +258,8 @@ def kaguya_feo(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list
         return []
     feo_m, cls_m = "numeric/kaguya/kaguya_south_feo_wtpct.tif", "numeric/kaguya/kaguya_south_support_class.tif"
     files = restore_bundle_members(man, "NATIVE_NUMERIC_KAGUYA.zip", [feo_m, cls_m], ctx.build)
+    for member in (feo_m, cls_m):
+        ctx.record_input(files[member], "kaguya_validation_cog_input")
     with rasterio.open(files[feo_m]) as ds, rasterio.open(files[cls_m]) as dq:
         v = ds.read(1).astype(np.float64)
         q = dq.read(1)
@@ -292,6 +294,7 @@ def kaguya_feo(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list
                           transform="품질 1 화소만 → 달 위경도(pyproj) → AEQD 칸 평균")]
     prov_list[0].transform += f" · COG {feo_m} SHA-256 {sha256_file(files[feo_m])[:16]}…"
     if rz.exists() and cz.exists():
+        ctx.record_input(cz, "kaguya_validation_counts")
         raw, cnt = read_raw_zip(rz), read_raw_zip(cz)
         rv, rq = feo_values(raw, cnt.data)
         both = np.isfinite(rv) & np.isfinite(v)
@@ -321,6 +324,7 @@ def kaguya_feo(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list
     # ── Lunar Prospector FeO (0.5°) 와 대조: 같은 0.5° 칸 단위 평균 ──
     lp = d.first("SouthPolar_75S_90S_v1/Regional/Composition/LP_ironhd_75S90S_0p5deg.csv")
     if lp:
+        ctx.record_input(lp, "kaguya_validation_lp_reference")
         df = read_csv(lp)
         df.columns = [str(c).strip() for c in df.columns]
         s_, w_ = df["south_lat_deg"].to_numpy(float), df["west_lon_deg_east"].to_numpy(float)
@@ -348,10 +352,40 @@ def kaguya_feo(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list
     ]
 
 
-def jaxa_tio2(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list[Out]:
-    """작업 6: JAXA Kaguya MI TiO₂ 16 ppd. 15 wt% 초과 제외, 2 wt% 미만은 수치로 쓰지 않는다 (WAC 규칙 적용, JAXA 검출 한계는 미확인)."""
+def jaxa_tio2_research(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list[Out]:
+    """작업 6 (계획서 2026-11-15 결정): JAXA MI TiO₂ 75~85°S 는 정량 사용 보류 → 연구용 레이어만.
+
+    - 대표값(평균·절단 평균·2~15 wt% 만 남긴 값·중앙값)을 만들지 않는다. 칸 중심에 가장 가까운 원래 화소 값을 그대로 싣는다
+      (source_estimate). 0~2 wt% 는 보존하고 15 wt% 초과도 자르지 않는다. 공급자 마스크가 결측인 곳만 NaN.
+    - 플래그(비트): 1 provider_valid · 2 upper_tail_suspect(원래 값 > 15 wt%, 진단용) · 4 near_missing(결측에서 Chebyshev 3 화소 이내).
+      원인·물리적 불가능을 뜻하지 않는다. scientific_status 는 레이어 전체가 "polar_quantitative_unvalidated".
+    - 이 레이어는 점수·필터·순위·내보내기에 연결하지 않는다 (웹). 85°S 이남은 자료 없음.
+    """
+
+    return _jaxa_research(ctx, binner, report)
+
+
+def _near_missing(valid: np.ndarray, k: int = 3) -> np.ndarray:
+    """결측(공급자 무효)에서 Chebyshev 거리 k 화소 이내인 화소. 경도 방향은 원형으로 잇는다."""
+    miss = ~valid
+    pad = np.concatenate([miss[:, -k:], miss, miss[:, :k]], axis=1)
+    out = np.zeros_like(pad)
+    for dr in range(-k, k + 1):
+        sh = np.roll(pad, dr, axis=0)
+        if dr > 0:
+            sh[:dr] = False
+        elif dr < 0:
+            sh[dr:] = False
+        for dc in range(-k, k + 1):
+            out |= np.roll(sh, dc, axis=1)
+    return out[:, k:-k]
+
+
+def _jaxa_research(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
+    import rasterio
+    from rasterio.windows import Window
+
     from luna.io.archives import restore_bundle_members
-    from luna.io.minerals import TIO2_DETECTION_LIMIT_WT, TIO2_MAX_RELIABLE_WT, jaxa_tio2_south
     from luna.provenance import sha256_file
 
     man = ctx.data.path(f"{MIN_DIR}/DOWNLOAD_AND_INSTALL.json")
@@ -359,60 +393,92 @@ def jaxa_tio2(ctx: Ctx, binner: Binner, prior: list[Out], report: dict) -> list[
         return []
     tm, qm = "numeric/alternatives/jaxa_mi_tio2_wt_percent_16ppd.tif", "numeric/alternatives/jaxa_mi_tio2_quality_16ppd.tif"
     files = restore_bundle_members(man, "NATIVE_NUMERIC_ALTERNATIVES.zip", [tm, qm], ctx.build)
-    lat_max = ctx.settings.grid.lat_limit_deg + 0.5  # 격자 가장자리 칸까지 덮도록 조금 더
-    v, q, lat, lon = jaxa_tio2_south(files[tm], files[qm], lat_max)
-    valid = np.isfinite(v)
-    reliable = valid & (v <= TIO2_MAX_RELIABLE_WT)
-    ge2 = reliable & (v >= TIO2_DETECTION_LIMIT_WT)
-    # 위도대별 점검 표 (계획서 6 '점검'과 같은 형식)
+    for member in (tm, qm):
+        ctx.record_input(files[member], "jaxa_validation_cog_input")
+    lat_max = ctx.settings.grid.lat_limit_deg + 0.5
+    with rasterio.open(files[tm]) as ds, rasterio.open(files[qm]) as dq:
+        if ds.crs is None or "104903" not in ds.crs.to_string():
+            raise ValueError(f"JAXA MI CRS 가 예상(ESRI:104903)과 다르다: {ds.crs}")
+        T = ds.transform
+        r0 = max(0, int(np.floor((T.f - lat_max) / -T.e)) - 3)  # 근접 결측 판정용 여유 3행
+        v = ds.read(1, window=Window(0, r0, ds.width, ds.height - r0)).astype(np.float64)
+        q = dq.read(1, window=Window(0, r0, ds.width, ds.height - r0))
+    valid = (q == 1) & np.isfinite(v)
+    near = _near_missing(valid, 3)
+    lat_rows = T.f + (r0 + np.arange(v.shape[0]) + 0.5) * T.e
+    lon_cols = T.c + (np.arange(v.shape[1]) + 0.5) * T.a
+    # 위도대별 점검 표 (분모: 15 wt% 를 빼기 전 유효값, 픽셀 기준)
     bands = []
     for lo in range(-85, int(np.floor(lat_max)), 1):
-        m = (lat >= lo) & (lat < lo + 1)
+        m = (lat_rows >= lo) & (lat_rows < lo + 1)
         if not m.any():
             continue
-        nv = valid[m].sum()
-        bands.append({"band": f"{-lo - 1}–{-lo}°S", "valid_frac": float(nv / m.sum()),
-                      "over15_of_valid": float((valid[m] & (v[m] > TIO2_MAX_RELIABLE_WT)).sum() / nv) if nv else None,
-                      "below2_of_valid": float((valid[m] & (v[m] < TIO2_DETECTION_LIMIT_WT)).sum() / nv) if nv else None})
-    idx = binner.index(lat, lon)
-    st = CellStats(binner.n_cells, keep_values=True)
-    st.add(idx, v, reliable, ge2=ge2)
-    med = st.median()
-    vfrac = st.frac()
-    ge2_frac = st.frac(st.extra["ge2"], st.valid)
-    tio2 = np.where(med >= TIO2_DETECTION_LIMIT_WT, med, np.nan)  # 중앙값이 2 미만인 칸은 수치 없음 ("2 wt% 미만")
-    below = np.isfinite(med) & (med < TIO2_DETECTION_LIMIT_WT)
-    # Lunar Prospector TiO₂ 원 격자와 대조: 원 격자 칸 안 JAXA 신뢰 화소 중앙값 vs LP
-    lp = ctx.data.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Polar_Science/LP_GRS_TiO2_native_75S90S.csv")
-    rep: dict = {"latitude_bands": bands, "pixels_south": int(lat.size), "cells_with_value": int(np.isfinite(tio2).sum()),
-                 "cells_below_2wt": int(below.sum()), "cells_no_data": int((~np.isfinite(med)).sum()),
-                 "south_of_85S": "공급자 유효 범위(±85°) 밖 → 자료 없음"}
-    if lp:
-        df = read_csv(lp)
-        df.columns = [str(c).strip() for c in df.columns]
-        rows = []
-        lonr = norm_lon(lon)
-        for _, r in df.iterrows():
-            m = reliable & (lat >= r["south_deg"]) & (lat < r["north_deg"])
-            w, e = float(r["west_deg"]), float(r["east_deg"])
-            m &= (lonr >= w) & (lonr < e) if w < e else ((lonr >= w) | (lonr < e))
-            if m.sum() >= 10:
-                rows.append((float(np.median(v[m])), float(np.mean(v[valid & m.copy()])) if (valid & m).any() else np.nan, float(r["TiO2_wt_pct"]), float(r["TiO2_1sigma_wt_pct"])))
-        if rows:
-            a = np.array(rows)
-            dm = a[:, 0] - a[:, 2]
-            rep["vs_lp_native_cells"] = {"cells": int(len(a)), "median_minus_lp_median": float(np.median(dm)),
-                                         "cells_within_lp_2sigma": int((np.abs(dm) <= 2 * a[:, 3]).sum()),
-                                         "note": "JAXA 칸 중앙값(15 wt% 초과 제외) 대 LP 원 격자 값. 평균은 이상치에 끌려 쓰지 않는다"}
-    report["tio2_jaxa"] = rep
-    pv = [ctx.prov(man, "jaxa_mi_tio2_bundle_manifest", allow_unlisted=True, source_crs="달 경위도 ESRI:104903, 16 ppd (공식 128 ppd 서비스의 최근접 내보내기)",
-                   transform="공급자 품질 1 · 15 wt% 이하 화소 → AEQD 칸 중앙값")]
-    pv[0].transform += f" · {tm} SHA-256 {sha256_file(files[tm])[:16]}…"
-    cau = "JAXA/ISAS DARTS Kaguya MI 공식 내보내기(ISAS Data Policy). 원래 해상도 약 1.9 km. 15 wt% 초과 제외, 중앙값 2 wt% 미만 칸은 수치 없음(2 wt% 미만). 85°S 이남 자료 없음. 추정 분포"
+        vv, ok = v[m], valid[m]
+        n = ok.sum()
+        bands.append({"band": f"{-lo - 1}–{-lo}°S", "provider_valid_frac": float(n / ok.size),
+                      "over15_of_valid": float((ok & (vv > 15)).sum() / n) if n else None,
+                      "below2_of_valid": float((ok & (vv < 2)).sum() / n) if n else None})
+    # 칸 중심 → 가장 가까운 원래 화소 (집계하지 않는다)
+    from luna.geo.polar import aeqd_inverse
+
+    clat, clon = aeqd_inverse(binner.cx, binner.cy)
+    clat, clon = np.asarray(clat), np.asarray(clon)
+    ri = np.floor((T.f - clat) / -T.e).astype(np.int64) - r0
+    ci = np.floor((clon - T.c) / T.a).astype(np.int64) % v.shape[1]
+    inside = (clat >= -85.0) & (ri >= 0) & (ri < v.shape[0])
+    est = np.full(binner.n_cells, np.nan)
+    flags = np.zeros(binner.n_cells)
+    rr, cc = ri[inside], ci[inside]
+    pv = valid[rr, cc]
+    est[np.flatnonzero(inside)[pv]] = v[rr, cc][pv]
+    f = pv.astype(float) * 1 + (pv & (v[rr, cc] > 15)).astype(float) * 2 + (pv & near[rr, cc]).astype(float) * 4
+    flags[inside] = f
+    report["tio2_jaxa_mi"] = {
+        "decision": "75~85°S 정량 사용 보류 (계획서 작업 6, 독립 검토 JAXA_MI_TIO2_POLAR_REVIEW_DEVELOPER_2026-11-15_0409)",
+        "scientific_status": "polar_quantitative_unvalidated", "detection_limit_wt_percent": None,
+        "latitude_bands": bands, "cells_provider_valid": int(np.isfinite(est).sum()),
+        "cells_upper_tail_suspect": int(((flags.astype(int) & 2) > 0).sum()), "cells_near_missing": int(((flags.astype(int) & 4) > 0).sum()),
+        "south_of_85S": "공급자 유효 범위(±85°) 밖 → 자료 없음",
+        "sampling": "칸 중심에 가장 가까운 원래 16 ppd 화소 (평균·중앙값 등 대표값 아님)",
+    }
+    prov = [ctx.prov(man, "jaxa_mi_tio2_bundle_manifest", allow_unlisted=True, source_crs="달 경위도 ESRI:104903, 16 ppd (공식 128 ppd 서비스의 최근접 내보내기)",
+                     transform="칸 중심 최근접 원래 화소, 값 변경 없음")]
+    prov[0].transform += f" · {tm} SHA-256 {sha256_file(files[tm])[:16]}…"
+    cau = "JAXA MI TiO₂ 추정값 — 남극 고위도 정량 미검증. 연구용 보기 전용(점수·필터·순위·내보내기에 쓰지 않음). 칸 중심의 원래 화소 값이며 칸 대표값이 아님. ISAS Data Policy. 85°S 이남 자료 없음"
     return [
-        Out("tio2_wt_jaxa", tio2, "wt%", "real", "칸 안 신뢰 화소(품질 1, ≤15 wt%) 중앙값 · 2 wt% 이상만", ["jaxa_mi_tio2"], pv, cau),
-        Out("tio2_jaxa_ge2_frac", ge2_frac, "frac", "real", "칸 안 신뢰 화소 중 2 wt% 이상 비율", ["jaxa_mi_tio2"], pv, "어디가 2 wt% 이상인가를 보는 레이어. 추정 분포"),
-        Out("tio2_jaxa_valid_frac", vfrac, "frac", "real", "칸 안 화소 중 신뢰(품질 1, ≤15 wt%) 비율", ["jaxa_mi_tio2"], pv, "결측은 경도마다 고르지 않다"),
+        Out("tio2_jaxa_mi_research", est, "wt%", "real", "source_estimate: 칸 중심 최근접 원래 화소 (16 ppd, 약 1.9 km)", ["jaxa_mi_tio2"], prov, cau),
+        Out("tio2_jaxa_mi_flags", flags, "bits", "real", "1 provider_valid · 2 upper_tail_suspect(>15 wt%, 진단용) · 4 near_missing(결측 3화소 이내)", ["jaxa_mi_tio2"], prov,
+            "검토 플래그. 원인이나 물리적 불가능을 뜻하지 않는다"),
+    ]
+
+
+def lp_tio2(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
+    """작업 6: LP GRS TiO₂ 를 남극 지역 조성 레이어로. 원래 2° 등면적 셀(약 60 km) 경계 그대로, 셀 1σ 함께. 다른 셀 크기로 메우지 않는다."""
+    from luna.geo.polar import aeqd_inverse
+
+    p = ctx.data.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Polar_Science/LP_GRS_TiO2_native_75S90S.csv")
+    if not p:
+        return []
+    df = read_csv(p)
+    df.columns = [str(c).strip() for c in df.columns]
+    df = df[pd.to_numeric(df["grid_deg"], errors="coerce") == 2]
+    if df.empty:
+        ctx.record_input(p, "tio2_lp_no_2deg_rows", "위경도 표 (셀 경계)")
+        report["tio2_lp"] = {"cells_2deg": 0, "grid_cells_with_value": 0,
+                             "grid_cells_without_2deg_cell": int(binner.cx.size), "status": "NO_DATA", "reason": "no_2deg_rows"}
+        log.warn(NAME, "LP TiO₂ 2° 셀 없음 → 선택 레이어 생략 (다른 셀 크기로 메우지 않음)")
+        return []
+    edges = tuple(pd.to_numeric(df[c], errors="coerce").to_numpy(float) for c in ("south_deg", "north_deg", "west_deg", "east_deg"))
+    lat_q, lon_q = aeqd_inverse(binner.cx, binner.cy)
+    lat_q, lon_q = np.asarray(lat_q), np.asarray(lon_q)
+    val = bin_contains(edges, lat_q, lon_q, pd.to_numeric(df["TiO2_wt_pct"], errors="coerce").to_numpy(float))
+    sig = bin_contains(edges, lat_q, lon_q, pd.to_numeric(df["TiO2_1sigma_wt_pct"], errors="coerce").to_numpy(float))
+    report["tio2_lp"] = {"cells_2deg": int(len(df)), "grid_cells_with_value": int(np.isfinite(val).sum()), "grid_cells_without_2deg_cell": int((~np.isfinite(val)).sum())}
+    pv = [ctx.prov(p, "tio2_lp", source_crs="위경도 표 (2° 등면적 셀 경계)", lon_convention="-180..180", transform="격자 칸 중심이 들어 있는 2° 셀 값 (보간 없음)")]
+    cau = "Lunar Prospector GRS 2° 등면적 셀(약 60 km) 지역 조성. 착륙지 규모의 값이 아님. 추정 분포"
+    return [
+        Out("tio2_wt_lp", val, "wt%", "real", "칸 중심이 들어 있는 LP 2° 셀 값 (TiO2_wt_pct)", ["lp_grs"], pv, cau),
+        Out("tio2_lp_sigma", sig, "wt%", "real", "같은 셀의 1σ (TiO2_1sigma_wt_pct)", ["lp_grs"], pv, "셀 불확도"),
     ]
 
 
@@ -453,6 +519,7 @@ def geology(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
         # 이전 추출본과 같은지 확인
         old = d.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/Bickel_Rockfalls_75S90S_06.csv")
         if old is not None:
+            ctx.record_input(old, "rockfall_validation_previous_extract")
             o = read_csv(old)
             o.columns = [str(c).strip() for c in o.columns]
             same = len(o) == len(s) and len(o.merge(s[o.columns.tolist()], how="inner")) == len(o)
@@ -466,6 +533,21 @@ def geology(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
         info["near_duplicates_not_merged"] = near
         info["readme_vs_data"] = f"README 는 80°S 까지라고 적었으나 80°S 이남 검출 {info['rows_south_of_80S']}개가 목록에 있다 → 검출 있는 칸은 값, 검출 없는 칸은 자료 없음"
         info["cells_no_data"] = int((~np.isfinite(dens)).sum())
+        rf8 = d.first("Raw_Data/Gap_Supplements_2026-11-14/science/Bickel_Global_Rockfalls/Bickel_et_al_2020_i80_08.csv")
+        if rf8:
+            ctx.record_input(rf8, "rockfall_validation_confidence_08")
+            s8, i8 = rockfalls_south(rf8, lat_lim)
+            x8, y8 = aeqd_forward(s8["lat_deg"].to_numpy(), s8["lon_deg"].to_numpy())
+            c8 = np.zeros(binner.n_cells)
+            for i in range(0, binner.n_cells, 2048):
+                dx = binner.cx[i:i + 2048, None] - x8[None, :]
+                dy = binner.cy[i:i + 2048, None] - y8[None, :]
+                c8[i:i + 2048] = ((dx * dx + dy * dy) <= R * R).sum(axis=1)
+            k6 = s[["NAC_ID", "C_LON", "C_LAT"]].astype(str).agg("|".join, axis=1)
+            k8 = s8[["NAC_ID", "C_LON", "C_LAT"]].astype(str).agg("|".join, axis=1)
+            info["confidence_0p8_sensitivity"] = {"rows_south": int(len(s8)), "subset_of_0p6_rows": int(k8.isin(set(k6)).sum()),
+                                                  "cells_with_detection_0p6": int((cnt > 0).sum()), "cells_with_detection_0p8": int((c8 > 0).sum()),
+                                                  "density_corr": _corr(cnt, c8), "note": "신뢰도 기준을 0.8 로 올렸을 때 (레이어는 0.6 목록)"}
         report["rockfalls"] = info
         pv = [ctx.prov(rf, "rockfalls", allow_unlisted=True, source_crs="위경도 표 (C_LAT·C_LON, −180..180)", lon_convention="-180..180")]
         out.append(Out("rockfall_density", dens, "1/km2", "real", "반경 10 km 안 낙석 검출 수 / 면적 (신뢰도 0.6 이상)", ["bickel_rockfalls"], pv,
@@ -474,7 +556,167 @@ def geology(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
     return out
 
 
+def _poly_reader(read_bytes, stem: str):
+    """ZIP·7z 안의 shapefile → (shapefile.Reader, prj 문자열)."""
+    import io
+
+    import shapefile
+
+    prj = read_bytes(f"{stem}.prj").decode("utf-8", "replace")
+    r = shapefile.Reader(shp=io.BytesIO(read_bytes(f"{stem}.shp")), dbf=io.BytesIO(read_bytes(f"{stem}.dbf")))
+    return r, prj
+
+
+def _stereo_polys_to_aeqd(r, prj: str):
+    """남극 평사도법(m) 폴리곤 → 남극 AEQD(km) shapely 폴리곤 목록. 좌표계 확인 실패면 멈춘다."""
+    from pyproj import CRS, Transformer
+    from shapely.geometry import Polygon
+    from shapely.validation import make_valid
+
+    from luna.constants import MOON_GEOG_PROJ4
+
+    if "Stereographic_South_Pole" not in prj or "1737400" not in prj:
+        raise ValueError(f"폴리곤 좌표계가 달 남극 평사도법(R=1737.4 km)이 아니다: {prj[:100]}")
+    tr = Transformer.from_crs(CRS.from_wkt(prj), CRS.from_proj4(MOON_GEOG_PROJ4), always_xy=True)
+    out = []
+    for sh in r.shapes():
+        parts = list(sh.parts) + [len(sh.points)]
+        rings = []
+        for a, b in zip(parts[:-1], parts[1:]):
+            pts = np.asarray(sh.points[a:b], float)
+            lon, lat = tr.transform(pts[:, 0], pts[:, 1])
+            x, y = aeqd_forward(np.asarray(lat), np.asarray(lon))
+            rings.append(list(zip(x, y)))
+        if not rings or len(rings[0]) < 3:
+            continue
+        poly = Polygon(rings[0], rings[1:])
+        out.append(poly if poly.is_valid else make_valid(poly))
+    return out, tr
+
+
+def extra_south(ctx: Ctx, binner: Binner, report: dict) -> list[Out]:
+    """남극 보조 레이어 (2026-11-15 미연결 자료): 영구음영 폴리곤 거리, 극지 평원 비율, 섀클턴 바위 수, WAC 시간가중 조명률."""
+    import zipfile
+
+    from shapely import STRtree
+    from shapely.geometry import Point, box
+
+    d = ctx.data
+    out: list[Out] = []
+    # ── 영구음영 폴리곤 (LOLA PSR, 75–90°S): 칸 중심에서 가장 가까운 폴리곤까지 거리, 안이면 0 ──
+    pz = d.first("Workspace/Codex_Data_Collection/01_NASA_Downloads/Illumination/NAC_POLE_PSR_SOUTH/LOLA_PSR_75S90S_complete_features.zip")
+    if pz:
+        try:
+            with zipfile.ZipFile(pz) as z:
+                r, prj = _poly_reader(lambda n: z.read(f"LOLA_PSR_75S90S_complete_features{n[n.index('.'):]}"), "LOLA_PSR_75S90S_complete_features")
+            polys, _ = _stereo_polys_to_aeqd(r, prj)
+            tree = STRtree(polys)
+            pts = [Point(x, y) for x, y in zip(binner.cx, binner.cy)]
+            idx = tree.query_nearest(pts, all_matches=False)
+            dist = np.array([polys[j].distance(pts[i]) for i, j in zip(*idx)])
+            arr = np.full(binner.n_cells, np.nan)
+            arr[idx[0]] = dist
+            ras = np.fromfile(ctx.out / "grid" / "layers" / "psr_dist_km.f32", dtype="<f4").astype(float) if (ctx.out / "grid" / "layers" / "psr_dist_km.f32").exists() else None
+            rep = {"polygons": len(polys), "area_km2_min": float(min(r.record(i)["area"] for i in range(len(r)))),
+                   "note": "폴리곤 경계까지 거리(5 km 칸 중심 기준). PGDA69 래스터 기반 psr_dist_km 과 별도 레이어"}
+            if ras is not None:
+                m = np.isfinite(ras) & np.isfinite(arr)
+                dd = arr[m] - ras[m]
+                rep["vs_raster_psr_dist"] = {"cells": int(m.sum()), "mean_diff_km": float(dd.mean()), "median_diff_km": float(np.median(dd)),
+                                             "p95_abs_km": float(np.percentile(np.abs(dd), 95)), "corr": _corr(arr[m], ras[m]),
+                                             "note": "폴리곤은 일정 면적 이상의 영구음영만 담는다 → 래스터(작은 그늘 포함)보다 거리가 길게 나오는 것이 정상"}
+            report["psr_polygons"] = rep
+            out.append(Out("psr_poly_dist_km", arr, "km", "real", "LOLA 영구음영 폴리곤 경계까지 최소 거리 (안은 0)", ["lola_psr_polygons"],
+                           [ctx.prov(pz, "psr_polygons", allow_unlisted=True, source_crs="남극 평사도법 R=1737.4 km (.prj)", transform="폴리곤 → 위경도 → AEQD, 칸 중심 거리")],
+                           "얼음 가능성 지표 · 검출 아님. 일정 면적 이상의 영구음영만"))
+        except Exception as e:  # noqa: BLE001
+            log.warn(NAME, f"영구음영 폴리곤 실패: {e}")
+    # ── 극지 평원 지질도 (PolarPlains_Mapping.7z): 칸 면적 중 평원 비율. 매핑 범위(평사 ±304 km 정사각) 밖은 자료 없음 ──
+    pp = d.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/PolarPlains_Mapping.7z")
+    if pp:
+        try:
+            import py7zr
+
+            with py7zr.SevenZipFile(pp) as z:
+                files = {k: (v.read() if hasattr(v, "read") else v) for k, v in z.readall().items()}
+            r, prj = _poly_reader(lambda n: files[n], "PolarPlains_Mapping")
+            polys, tr = _stereo_polys_to_aeqd(r, prj)
+            from pyproj import CRS, Transformer
+
+            from luna.constants import MOON_GEOG_PROJ4
+            from luna.geo.polar import aeqd_inverse
+
+            fwd = Transformer.from_crs(CRS.from_proj4(MOON_GEOG_PROJ4), CRS.from_wkt(prj), always_xy=True)
+            ext = r.bbox  # 매핑 범위 (데이터 경계가 정확히 ±304,000 m)
+            clat, clon = aeqd_inverse(binner.cx, binner.cy)
+            sx, sy = fwd.transform(np.asarray(clon), np.asarray(clat))
+            inside = (sx >= ext[0]) & (sx <= ext[2]) & (sy >= ext[1]) & (sy <= ext[3])
+            tree = STRtree(polys)
+            half = binner.spec.cell_km / 2
+            frac = np.full(binner.n_cells, np.nan)
+            for i in np.flatnonzero(inside):
+                cell = box(binner.cx[i] - half, binner.cy[i] - half, binner.cx[i] + half, binner.cy[i] + half)
+                hits = tree.query(cell)
+                frac[i] = sum(polys[j].intersection(cell).area for j in hits) / cell.area if len(hits) else 0.0
+            frac = np.clip(frac, 0, 1)
+            report["polar_plains"] = {"polygons": len(polys), "mapped_extent_m": list(ext), "cells_in_extent": int(inside.sum()),
+                                      "cells_with_plains": int((frac > 0).sum())}
+            out.append(Out("plains_frac", frac, "frac", "real", "칸 면적 중 극지 평원 폴리곤 비율", ["polar_plains"],
+                           [ctx.prov(pp, "polar_plains", allow_unlisted=True, source_crs="남극 평사도법 R=1737.4 km (.prj)", transform="폴리곤 → 위경도 → AEQD, 칸 사각형과 교차 면적")],
+                           "지질 단위(평원) 지도. 착륙 안전을 뜻하지 않는다. 매핑 범위 밖은 자료 없음"))
+        except Exception as e:  # noqa: BLE001
+            log.warn(NAME, f"극지 평원 실패: {e}")
+    # ── 섀클턴 바위 위치 (Gawronska & Boazman 2025): 칸별 개수. 매핑 범위 정의가 없어 0 인 칸은 자료 없음 ──
+    bx = d.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/Boulder_locations_in_shackleton_Gawronska_Boazman_2025.xlsx")
+    if bx:
+        try:
+            df = pd.read_excel(bx)
+            qa = d.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/Lunar_Geologic_Catalog_Coordinate_QA.csv")
+            dropped = 0
+            if qa:
+                ctx.record_input(qa, "boulder_coordinate_qa")
+                q = read_csv(qa)
+                q = q[q["filename"].astype(str).str.startswith("Boulder_locations")]
+                bad = set(zip(q["latitude_deg"].round(4), q["longitude_deg"].round(4)))
+                keep = ~pd.Series(list(zip(df["Latitude"].round(4), df["Longitude"].round(4)))).isin(bad).to_numpy()
+                dropped = int((~keep).sum())
+                df = df[keep]
+            lat, lon = df["Latitude"].to_numpy(float), norm_lon(df["Longitude"].to_numpy(float))
+            ii = binner.index(lat, lon)
+            cnt = np.bincount(ii[ii >= 0], minlength=binner.n_cells).astype(float)
+            report["boulders_shackleton"] = {"points": int(len(df) + dropped), "dropped_by_coordinate_qa": dropped, "points_used": int((ii >= 0).sum()),
+                                             "cells_with_boulders": int((cnt > 0).sum()), "lat_range": [float(lat.min()), float(lat.max())]}
+            out.append(Out("boulder_count", np.where(cnt > 0, cnt, np.nan), "count", "real", "칸 안 매핑된 바위 수 (섀클턴 분화구)", ["shackleton_boulders"],
+                           [ctx.prov(bx, "boulders", allow_unlisted=True, source_crs="위경도 표 (Latitude·Longitude)", lon_convention="-180..180")],
+                           "섀클턴 연구 범위만. 매핑 범위 경계가 없어 바위가 없는 칸은 0 이 아니라 자료 없음. 좌표 QA 이상치 제외"))
+        except Exception as e:  # noqa: BLE001
+            log.warn(NAME, f"섀클턴 바위 실패: {e}")
+    # ── WAC 시간가중 조명률 (88–90°S) ──
+    tw = d.first("Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/WAC_POLE_ILL_TWI_SOUTH_100M.IMG")
+    if tw:
+        try:
+            from luna.io.pds import PolarPdsSampler, read_pds_image
+
+            im = read_pds_image(tw, tw)
+            smp = PolarPdsSampler(im)
+            agg = MeanAgg(binner.n_cells)
+            for r0 in range(0, smp.lines, 512):
+                rows = np.arange(r0, min(smp.lines, r0 + 512))
+                R, C = np.meshgrid(rows, np.arange(smp.samples), indexing="ij")
+                lat, lon = smp.pix_to_latlon(R.ravel(), C.ravel())
+                v = im.data[r0:r0 + rows.size].astype(float).ravel()
+                v[v < PDS_FLOAT_SPECIAL_MAX] = np.nan
+                agg.add(binner.index(lat, lon), v * im.scale + im.offset)
+            # README: 관측 중 조명된 비율(%) — 시간가중(관측 공백은 앞뒤 관측으로 선형 보간)
+            out.append(Out("wac_ill_twi", _check_frac("wac_ill_twi", np.clip(agg.result() / 100.0, 0, None)), "frac", "real", "칸 평균 (WAC 시간가중 실측)", ["lroc_wac_ill"],
+                           [ctx.prov(tw, "wac_ill_twi", allow_unlisted=True, source_crs=im.crs.summary())], "88–90°S 만. 관측 공백을 보간한 판"))
+        except Exception as e:  # noqa: BLE001
+            log.warn(NAME, f"WAC 시간가중 조명률 실패: {e}")
+    return out
+
+
 def run(ctx: Ctx) -> int:
+    ctx._inputs = {}
     gm = ctx.out / "grid" / "manifest.json"
     if not gm.exists():
         log.warn(NAME, "s40 먼저 실행")
@@ -589,7 +831,6 @@ def run(ctx: Ctx) -> int:
     for name, pattern, cols, max_km, caution in (
         ("h_ppm", f"{SP}/Composition/LP_hydrogenhd_75S90S_0p5deg.csv", ["H_ppm_by_weight", "hydrogen_ppm", "h_ppm", "ppm", "H_ppm"], 25.0, "얼음 가능성 지표 · 검출 아님 (0.5° 격자, 음수 추정값 포함 — QA)"),
         ("feo_wt", f"{SP}/Composition/LP_ironhd_75S90S_0p5deg.csv", ["FeO_weight_percent", "feo_wt", "FeO", "FeO_wt", "feo"], 25.0, "원 격자 0.5°, 해상도 거침"),
-        ("tio2_wt", "Raw_Data/NASA_Gap_Collection_2026-11-14/Polar_Science/LP_GRS_TiO2_native_75S90S.csv", ["TiO2_wt_pct", "tio2_wt", "TiO2", "TiO2_wt", "tio2"], 300.0, "원 격자 2–20°, 해상도 거침"),
     ):
         p = d.first(pattern)
         if not p:
@@ -602,13 +843,16 @@ def run(ctx: Ctx) -> int:
         except ColumnError as e:
             log.warn(NAME, str(e))
 
-    # 광물: Kaguya FeO 약 1 km (작업 5), JAXA MI TiO₂ (작업 6). 기존 LP 레이어(feo_wt·tio2_wt)는 그대로 두고 따로 싣는다
+    # 광물: LP TiO₂ 2° 셀(지역 조성), Kaguya FeO 약 1 km (작업 5), JAXA MI TiO₂ 연구용 (작업 6, 정량 보류)
     report: dict = {}
-    for fn in (kaguya_feo, jaxa_tio2):
+    outs += lp_tio2(ctx, binner, report)
+    for fn in (kaguya_feo, jaxa_tio2_research):
         try:
             outs += fn(ctx, binner, outs, report)
         except Exception as e:  # noqa: BLE001
             log.warn(NAME, f"{fn.__name__} 실패 → 레이어 생략: {e}")
+
+    outs += extra_south(ctx, binner, report)
 
     # 지질: 단층애 거리, 낙석 밀도 (작업 7: 새 목록)
     try:
@@ -616,7 +860,7 @@ def run(ctx: Ctx) -> int:
     except Exception as e:  # noqa: BLE001
         log.warn(NAME, f"지질 레이어 실패: {e}")
     if report:
-        write_envelope(ctx, "validation/layers_minerals.json", Envelope("luna.validation.minerals.v1", report, [], quality="REVIEW_REQUIRED",
+        write_envelope(ctx, "validation/layers_minerals.json", Envelope("luna.validation.minerals.v1", report, list(ctx._inputs.values()), quality="REVIEW_REQUIRED",
                        notes=["대조 결과는 차이를 기록할 뿐 합격·불합격을 판정하지 않는다 (허용 오차는 팀이 정함)"]))
 
     # 쓰기

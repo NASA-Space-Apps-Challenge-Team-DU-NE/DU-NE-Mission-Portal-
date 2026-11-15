@@ -82,3 +82,25 @@ def test_rockfalls_exact_duplicates_only(tmp_path):
     assert info["exact_duplicates_removed"] == 1
     assert len(s) == 2                     # 가까운 다른 영상 검출(b)은 묶지 않는다
     assert s["lon_deg"].max() <= 180       # 경도 (−180, 180]
+
+
+def test_jaxa_near_missing_wraps_longitude():
+    from luna.stages.s50_layers import _near_missing
+
+    valid = np.ones((9, 20), dtype=bool)
+    valid[4, 0] = False                      # 경도 0 열의 결측
+    near = _near_missing(valid, 3)
+    assert near[4, 19] and near[4, 17] and not near[4, 16]   # 경도 이음매를 넘어 3 화소
+    assert near[1, 0] and not near[0, 0]
+
+
+def test_mission_duration_does_not_fall_back_to_planned(tmp_path):
+    import json
+
+    from luna.catalogs import load_missions
+
+    p = tmp_path / "m.json"
+    p.write_text(json.dumps([{"id": "x", "name": "x", "landing_utc": "2024-01-01T00:00:00Z", "lat_deg": -80, "lon_deg": 10,
+                              "planned_duration_h": 240, "actual_duration_h": None}]), encoding="utf-8")
+    ms, _ = load_missions(p, None)
+    assert ms[0]["duration_h"] is None
