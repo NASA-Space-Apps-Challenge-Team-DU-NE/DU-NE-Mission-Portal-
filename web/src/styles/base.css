@@ -625,3 +625,6 @@ tr.sel{background:var(--panel3);box-shadow:inset 2px 0 0 #fff}
 .confirm-b{display:flex;justify-content:flex-end;gap:8px}
 .btn.danger{background:#ef4444;border-color:#ef4444;color:#fff}
 .btn.danger:hover{background:#dc2626;border-color:#dc2626}
+/* "처음부터 다시": 예전 미검증 배지와 같은 빨간 모양, 크기는 옆 button 과 같게 */
+.macts .btn.so-btn{font-family:var(--f-mono);font-weight:600;letter-spacing:var(--ls);border-color:#5a2424;color:var(--warn);background:var(--warn-bg)}
+.macts .btn.so-btn:hover{border-color:var(--warn);color:#fff}

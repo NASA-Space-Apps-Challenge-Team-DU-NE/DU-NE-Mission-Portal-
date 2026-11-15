@@ -38,7 +38,7 @@ function StartOver() {
   }, [ask]);
   return (
     <>
-      <button type="button" className="btn sm" onClick={() => setAsk(true)}>처음부터 다시</button>
+      <button type="button" className="btn sm so-btn" onClick={() => setAsk(true)}>처음부터 다시</button>
       {ask ? (
         <div className="confirm-bg" onMouseDown={(e) => { if (e.target === e.currentTarget) setAsk(false); }}>
           <div className="confirm" role="alertdialog" aria-modal="true" aria-labelledby="so-h" aria-describedby="so-p">
