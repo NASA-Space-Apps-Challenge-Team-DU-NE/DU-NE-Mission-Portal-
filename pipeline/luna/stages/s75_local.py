@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+from pathlib import Path
 
 import numpy as np
 
@@ -79,7 +80,7 @@ def sample_vrt(vrt, lat: np.ndarray, lon: np.ndarray) -> np.ndarray:
 def run(ctx: Ctx) -> int:
     from PIL import Image
 
-    from luna.io.geotiff import VrtTiles
+    from luna.io.geotiff import VrtTiles, vrt_dependencies
     from luna.terrain import Terrain
 
     vrt_path = ctx.data.first("SouthPolar_75S_90S_v1/Regional/Terrain_30m/*.vrt")
@@ -95,7 +96,12 @@ def run(ctx: Ctx) -> int:
     else:
         sites, _ = load_sites(seed)
     south = [s for s in sites if s["lat_deg"] <= ctx.settings.grid.lat_limit_deg and (not ctx.only or s["id"] in ctx.only)]
-    key = ctx.stamp_key(NAME, [vrt_path, seed] + ([built] if built.exists() else []), {"half": HALF_KM, "n": SIZE_PX, "light": [LIGHT_AZ, LIGHT_ALT], "ids": [s["id"] for s in south], "v": 1})
+    inputs = vrt_dependencies(vrt_path) + [seed] + ([built] if built.exists() else [])
+    if meta.exists():
+        inputs.append(meta)
+        dem80_meta = json.loads(meta.read_text(encoding="utf-8")).get("dem80", {})
+        inputs += [Path(dem80_meta[k]) for k in ("label", "image") if dem80_meta.get(k)]
+    key = ctx.stamp_key(NAME, inputs, {"half": HALF_KM, "n": SIZE_PX, "light": [LIGHT_AZ, LIGHT_ALT], "ids": [s["id"] for s in south], "v": 2})
     if ctx.up_to_date(NAME, key):
         log.info(NAME, "변경 없음, 건너뜀")
         return 0
@@ -132,14 +138,24 @@ def run(ctx: Ctx) -> int:
             "file": f"{s['id']}.jpg", "lat_deg": s["lat_deg"], "lon_deg": s["lon_deg"],
             "elev_center_m": round(float(np.nanmean(z[c - 1:c + 1, c - 1:c + 1])), 1),
             "elev_min_m": round(float(np.nanmin(z)), 1), "elev_max_m": round(float(np.nanmax(z)), 1),
-            "dem": dem, "missing_frac": round(float(miss.mean()), 4),
+            "dem": dem, "missing_frac": round(float((~np.isfinite(z)).mean()), 4),
         }
         log.info(NAME, f"{s['id']}: 중심 {out[s['id']]['elev_center_m']:.0f} m, 범위 {out[s['id']]['elev_min_m']:.0f}~{out[s['id']]['elev_max_m']:.0f} m ({dem})")
 
+    # --only 로 일부만 다시 만들면 기존 local.json 의 다른 지점을 지우지 않고 합친다
+    old_local = ctx.out / "local" / "local.json"
+    if ctx.only and old_local.exists():
+        try:
+            prev = json.loads(old_local.read_text(encoding="utf-8"))["data"]["sites"]
+            out = {k: v for k, v in prev.items() if k not in out and (ctx.out / "local" / v.get("file", "")).exists()} | out
+        except (ValueError, KeyError, TypeError, AttributeError) as e:
+            log.warn(NAME, f"기존 local/local.json 을 읽지 못해 병합하지 않음: {e}")
     prov = [ctx.prov(vrt_path, "dem30", allow_unlisted=True, source_crs=crs, transform="국지 방위 등거리 화소 → 위경도 → 극평사 (luna.geo.polar) → 30 m 화소 쌍선형", lon_convention="-180..180")]
     if dem80 is not None:
         prov += [Provenance(**p) for p in json.loads(meta.read_text(encoding="utf-8"))["provenance"] if p["role"] == "dem80"]
     prov.append(ctx.prov(seed, "site_seed"))
+    for record in out.values():
+        ctx.track_output(ctx.out / "local" / record["file"])
     write_envelope(ctx, "local/local.json", Envelope(SCHEMA, {
         "half_km": HALF_KM, "size_px": SIZE_PX, "m_per_px": round(px_km * 1000, 2),
         "frame": "착륙지 중심 방위 등거리, 위 = 북(위도 증가), 오른쪽 = 동",

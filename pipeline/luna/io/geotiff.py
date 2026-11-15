@@ -10,6 +10,36 @@ import numpy as np
 from luna.constants import MOON_GEOG_PROJ4
 
 
+def vrt_dependencies(vrt: Path) -> list[Path]:
+    """VRT 자체와 실제 SourceFilename 참조를 재귀적으로 반환한다.
+
+    디렉터리에 인접한 타일만 추측하지 않는다. 없는 참조도 반환하여
+    stamp 계산이 실패하도록 한다 (누락된 타일로 기존 결과를 재사용하지 않음).
+    """
+    import xml.etree.ElementTree as ET
+
+    found: set[Path] = set()
+
+    def visit(path: Path) -> None:
+        path = path.resolve()
+        if path in found:
+            return
+        found.add(path)
+        if path.suffix.lower() != ".vrt":
+            return
+        for node in ET.parse(path).getroot().iter("SourceFilename"):
+            name = (node.text or "").strip()
+            if not name:
+                raise ValueError(f"비어 있는 VRT SourceFilename: {path}")
+            source = Path(name)
+            if node.get("relativeToVRT", "0") == "1":
+                source = path.parent / source
+            visit(source)
+
+    visit(vrt)
+    return sorted(found)
+
+
 def band_scale(ds, band: int = 1) -> tuple[float, float]:
     """GDAL 밴드 배율·오프셋 (값 = DN·scale + offset). PGDA69 GeoTIFF 는 int16 + 배율이다
     (예: 일조율 scale 4e-5, 하늘 입체각 scale 2e-4·offset 6.2832). 없으면 (1, 0)."""

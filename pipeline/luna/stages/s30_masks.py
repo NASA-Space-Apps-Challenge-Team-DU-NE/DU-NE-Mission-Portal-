@@ -44,7 +44,7 @@ def run(ctx: Ctx) -> int:
         return 1
     sites, conv = load_sites(seed)
     cfg = ctx.settings.mask
-    key = ctx.stamp_key(NAME, [meta, seed], {"cfg": cfg.__dict__, "only": ctx.only})
+    key = ctx.stamp_key(NAME, [meta, seed] + ctx.data.glob("Horizon_Masks/*.json"), {"cfg": cfg.__dict__, "only": ctx.only, "code": 2})
     if ctx.up_to_date(NAME, key):
         log.info(NAME, "변경 없음, 건너뜀")
         return 0
@@ -54,12 +54,14 @@ def run(ctx: Ctx) -> int:
     rows = []
     south = [s for s in sites if s["lat_deg"] <= ctx.settings.grid.lat_limit_deg and (not ctx.only or s["id"] in ctx.only)]
     log.info(NAME, f"남극권 착륙지 {len(south)}곳")
+    failed: list[str] = []
     for s in south:
         try:
             smp = terr.site_samplers(s["lat_deg"], s["lon_deg"], cfg.max_range_km)
             res = compute_mask(smp, s["lat_deg"], s["lon_deg"], cfg.observer_height_m, cfg.az_step_deg, cfg.max_range_km, near_exclude_km=cfg.near_exclude_km, ground_radius_km=cfg.ground_radius_km)
         except ValueError as e:
             log.warn(NAME, f"{s['id']}: {e}")
+            failed.append(s["id"])
             continue
         ref, ref_rel = drive_mask(ctx, s["id"])
         cmp = None
@@ -76,6 +78,9 @@ def run(ctx: Ctx) -> int:
         from luna.contracts import Provenance
 
         prov = [Provenance(**p) for p in dem_prov] + [seed_prov]
+        if cmp is not None and ref_rel:
+            ctx.record_input(ctx.data.path(ref_rel), "mask_comparison_reference")
+            prov += [p for p in ctx._inputs.values() if p.drive_path == ref_rel and p.role == "mask_comparison_reference"]
         write_envelope(ctx, f"masks/{s['id']}.json", Envelope(SCHEMA, hm, prov, notes=[f"관측 높이 {cfg.observer_height_m} m, 최대 {cfg.max_range_km} km", f"근거리 {cfg.near_exclude_km * 1000:.0f} m 안 제외, 지면 고도는 반경 {cfg.ground_radius_km * 1000:.0f} m 평균"]))
         save_mask_plot(res["az_deg"], res["elevation_deg"], ctx.build_path(f"preview/masks/{s['id']}.png"), ref)
 
@@ -90,5 +95,9 @@ def run(ctx: Ctx) -> int:
         w = csv.writer(f)
         w.writerow(["site_id", "drive_file", "rms_deg", "max_deg"])
         w.writerows(rows)
+    if failed:
+        # 성공한 착륙지만 썼고 도장은 찍지 않는다 → 다음 실행에서 다시 시도
+        log.warn(NAME, f"마스크 생성 실패 {len(failed)}곳: {', '.join(failed)}")
+        return 1
     ctx.mark_done(NAME, key)
     return 0

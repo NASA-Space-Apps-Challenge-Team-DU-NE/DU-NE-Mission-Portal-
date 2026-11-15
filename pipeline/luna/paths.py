@@ -72,6 +72,22 @@ NEEDS: list[Need] = [
     Need("ref_horizons", "Reference_Tables/horizons_*.csv", required=False),
     Need("ref_spice", "Reference_Tables/spice_*.csv", required=False),
     Need("spice_frames", "Raw_Data/SPICE_Kernels/moon_de440_250416.tf", required=False),
+    Need("spice_kernels", "Raw_Data/SPICE_Kernels/de440s.bsp", required=False, note="s10 천체력 표 원천 (작업 4)"),
+    # 2026-11-15 추가 자료 (남은 작업 1·5·6·7)
+    Need("lroc_objects", "Raw_Data/Additional_Global_Science/Mission_History/ANTHROPOGENIC_OBJECTS_180.ZIP", required=False, note="착륙지 좌표 교차 확인"),
+    Need("wueller_sites", "Raw_Data/Gap_Supplements_2026-11-14/operations/Zenodo_17084058/Landing_Sites.zip", required=False, note="아르테미스 후보점"),
+    Need("mission_recon", "Workspace/Codex_Data_Collection/00_Existing_Audit/LANDING_MISSION_RECONCILIATION.csv", required=False),
+    Need("mineral_bundle", "Web_Derived/Mineral_Resources_3D_2026-11-15/DOWNLOAD_AND_INSTALL.json", required=False, note="Kaguya FeO·JAXA MI 분할 묶음"),
+    Need("kaguya_raw", "Raw_Data/Gap_Supplements_2026-11-14/science/Kaguya_SP_LOLA_v2/gridded_feo_mosaic_south_pole.tif.zip", required=False),
+    Need("rockfalls_global", "Raw_Data/Gap_Supplements_2026-11-14/science/Bickel_Global_Rockfalls/Bickel_et_al_2020_i80_06.csv", required=False),
+    Need("polar_plains", f"{GAP}/Terrain_Geology/PolarPlains_Mapping.7z", required=False, note="극지 평원 비율 레이어"),
+    Need("shackleton_boulders", f"{GAP}/Terrain_Geology/Boulder_locations_in_shackleton_Gawronska_Boazman_2025.xlsx", required=False),
+    Need("geo_coord_qa", f"{GAP}/Terrain_Geology/Lunar_Geologic_Catalog_Coordinate_QA.csv", required=False, note="바위 좌표 이상치"),
+    Need("wac_ill_twi", f"{GAP}/Terrain_Geology/WAC_POLE_ILL_TWI_SOUTH_100M.IMG", required=False),
+    Need("rockfalls_global_08", "Raw_Data/Gap_Supplements_2026-11-14/science/Bickel_Global_Rockfalls/Bickel_et_al_2020_i80_08.csv", required=False, note="신뢰도 민감도"),
+    Need("horizons_im", f"{GAP}/Terrain_Geology/Horizons_IM*_*.json", required=False, note="천체력 대조"),
+    Need("wueller_illum", "Raw_Data/Gap_Supplements_2026-11-14/operations/Zenodo_17084058/Illumination_Modeling.zip", required=False, note="원 래스터 (검증은 후보점 속성 사용)"),
+    Need("scarps_polar", "Raw_Data/Gap_Supplements_2026-11-14/science/LROC_Scarps/POLAR_SCARP_LOCATIONS_180.ZIP", required=False),
     Need("mast_tables", f"{GAP}/Terrain_Geology/JPL_IPN_42_176C_*Height_Tables*.csv", required=False),
 ]
 
