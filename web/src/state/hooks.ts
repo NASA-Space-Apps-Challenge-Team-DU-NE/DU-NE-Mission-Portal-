@@ -39,7 +39,13 @@ export function useResolvedSite(ref?: SiteRef | null): ResolvedSite | null {
   const base = useMemo((): Site | null => {
     if (!r) return null;
     if (r.kind === 'catalog') return sites.find((s) => s.id === r.id) ?? null;
-    if (r.kind === 'cell') return grid ? cellSite(r.cell, grid.lat[r.cell], grid.lon[r.cell]) : null;
+    if (r.kind === 'cell') {
+      // 격자 인덱스 정수·범위 확인 (오래된 공유 URL 등). 범위 밖이면 지점 없음 → 화면은 "착륙지를 고르세요"
+      if (!grid || !Number.isInteger(r.cell) || r.cell < 0 || r.cell >= grid.lat.length) return null;
+      const lat = grid.lat[r.cell], lon = grid.lon[r.cell];
+      return Number.isFinite(lat) && Number.isFinite(lon) ? cellSite(r.cell, lat, lon) : null;
+    }
+    if (!Number.isFinite(r.lat) || !Number.isFinite(r.lon) || Math.abs(r.lat) > 90 || Math.abs(r.lon) > 180) return null;
     return { id: 'custom', name: tr('site.custom_name'), category: 'custom', lat_deg: r.lat, lon_deg: r.lon, terrain: 'flat', source_keys: [], verified: true };
   }, [r, sites, grid]);
 

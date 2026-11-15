@@ -28,23 +28,26 @@ export function lightTwins(g: GridGeometry, lit: Uint8Array, comm: Uint8Array, m
 }
 
 /** 빛 릴레이: 두 칸 중 하나라도 밝은 비율과, 둘 다 어두운 최장 시간 */
-export function relayPair(lit: Uint8Array, m: number, a: number, b: number, step_h: number) {
-  let either = 0, run = 0, best = 0;
+export function relayPair(lit: Uint8Array, m: number, a: number, b: number, hours: ArrayLike<number>) {
+  let either = 0, run = 0, best = 0, total = 0;
   for (let k = 0; k < m; k++) {
+    const h = hours[k];
+    if (!(h > 0)) continue;
+    total += h;
     const on = lit[a * m + k] || lit[b * m + k];
-    if (on) { either++; run = 0; } else { run++; if (run > best) best = run; }
+    if (on) { either += h; run = 0; } else { run += h; if (run > best) best = run; }
   }
-  return { either_lit_frac: either / m, longest_both_dark_h: best * step_h };
+  return { either_lit_frac: total > 0 ? either / total : m ? Number(!!(lit[a * m] || lit[b * m])) : 0, longest_both_dark_h: best };
 }
 
 /** 기준 칸 반경 안에서 릴레이 짝 상위 k (둘 다 어두운 시간이 짧은 순) */
-export function relayCandidates(g: GridGeometry, lit: Uint8Array, m: number, cell: number, radius_km: number, step_h: number, k = 5) {
+export function relayCandidates(g: GridGeometry, lit: Uint8Array, m: number, cell: number, radius_km: number, hours: ArrayLike<number>, k = 5) {
   const out: Array<{ cell: number; km: number; either_lit_frac: number; longest_both_dark_h: number }> = [];
   for (let i = 0; i < g.cells.length; i++) {
     if (i === cell) continue;
     const km = Math.hypot(g.x_km[i] - g.x_km[cell], g.y_km[i] - g.y_km[cell]);
     if (km > radius_km) continue;
-    out.push({ cell: i, km, ...relayPair(lit, m, cell, i, step_h) });
+    out.push({ cell: i, km, ...relayPair(lit, m, cell, i, hours) });
   }
   out.sort((a, b) => a.longest_both_dark_h - b.longest_both_dark_h || b.either_lit_frac - a.either_lit_frac);
   return out.slice(0, k);

@@ -11,6 +11,7 @@ import { useApp, type PageId } from '../state/store';
 import { PROFILE_UI, STEPS, useUi } from '../state/ui';
 import { HOMEPAGE_URL } from '../config';
 import { useLang } from '../i18n';
+import { t } from '../strings';
 
 const toInput = (ms: number) => new Date(ms).toISOString().slice(0, 16);
 const fromInput = (s: string) => Date.parse(`${s}:00Z`);
@@ -29,7 +30,10 @@ export function Masthead() {
   const status = useData((d) => d.status);
   const unverified = useData((d) => d.unverified);
   const reasons = useData((d) => d.missingReasons);
+  const gridApprox = useData((d) => d.gridApprox);
   const res = useGridRun((g) => g.result);
+  const gridError = useGridRun((g) => g.error);
+  const retryGrid = useGridRun((g) => g.retry);
   const rs = useResolvedSite();
   const ev = useEval();
   const warns = useSiteWarnings();
@@ -69,7 +73,8 @@ export function Masthead() {
         {HOMEPAGE_URL ? <a href={HOMEPAGE_URL}>학습 자료 · 출처 ↗</a> : null}
       </nav>
       <div className="macts">
-        <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? '데이터 준비됨' : status === 'loading' ? '불러오는 중' : '자료 없음'}</span>
+        {gridError ? <button className="btn" title={gridError} onClick={retryGrid}>{t('grid.retry')}</button> : null}
+        <span className={`badge ${status === 'ready' ? 'ok' : 'warn'}`} title={reasons.join('\n') || '파이프라인 산출물(web/public/data)을 모두 읽었을 때'}>● {status === 'ready' ? (gridApprox ? '데이터 일부 근사' : '데이터 준비됨') : status === 'loading' || status === 'idle' ? '불러오는 중' : status === 'degraded' ? `일부 자료 없음 (${reasons.length})` : status === 'failed' ? '불러오기 실패' : '자료 없음'}</span>
         {unverified ? <span className="badge warn" title="verified:false 항목이 있음">일부 수치 미검증</span> : null}
         <button className="btn sm" onClick={report}>보고서 복사</button>
         <button className="btn sm" onClick={csv} disabled={!res}>순위 CSV</button>

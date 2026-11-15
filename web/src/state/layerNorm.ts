@@ -22,9 +22,10 @@ export function useNormLayer(): NormLayer {
   const metas = useData((d) => d.layerMetas);
   const approx = useData((d) => d.gridApprox);
   const res = useGridRun((g) => g.result);
+  const sources = useGridRun((g) => g.sources);
   return useMemo(() => {
     if (!grid) return { name, v: null, pass: null };
-    const lv = layerView(name, res, layers, metas, grid.cells.length, approx);
+    const lv = layerView(name, res, layers, metas, grid.cells.length, approx, sources);
     if (!lv.values) return { name, v: null, pass: null };
     const ui = LAYER_UI[name];
     let [lo, hi] = lv.range ?? ui?.range ?? [Infinity, -Infinity];
@@ -42,5 +43,5 @@ export function useNormLayer(): NormLayer {
       out[i] = f;
     }
     return { name, v: out, pass: name === 'composite' ? res?.pass ?? null : null };
-  }, [name, grid, layers, metas, approx, res]);
+  }, [name, grid, layers, metas, approx, res, sources]);
 }

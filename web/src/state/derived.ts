@@ -27,8 +27,10 @@ export function cached<T>(key: string, fn: () => T): T {
 /** 지점·마스크·천체력 상태를 묶은 캐시 키 */
 export function siteKey(rs: ResolvedSite | null, margin: number): string {
   if (!rs) return 'none';
-  const eph = useData.getState().ephMeta;
-  return `${rs.site.id}|${rs.site.lat_deg.toFixed(5)}|${rs.site.lon_deg.toFixed(5)}|${rs.terrain}|${margin}|${eph?.count ?? 0}`;
+  const d = useData.getState();
+  // 천체력 revision 과 마스크 내용(관측 높이·생성 시각)을 키에 넣어 정밀 표·마스크가 준비되면 다시 계산한다
+  const m = rs.maskEnv ? `${rs.maskEnv.observer_height_m}@${(rs.maskEnv as { generated_utc?: string }).generated_utc ?? ''}` : '';
+  return `${rs.site.id}|${rs.site.lat_deg.toFixed(5)}|${rs.site.lon_deg.toFixed(5)}|${rs.terrain}|${m}|${margin}|${d.ephMeta?.count ?? 0}|r${d.ephRev}`;
 }
 
 export function useCurrent() {
@@ -50,7 +52,8 @@ export function useEval(): ScenarioEval | null {
 
 export function evalFor(ctx: SiteContext, key: string, landing: number, duration_h: number, step_h = 3): ScenarioEval {
   const a = useApp.getState();
-  return cached(`evf|${key}|${landing}|${duration_h}|${step_h}|${a.margin_deg}|${JSON.stringify(a.req)}|${JSON.stringify(a.scenarioWeights)}|${a.delay_days}`, () =>
+  // 여유각은 ctx 의 값을 쓴다 (저장한 시나리오는 자기 여유각으로 평가)
+  return cached(`evf|${key}|${landing}|${duration_h}|${step_h}|${ctx.margin_deg}|${JSON.stringify(a.req)}|${JSON.stringify(a.scenarioWeights)}|${a.delay_days}`, () =>
     scoreScenario(ctx, landing, duration_h, a.req, a.scenarioWeights, a.delay_days, step_h),
   );
 }
@@ -119,6 +122,21 @@ export function useSiteWarnings(): DustWarning[] {
     const d = c >= 0 ? layers.scarp_dist_km[c] : NaN;
     return Number.isFinite(d) && d <= DEFAULTS.fault_warn_km ? [{ kind: 'fault', target_id: 'scarp', target_name: t('map.geo_hazard'), distance_km: d, limit_km: DEFAULTS.fault_warn_km }] : [];
   }, [rs, grid, layers]);
+}
+
+/** 단층애 검사 상태: unknown(자료 없음·격자 밖·NaN) 과 checked(검사함) 를 구분한다 */
+export function useFaultCheck(): { state: 'unknown' | 'checked'; reason: string | null } {
+  const rs = useResolvedSite();
+  const grid = useData((d) => d.grid);
+  const layers = useData((d) => d.layers);
+  const lr = useData((d) => d.layerReasons);
+  return useMemo(() => {
+    if (!rs) return { state: 'unknown', reason: null };
+    if (!grid || !layers.scarp_dist_km) return { state: 'unknown', reason: lr.scarp_dist_km ?? '단층애 거리 자료 없음' };
+    const c = nearestCell(grid, rs.site.lat_deg, rs.site.lon_deg, grid.manifest.cell_km);
+    if (c < 0) return { state: 'unknown', reason: '격자 밖 지점' };
+    return Number.isFinite(layers.scarp_dist_km[c]) ? { state: 'checked', reason: null } : { state: 'unknown', reason: '이 칸의 단층애 거리 값 없음' };
+  }, [rs, grid, layers, lr]);
 }
 
 export const DAY = DAY_MS;

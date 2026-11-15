@@ -15,8 +15,10 @@ const sys: SimSystem = { panel_area_m2: 1, efficiency: 0.3, loss: 0, mount: 'ver
 describe('energy', () => {
   it('발전 0 이면 소비만큼 줄고 하한에서 멈춘다 (원인: 일조 차단)', () => {
     const r = simulate(Array.from({ length: 20 }, (_, i) => s(false, true, i)), 1, sys, { min_ops_h: 1, data_mb: 1 });
-    expect(r.soc[0]).toBeCloseTo(0.7, 6); // 800 − 100 Wh
-    expect(r.stop_index).toBe(5); // 6번째 표본에서 800 − 6·100 = 200 = 하한
+    expect(r.soc[0]).toBeCloseTo(0.8, 6); // 착륙 순간(소비 전) 80%
+    expect(r.soc[1]).toBeCloseTo(0.7, 6); // 1 h 뒤 800 − 100 Wh
+    expect(r.stop_t).toBe(6 * 3_600_000); // 800 − 6·100 = 200 = 하한 → 6 h 에 멈춤 (F08)
+    expect(r.ops_h).toBeCloseTo(6, 9); // 운용 6 h (7 h 아님)
     expect(r.stop_cause).toBe('sun_blocked');
   });
   it('상한 고정과 충족 판정', () => {
@@ -48,5 +50,40 @@ describe('power', () => {
   });
   it('항상 어두우면 불가능', () => {
     expect(powerPlan(samples.map((_x, i) => s(false, true, i)), 1, 1, 0.3, 0, 0).feasible).toBe(false);
+  });
+});
+
+describe('energy 회귀 (검토 보고서 F01·F02·F08)', () => {
+  const dark = (n: number) => Array.from({ length: n }, (_, i) => s(false, true, i));
+  it('24 h 요청 = 표본 25개지만 운용·전송은 24 h 분 (F01)', () => {
+    const big = { ...sys, battery_wh: 1e9 };
+    const r = simulate(dark(25), 1, big, { min_ops_h: 25, data_mb: 1100 });
+    expect(r.ops_h).toBeCloseTo(24, 9);
+    expect(r.total_sent_mb).toBeCloseTo(1080, 6); // 100 kbps × 24 h
+    expect(r.verdict).toBe('not_met'); // 25 h·1,100 MB 요구는 못 채움
+  });
+  it('배터리·발전 0 이면 운용 0, 전송 0, 시작 즉시 멈춤 (F02)', () => {
+    const none = { ...sys, battery_wh: 0, panel_area_m2: 0 };
+    const r = simulate(dark(25), 1, none, { min_ops_h: 1, data_mb: 1 });
+    expect(r.ops_h).toBe(0);
+    expect(r.total_sent_mb).toBe(0);
+    expect(r.verdict).toBe('not_met');
+    expect(r.stop_t).toBe(0);
+  });
+  it('0 Wh 배터리는 발전 ≥ 부하인 동안만 운용 (태양광 직결)', () => {
+    const direct = { ...sys, battery_wh: 0, panel_area_m2: 1 }; // 1361·0.3 = 408 W ≥ 100 W
+    const samples = Array.from({ length: 11 }, (_, i) => s(i < 5, true, i));
+    const r = simulate(samples, 1, direct, { min_ops_h: 1, data_mb: 1 });
+    expect(r.ops_h).toBeCloseTo(5, 9);
+    expect(r.stop_t).toBe(5 * 3_600_000);
+  });
+  it('NaN·음수 입력은 0 으로 막는다 (빈 숫자 칸)', () => {
+    const bad = { ...sys, battery_wh: NaN, panel_area_m2: -3 };
+    const r = simulate(dark(5), 1, bad, { min_ops_h: 1, data_mb: 1 });
+    expect(r.ops_h).toBe(0);
+  });
+  it('구간 중간의 하한 도달 시각을 보간한다', () => {
+    const r = simulate(Array.from({ length: 5 }, (_, i) => s(false, true, i * 4)), 4, sys, { min_ops_h: 1, data_mb: 1 });
+    expect(r.stop_t).toBe(6 * 3_600_000); // 4 h 간격 표본이어도 6 h
   });
 });

@@ -10,7 +10,7 @@ const manifest: GridManifest = {
 const g = buildGeometry(manifest, new Uint32Array([0, 1, 2]), new Int16Array(3 * 72));
 const dyn = (illum: number[], comm: number[]): DynamicLayers => ({
   illum_mission: Float32Array.from(illum), comm_mission: Float32Array.from(comm), sun_now: new Float32Array(3),
-  dark_h: Float32Array.from([10, 50, 10]), lit_bits: new Uint8Array(3), comm_bits: new Uint8Array(3), n_samples: 1,
+  dark_h: Float32Array.from([10, 50, 10]), lit_bits: new Uint8Array(3), comm_bits: new Uint8Array(3), n_samples: 1, sample_hours: new Float64Array(1),
 });
 const weights = { power: 40, comm: 25, water: 20, metal: 0, safety: 15, geo: 10 };
 

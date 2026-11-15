@@ -20,10 +20,13 @@ function Col({ sc, best, onScore }: { sc: Scenario; best: boolean; onScore(id: s
   const app = useApp();
   const ref = refOf(sc);
   const rs = useResolvedSite(ref);
-  const ctx = useSiteCtx(rs);
+  const ctx0 = useSiteCtx(rs);
+  // 저장할 때의 통신 여유각으로 평가한다 (지금 화면의 여유각이 아님)
+  const margin = Number.isFinite(sc.comm_margin_deg) ? sc.comm_margin_deg : app.margin_deg;
+  const ctx = useMemo(() => (ctx0 ? { ...ctx0, margin_deg: margin } : null), [ctx0, margin]);
   const landing = Date.parse(sc.landing_utc);
-  const e = useMemo(() => (ctx ? evalFor(ctx, siteKey(rs, app.margin_deg), landing, sc.duration_h, 3) : null), [ctx, rs, app.margin_deg, landing, sc.duration_h, app.req, app.scenarioWeights]);
-  const band = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), landing, 720, 6) : null), [ctx, rs, app.margin_deg, landing]);
+  const e = useMemo(() => (ctx ? evalFor(ctx, siteKey(rs, margin), landing, sc.duration_h, 3) : null), [ctx, rs, margin, landing, sc.duration_h, app.req, app.scenarioWeights]);
+  const band = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, margin), landing, 720, 6) : null), [ctx, rs, margin, landing]);
   useEffect(() => { if (e) onScore(sc.id, e.score.total); }, [e, sc.id, onScore]);
   return (
     <div className="card" style={{ background: 'var(--bg)', ...(best ? { borderColor: 'var(--accent)' } : {}) }}>
@@ -38,6 +41,7 @@ function Col({ sc, best, onScore }: { sc: Scenario; best: boolean; onScore(id: s
           <tr><td>요구 조건</td><td style={{ textAlign: 'right' }}>{e.score.meets_requirements ? <span className="badge ok">충족</span> : <span className="badge warn">요건 미달</span>}</td></tr>
           <tr><td>착륙지</td><td style={{ textAlign: 'right' }} className="small">{sc.site.name.slice(0, 18)}</td></tr>
           <tr><td>착륙 시각</td><td className="mono small" style={{ textAlign: 'right' }}>{utc(landing)}</td></tr>
+          <tr><td>통신 여유각</td><td className="mono small" style={{ textAlign: 'right' }}>{margin}°</td></tr>
           <tr><td>일조율</td><td className="mono" style={{ textAlign: 'right' }}>{pct(e.summary.illum_frac)}</td></tr>
           <tr><td>교신율</td><td className="mono" style={{ textAlign: 'right' }}>{pct(e.summary.comm_frac)}</td></tr>
           <tr><td>최장 연속 암흑</td><td className="mono" style={{ textAlign: 'right' }}>{hrs(e.summary.longest_dark_h)}</td></tr>
@@ -47,7 +51,7 @@ function Col({ sc, best, onScore }: { sc: Scenario; best: boolean; onScore(id: s
       ) : <NoData what="계산 중" />}
       <div style={{ padding: 8 }}>
         {band ? <BandChart h={40} times={band.map((p) => p.t)} rows={[{ label: '햇빛', values: band.map((p) => p.sun_frac), color: '--sun', grad: true }, { label: '지구', values: band.map((p) => (p.earth_visible ? 1 : 0)), color: '--earth' }]} /> : null}
-        <button className="btn sm" style={{ marginTop: 6, width: '100%', justifyContent: 'center' }} onClick={() => { app.setSite(ref); app.setLanding(landing); app.setT(landing); app.setDuration(sc.duration_h); }}>이 안으로 바꾸기</button>
+        <button className="btn sm" style={{ marginTop: 6, width: '100%', justifyContent: 'center' }} onClick={() => { app.setSite(ref); app.setLanding(landing); app.setT(landing); app.setDuration(sc.duration_h); app.setMargin(margin); }}>이 안으로 바꾸기</button>
       </div>
     </div>
   );
@@ -68,7 +72,7 @@ export default function Compare() {
 
   const rankFor = (set: ConditionSet | undefined) => {
     if (!set || !grid || !res) return null;
-    const dyn = { ...res.dyn, lit_bits: new Uint8Array(0), comm_bits: new Uint8Array(0), n_samples: 0 } as DynamicLayers;
+    const dyn = { ...res.dyn, lit_bits: new Uint8Array(0), comm_bits: new Uint8Array(0), n_samples: 0, sample_hours: new Float64Array(0) } as DynamicLayers;
     return rankCells(grid, scoreGrid({ g: grid, dyn, st: layers, weights: set.weights, filters: set.filters, artemisPoints: sites.filter((s) => s.category === 'artemis'), artemisRadiusKm: 0, artemisRegions: regions }), 8, 8);
   };
   const A = useMemo(() => rankFor(app.abSets.A), [app.abSets.A, grid, res, layers, sites, regions]);

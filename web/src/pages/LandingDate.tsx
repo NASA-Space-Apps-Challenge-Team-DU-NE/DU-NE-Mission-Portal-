@@ -7,7 +7,7 @@ import { DAY_MS, HOUR_MS } from '../core/constants';
 import { cellMask } from '../core/gridScore';
 import type { ReverseHit } from '../core/reverseSearch';
 import { siteContext } from '../core/scenario';
-import { sampleTimeline } from '../core/timeline';
+import { intervalSpans, sampleTimeline } from '../core/timeline';
 import { useData } from '../state/data';
 import { siteKey, timelineFor } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
@@ -44,14 +44,9 @@ export default function LandingDate() {
   const tl = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), winStart, winH, 1) : null), [ctx, rs, app.margin_deg, winStart, winH]);
   const wins = useMemo(() => {
     if (!tl) return [];
-    const out: Array<{ start: number; end: number; h: number; minEl: number }> = [];
-    let s = -1;
-    for (let i = 0; i <= tl.length; i++) {
-      const ok = i < tl.length && tl[i].sun_frac >= 0.5 && tl[i].earth_visible;
-      if (ok && s < 0) s = i;
-      if (!ok && s >= 0) { if (i - s >= minH) out.push({ start: tl[s].t, end: tl[i - 1].t, h: i - s, minEl: Math.min(...tl.slice(s, i).map((x) => x.sun.el_deg)) }); s = -1; }
-    }
-    return out;
+    return intervalSpans(tl.map((x) => x.t), tl.map((x) => x.sun_frac >= 0.5 && x.earth_visible))
+      .filter((w) => w.h >= minH)
+      .map((w) => ({ ...w, minEl: Math.min(...tl.slice(w.start_index, w.end_index).map((x) => x.sun.el_deg)) }));
   }, [tl, minH]);
   const top6 = useMemo(() => {
     if (!grid || !res) return [];
@@ -64,7 +59,8 @@ export default function LandingDate() {
 
   // 기간 모드: 기간·착륙지·최소 연속 시간이 바뀔 때마다 착륙 시각을 기간 안 첫 윈도 시작(없으면 기간 시작)으로 맞춘다.
   // 그 뒤 표에서 다른 윈도를 고르면 그 값을 그대로 둔다.
-  const autoKey = period && pOk ? `${pFrom}|${pTo}|${rs?.site.id ?? ''}|${minH}` : '';
+  // 지점 id 는 수동 좌표가 모두 'custom' 이라 부족하다: 좌표·마스크·천체력 revision·여유각을 담은 siteKey 를 쓴다
+  const autoKey = period && pOk ? `${pFrom}|${pTo}|${siteKey(rs, app.margin_deg)}|${minH}` : '';
   const lastKey = useRef('');
   useEffect(() => {
     if (!autoKey) { lastKey.current = ''; return; }

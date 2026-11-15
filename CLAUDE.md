@@ -191,25 +191,31 @@ NASA Space Apps Challenge 2026 **"Lunar Landing Site Navigator"**. 달 남극 �
 | 지평선 근거리 | `SouthPolar_75S_90S_v1/Regional/Terrain_30m/LOLA_LDEM_75S_30m_r??_c??.tif` (36장, `.vrt`) | VALIDATED | 30 m |
 | 경사·안전 | `SouthPolar_75S_90S_v1/Regional/Terrain/slope_75s_240m.tif`, `slope_80s_80m_{NE,NW,SE,SW}.tif`, `elevation_*` | VALIDATED | 격자 칸별 평균·90분위 경사 |
 | 장기 평균 일조·지구 가시 | `SouthPolar_75S_90S_v1/Regional/Illumination/solar_illumination_{75s_120m,85s_60m}.tif`, `earth_visibility_{…}.tif` | VALIDATED | **장기 평균**(약 18.6년) |
-| 영구음영(PSR) | `…/Illumination/permanent_shadow_{75s_120m,85s_60m}.tif` · `Workspace/Codex_Data_Collection/01_NASA_Downloads/Illumination/NAC_POLE_PSR_SOUTH/LOLA_PSR_75S90S_complete_features.zip` | VALIDATED · LIMITED_USE | PSR 거리 레이어 |
+| 영구음영(PSR) | `…/Illumination/permanent_shadow_{75s_120m,85s_60m}.tif` · `Workspace/Codex_Data_Collection/01_NASA_Downloads/Illumination/NAC_POLE_PSR_SOUTH/LOLA_PSR_75S90S_complete_features.zip` | VALIDATED · LIMITED_USE | `psr_dist_km`(래스터, 작은 그늘 포함 → 칸의 62%가 0), `psr_poly_dist_km`(폴리곤 5 km² 이상) |
 | 하늘 입체각 | `…/Illumination/sky_visibility_75s_240m.tif` | VALIDATED | 참고 레이어(선택) |
 | 실측 조명률(검증) | `Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/WAC_POLE_ILL_PCT_SOUTH_100M.IMG` (+README), `…_TWI_…` | LIMITED_USE | **88–90°S만** |
 | 수소(물 지표) | `SouthPolar_75S_90S_v1/Regional/Composition/LP_hydrogenhd_75S90S_0p5deg.csv` | LIMITED_USE | 음수 추정 25개 처리(QA) |
-| FeO·TiO₂(금속) | `…/Composition/LP_ironhd_75S90S_0p5deg.csv`, `Raw_Data/NASA_Gap_Collection_2026-11-14/Polar_Science/LP_GRS_TiO2_native_75S90S.csv` | LIMITED_USE | 2·5·20° 원 격자, **해상도 거칠다** 표시 |
+| FeO·TiO₂(금속) | `…/Composition/LP_ironhd_75S90S_0p5deg.csv`(FeO 0.5°), `Raw_Data/NASA_Gap_Collection_2026-11-14/Polar_Science/LP_GRS_TiO2_native_75S90S.csv`(TiO₂ **2° 셀만** → `tio2_wt_lp`·`tio2_lp_sigma`) | LIMITED_USE | 지역 조성, **해상도 거칠다** 표시 |
+| FeO 약 1 km | `Web_Derived/Mineral_Resources_3D_2026-11-15/NATIVE_NUMERIC_KAGUYA.zip.part*`(COG, `DOWNLOAD_AND_INSTALL.json`로 build/에 복원), 교차 확인 `Raw_Data/Gap_Supplements_2026-11-14/science/Kaguya_SP_LOLA_v2/*.zip` | REVIEW_REQUIRED | Lemelin 외 2022, 품질 1 화소만, 보간·−10 제외 (작업 5) |
+| TiO₂ JAXA MI (연구용) | `…/NATIVE_NUMERIC_ALTERNATIVES.zip.part*`의 `jaxa_mi_tio2_*_16ppd.tif` | REVIEW_REQUIRED | **75–85°S 정량 사용 보류.** `tio2_jaxa_mi_research`(칸 중심 원래 화소)·`tio2_jaxa_mi_flags`만, 점수·필터·순위·내보내기에 쓰지 않음 (작업 6) |
 | 중성자(보조) | `…/Regional/Science/lend_neutron_rates_75s_*.csv`, `lp_epithermal_75s.csv` | LIMITED_USE | 선택 |
 | 온도(보조) | `…/Regional/Science/diviner_gcp_80s75s_002.tab.gz`, `Raw_Data/Thermal/global_cumul_avg_cyl_*.tab.gz` | LIMITED_USE | Diviner ST·PRP는 얼음 판정 금지 |
-| 단층(지질) | `Raw_Data/NASA_Gap_Collection_2026-11-14/Terrain_Geology/LROC_Polar_Lobate_Scarps_75S90S.csv` | LIMITED_USE | 지점·군집 3곳뿐 |
-| 낙석·바위 | `…/Terrain_Geology/Bickel_Rockfalls_75S90S_{06,08}.csv`, `Boulder_locations_in_shackleton_*` | LIMITED_USE | 좌표 QA 표 함께 확인 |
-| 평원 지질도 | `…/Terrain_Geology/PolarPlains_Mapping.7z` | LIMITED_USE | 선택 |
+| 단층(지질) | `Raw_Data/Gap_Supplements_2026-11-14/science/LROC_Scarps/POLAR_SCARP_LOCATIONS_180.ZIP` (남쪽 점 12개, 도형 좌표 기준) | REVIEW_REQUIRED | 점 자료 — 단층선까지 거리보다 길게 나옴 (작업 7) |
+| 낙석·바위 | `Raw_Data/Gap_Supplements_2026-11-14/science/Bickel_Global_Rockfalls/Bickel_et_al_2020_i80_06.csv` (75°S 이남, 이전 추출본과 같은 821행), `Boulder_locations_in_shackleton_*` | REVIEW_REQUIRED | 80°S 이남은 검출 범위 밖 → 검출 없는 칸은 자료 없음 (작업 7) |
+| 평원 지질도 | `…/Terrain_Geology/PolarPlains_Mapping.7z` | LIMITED_USE | `plains_frac` (매핑 범위 평사 ±304 km 밖은 자료 없음) |
+| 섀클턴 바위 | `…/Terrain_Geology/Boulder_locations_in_shackleton_Gawronska_Boazman_2025.xlsx` + `Lunar_Geologic_Catalog_Coordinate_QA.csv` | LIMITED_USE | `boulder_count` (바위 없는 칸은 자료 없음, QA 이상치 1점 제외) |
+| WAC 시간가중 조명률 | `…/Terrain_Geology/WAC_POLE_ILL_TWI_SOUTH_100M.IMG` | LIMITED_USE | `wac_ill_twi`, s80 일조 대조 (88–90°S) |
+| 마스트 높이 검증 | `…/Terrain_Geology/JPL_IPN_42_176C_B1_Sun_Earth_Height_Tables.csv` | REVIEW_REQUIRED | s80 `mast` — B1 좌표 축 규약 미확인 |
+| 한여름 연속 일조 검증 | `Raw_Data/Gap_Supplements_2026-11-14/operations/Zenodo_17084058/Landing_Sites.zip` (후보점 속성 SunDays·SunEarth) | REVIEW_REQUIRED | s80 `wueller` — 한여름 기간 정의 없음, 가정 비교 |
 | 5 m 국지 지형 | `Raw_Data/PGDA78/Site01_*`, `…/Terrain_Geology/PGDA104_A3CLR22_*.zip`, `NAC_DTM_*.TIF` | LIMITED_USE | 착륙지 상세(P1-05 완성, P3-05) |
 | 3D 남극 텍스처 | `SouthPolar_75S_90S_v1/Regional/Imaging/wac_south_summer_75s_100m_{NE,NW,SE,SW}.tif` | VALIDATED | 다운샘플 PNG |
 | 3D 전구 텍스처 | Moon Trek WMTS LRO_LOLA_ClrShade (원격), 대체 NASA SVS 4720 | 외부 | `Reference_Tables/external_checks/moon_trek_capabilities.xml` |
-| 천체력 | JPL Horizons API로 새로 받기 (`Web_Derived/ephemeris/*`는 대조용) | — | 2026-11-01~2028-01-01 + 미션별 |
+| 천체력 | **SPICE 주 경로** (`Raw_Data/SPICE_Kernels/*`, MOON_ME, LT+S), Horizons 는 대조용 (`config.eph.source`) | REVIEW_REQUIRED | **2026-11-01~2031-01-01** + 미션별 (작업 4) |
 | 천체력 검증 | `Reference_Tables/horizons_*.csv`, `spice_*.csv`, `existing_validation.json`, `…/Terrain_Geology/Horizons_IM{1,2}_{Sun,Earth}_*.json` | REVIEW_REQUIRED/REF | 기준 표 |
-| SPICE (검증용) | `Raw_Data/SPICE_Kernels/*` | REVIEW_REQUIRED | `moon_de440_250416.tf`의 **MOON_ME** 프레임 |
-| 착륙지 카탈로그 | `Catalogs/sites.json` + 아르테미스 발표(1.2-2) | REFERENCE_ONLY | 출처 대조 후 `verified` |
-| 과거 미션 | `Reference_Tables/NASA_Gap_Collection_2026-11-14/LUNA_HISTORICAL_SITE_COORDINATES_16.csv`, `LUNA_MISSION_FIELD_EVIDENCE.csv`, `Catalogs/missions.json` | REFERENCE_ONLY | 좌표는 공식 기록 대조본 우선 |
-| 착륙선 프리셋 | `Reference_Tables/NASA_Gap_Collection_2026-11-14/LUNA_LANDER_TECHNICAL_SPECS.csv`, `Catalogs/landers.json` | REFERENCE_ONLY | "근사값" 배지 |
+| SPICE | `Raw_Data/SPICE_Kernels/*` | REVIEW_REQUIRED | 천체력 표 원천. `moon_de440_250416.tf`의 **MOON_ME** 프레임. CSPICE 는 한글 경로를 못 열어 커널 폴더로 옮겨 연다 |
+| 착륙지 카탈로그 | `Catalogs/sites.json` (2026-11-15 대조 반영) + 대조 자료 `LUNA_HISTORICAL_SITE_COORDINATES_16.csv`, `Raw_Data/Additional_Global_Science/Mission_History/ANTHROPOGENIC_OBJECTS_180.ZIP`, `Raw_Data/Artemis_III_Regions_USGS_2024/A3_9regions-lonlat-simplified.zip`, `Raw_Data/Gap_Supplements_2026-11-14/operations/Zenodo_17084058/Landing_Sites.zip` | REFERENCE_ONLY | 좌표 종류·근거 수준 필드, 대조 표 `validation/catalog_sites.json` (작업 1) |
+| 과거 미션 | `Reference_Tables/NASA_Gap_Collection_2026-11-14/LUNA_HISTORICAL_SITE_COORDINATES_16.csv`, `LUNA_MISSION_FIELD_EVIDENCE.csv`, `Workspace/Codex_Data_Collection/00_Existing_Audit/LANDING_MISSION_RECONCILIATION.csv`, `Catalogs/missions.json` | REFERENCE_ONLY | 필드별 근거·조명 관련(yes/no/unknown)·시각 정밀도. 실제 운용 기간이 없으면 계획 기간으로 대신하지 않음 (작업 2) |
+| 착륙선 프리셋 | `Reference_Tables/NASA_Gap_Collection_2026-11-14/LUNA_LANDER_TECHNICAL_SPECS.csv`, `Catalogs/landers.json` | REFERENCE_ONLY | 근거표에 대응 행 없음 → 데이터 숫자는 null. 화면은 근사값(PROVISIONAL)으로 시작, "근사값" 배지 (작업 3) |
 | 기지 전력 기준 | `…/LUNAR_BASE_POWER_CONCEPT_PARAMETERS.csv`, `Mission_Engineering/NASA_Lunar_relocatable_10kW_array.pdf` | REFERENCE_ONLY | 비교 단위 |
 | 지상국 | `…/DSN_ITRF93_ANTENNA_COORDINATES.csv`, `DSN_HORIZON_MASKS_301O.csv`, `EARTH_STATION_LEGACY_FIELD_AUDIT.csv`(여주 포함), `Mission_Engineering/earthstns_itrf93_260814.bsp` | REFERENCE_ONLY | 안테나별 방위 마스크 |
 | 마스트 높이(검증) | `…/Terrain_Geology/JPL_IPN_42_176C_B1_Sun_Earth_Height_Tables.csv` | REVIEW_REQUIRED | P3-01 결과 대조 |

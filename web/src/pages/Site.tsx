@@ -30,7 +30,7 @@ function RankTab() {
     return sites.map((s) => {
       const env = s.mask ? masks[s.mask] : undefined, m = env && env !== 'missing' ? env.data : null;
       const ctx = siteContext({ ...s, elevation_m: m?.ground_elev_m ?? s.elevation_m }, m ?? flatMask(s.id, s.lat_deg, s.lon_deg, 2), eph, app.margin_deg);
-      return { s, terrain: (m ? 'site' : 'flat') as 'site' | 'flat', e: evalFor(ctx, `cat|${s.id}|${m ? 1 : 0}|${eph.constructor.name}`, app.landing, app.duration_h, 6) };
+      return { s, terrain: (m ? 'site' : 'flat') as 'site' | 'flat', e: evalFor(ctx, `cat|${s.id}|${m ? 1 : 0}|r${useData.getState().ephRev}`, app.landing, app.duration_h, 6) };
     }).sort((a, b) => b.e.score.total - a.e.score.total);
   }, [app.rankMode, sites, masks, eph, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights]);
   const ref = app.siteRef;

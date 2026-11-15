@@ -1,5 +1,6 @@
 // 전력 계산·패널 위치 추천 (P1-30·31, CLAUDE.md 8.9)
 import { CHARGE_EFF } from './energy';
+import { intervalHours } from './timeline';
 import type { TimelineSample } from './types';
 
 export const DEPTH_OF_DISCHARGE = 0.8;
@@ -15,11 +16,12 @@ export interface PowerPlan {
 }
 
 /** 면적 A 로 수요를 버틸 때 배터리 최대 감소량(Wh) — 순수지 ≥ 0 이면 Infinity 아님 */
-export function maxDrawdownWh(perM2: Float32Array, area: number, demand_w: number, step_h: number): { drawdown: number; netWh: number } {
+export function maxDrawdownWh(perM2: Float32Array, area: number, demand_w: number, step_h: number | ArrayLike<number>): { drawdown: number; netWh: number } {
   let E = 0, minE = 0, net = 0;
   for (let i = 0; i < perM2.length; i++) {
+    const h = typeof step_h === 'number' ? step_h : step_h[i];
     const d = perM2[i] * area - demand_w;
-    const de = d * step_h * (d > 0 ? CHARGE_EFF : 1);
+    const de = d * h * (d > 0 ? CHARGE_EFF : 1);
     E += de;
     net += de;
     if (E > 0) E = 0; // 배터리는 가득 찬 상태에서 넘치면 버린다
@@ -28,14 +30,16 @@ export function maxDrawdownWh(perM2: Float32Array, area: number, demand_w: numbe
   return { drawdown: -minE, netWh: net };
 }
 
-export function powerPlan(samples: TimelineSample[], step_h: number, demand_kw: number, efficiency: number, loss: number, margin: number): PowerPlan {
+export function powerPlan(samples: TimelineSample[], _step_h: number, demand_kw: number, efficiency: number, loss: number, margin: number): PowerPlan {
   const per = new Float32Array(samples.length);
-  let sum = 0;
+  const w = intervalHours(samples);
+  let sum = 0, tot = 0;
   for (let i = 0; i < samples.length; i++) {
     per[i] = samples[i].irr_vertical_w_m2 * efficiency * (1 - loss);
-    sum += per[i];
+    sum += per[i] * w[i];
+    tot += w[i];
   }
-  const mean = sum / Math.max(1, samples.length);
+  const mean = tot > 0 ? sum / tot : samples.length ? per[0] : 0;
   const demand = demand_kw * 1000;
   if (demand <= 0) return { mean_w_per_m2: mean, panel_area_m2: 0, battery_kwh: 0, per_m2_w: per, feasible: true };
   if (mean <= 0) return { mean_w_per_m2: 0, panel_area_m2: Infinity, battery_kwh: Infinity, per_m2_w: per, feasible: false };
@@ -43,7 +47,7 @@ export function powerPlan(samples: TimelineSample[], step_h: number, demand_kw: 
   const ok = (A: number) => {
     let surplus = 0, deficit = 0;
     for (let i = 0; i < per.length; i++) {
-      const d = per[i] * A - demand;
+      const d = (per[i] * A - demand) * w[i];
       if (d > 0) surplus += d; else deficit -= d;
     }
     return surplus * CHARGE_EFF >= deficit;
@@ -57,7 +61,7 @@ export function powerPlan(samples: TimelineSample[], step_h: number, demand_kw: 
     if (ok(mid)) hi = mid; else lo = mid;
   }
   const area = hi * (1 + margin);
-  const { drawdown } = maxDrawdownWh(per, area, demand, step_h);
+  const { drawdown } = maxDrawdownWh(per, area, demand, w);
   return { mean_w_per_m2: mean, panel_area_m2: area, battery_kwh: drawdown / DEPTH_OF_DISCHARGE / 1000, per_m2_w: per, feasible: true };
 }
 

@@ -131,7 +131,8 @@ export const useApp = create<AppState>((set, get) => ({
   setSite: (siteRef) => set({ siteRef }),
   setT: (t) => set({ t }),
   setLanding: (landing) => set({ landing }),
-  setDuration: (duration_h) => set({ duration_h: Math.max(1, Math.min(24 * 365, duration_h)) }),
+  // 지도·순위와 같은 상한(60일)을 URL·프리셋에도 강제한다
+  setDuration: (duration_h) => { if (Number.isFinite(duration_h)) set({ duration_h: Math.max(1, Math.min(MAX_DURATION_H, duration_h)) }); },
   togglePlay: () => set({ playing: !get().playing }),
   setSpeed: (speed_h) => set({ speed_h }),
   setMargin: (margin_deg) => set({ margin_deg }),
@@ -166,6 +167,9 @@ export const useApp = create<AppState>((set, get) => ({
   setOverlay: (overlayScenarioId) => set({ overlayScenarioId }),
 }));
 
+/** 임무 기간 상한 (h). computeDynamic 의 평가 상한과 같다 */
+export const MAX_DURATION_H = 60 * 24;
+
 // ───────── URL 동기화 (?site=&t=&d=&p=) ─────────
 export function siteRefToParam(r: SiteRef | null): string | null {
   if (!r) return null;
@@ -176,9 +180,13 @@ export function siteRefToParam(r: SiteRef | null): string | null {
 export function paramToSiteRef(s: string | null): SiteRef | null {
   if (!s) return null;
   const m = /^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/.exec(s);
-  if (m) return { kind: 'custom', lat: Number(m[1]), lon: Number(m[2]) };
+  if (m) {
+    const lat = Number(m[1]), lon = Number(m[2]);
+    // 입력 폼과 같은 범위 검사. 범위 밖이면 무시(현재 지점 유지)
+    return Math.abs(lat) <= 90 && Math.abs(lon) <= 180 ? { kind: 'custom', lat, lon } : null;
+  }
   const c = /^cell_(\d+)$/.exec(s);
-  if (c) return { kind: 'cell', cell: Number(c[1]) };
+  if (c) return Number.isSafeInteger(Number(c[1])) ? { kind: 'cell', cell: Number(c[1]) } : null;
   return { kind: 'catalog', id: s };
 }
 

@@ -1,6 +1,7 @@
 // 지상국 통신 창 (묶음 F, P1-36, CLAUDE.md 8.7)
 // 지구 쪽 좌표(WGS84/ITRF)는 지상국에서 본 달 고도 계산에만 쓰고 달 좌표와 섞지 않는다(4.6).
 // 달 위치는 해석적 근사(ephemeris.moonGeocentricJ2000) + 세차·GMST 회전. 대기 굴절 없음 → 화면 "근사".
+import { dailyMinHours, intervalHours } from './timeline';
 import { DEG, RAD, WGS84_A_KM, WGS84_F } from './constants';
 import { moonGeocentricJ2000 } from './ephemeris';
 import { horizonAt } from './horizon';
@@ -67,13 +68,13 @@ export function moonAzElFromStation(lat: number, lon: number, h_m: number, t: Ti
   return { az_deg: normAz(Math.atan2(x, y) * RAD), el_deg: Math.asin(clamp(z, -1, 1)) * RAD };
 }
 
-/** 기준: 안테나 지평선 마스크가 있으면 max(마스크, 최소 고도각), 없으면 최소 고도각 */
+/** 기준(CLAUDE.md 8.7): 안테나 지평선 마스크가 있으면 마스크 우선, 없으면 최소 고도각 */
 export function stationSees(st: Station, t: TimeMs): { visible: boolean; el_deg: number; threshold_deg: number; uses_mask: boolean } {
   const a = st.antennas[0];
   const lat = a?.lat_deg ?? st.lat_deg, lon = a?.lon_deg ?? st.lon_deg, h = a?.height_m ?? st.height_m;
   const ae = moonAzElFromStation(lat, lon, h, t);
   const mask = a?.horizon_mask;
-  const thr = mask ? Math.max(horizonAt(mask, ae.az_deg), st.min_elev_deg) : st.min_elev_deg;
+  const thr = mask ? horizonAt(mask, ae.az_deg) : st.min_elev_deg;
   return { visible: ae.el_deg >= thr, el_deg: ae.el_deg, threshold_deg: thr, uses_mask: !!mask };
 }
 
@@ -86,7 +87,7 @@ export interface StationWindows {
   link_frac: number;
 }
 
-export function stationWindows(stations: Station[], times: TimeMs[], earthVisible: ArrayLike<boolean | number>, step_h: number): StationWindows {
+export function stationWindows(stations: Station[], times: TimeMs[], earthVisible: ArrayLike<boolean | number>, _step_h: number): StationWindows {
   const per: Record<string, Uint8Array> = {};
   const n = times.length;
   const link = new Uint8Array(n);
@@ -100,19 +101,10 @@ export function stationWindows(stations: Station[], times: TimeMs[], earthVisibl
     }
     link[i] = any && earthVisible[i] ? 1 : 0;
   }
-  const perDay = Math.max(1, Math.round(24 / step_h));
-  let minDay = Infinity, total = 0;
-  for (let i = 0; i < n; i++) total += link[i];
-  if (n < perDay) minDay = total * step_h;
-  else {
-    let w = 0;
-    for (let i = 0; i < perDay; i++) w += link[i];
-    minDay = w;
-    for (let i = perDay; i < n; i++) {
-      w += link[i] - link[i - perDay];
-      if (w < minDay) minDay = w;
-    }
-    minDay *= step_h;
-  }
-  return { times, per_station: per, link, daily_link_h_min: minDay, link_frac: n ? total / n : 0 };
+  // 표본 i 는 [t_i, t_{i+1}) 을 대표 (마지막 표본 0 h)
+  const w = intervalHours(times);
+  let total = 0, tot = 0;
+  for (let i = 0; i < n; i++) { tot += w[i]; if (link[i]) total += w[i]; }
+  const minDay = n ? dailyMinHours(times, w, link) : 0;
+  return { times, per_station: per, link, daily_link_h_min: minDay, link_frac: tot > 0 ? total / tot : n ? link[0] : 0 };
 }
