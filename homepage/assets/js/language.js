@@ -16,7 +16,7 @@
     ? choice
     : saved === "en" || saved === "ko"
       ? saved
-      : /^ko(?:-|$)/i.test(navigator.language) ? "ko" : "en";
+      : "en"; // 처음 들어오면 영어. KR 을 고르면 그 선택을 기억한다
 
   const korean = lang === "ko";
 

@@ -222,6 +222,7 @@ export const EN: Record<string, string> = {
  "점수는 후보 간 상대 비교용 지표이며 확률이 아님.": "Scores compare candidates with each other; they are not probabilities.",
  "보고서를 복사했습니다": "Report copied",
  "DU:NE 임무 포털 처음으로": "DU:NE mission portal home",
+ "DU:NE 홈페이지로": "Go to the DU:NE homepage",
  "화면": "Views",
  "파이프라인 산출물(web/public/data)을 모두 읽었을 때": "When all pipeline outputs (web/public/data) were read",
  "데이터 준비됨": "Data ready",

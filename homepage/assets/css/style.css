@@ -523,3 +523,18 @@ html:lang(en) body:has(
 ) .bar-title h1 {
   font-weight: 700;
 }
+
+/* ---- 미션 포털 저장소에서 덧붙임 (2026-11-15) ---- */
+/* 메뉴 띠를 화면 양끝까지 이어 그린다 (양옆 흰 공백 없음) */
+.bar-menu { background: #1e253e; }
+/* 홈: 슬라이드·착륙 계획 세우기 칸을 화면 가운데에 두고, 최신 소식은 오른쪽 칸에 둔다 */
+@media (min-width: 1001px) {
+  body:has(.plan-bar) .page.layout {
+    width: calc(50% + 490px);
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr) 210px;
+    column-gap: 10px;
+  }
+  body:has(.plan-bar) .page.layout > .content { grid-column: 2; width: auto; min-width: 0; }
+  body:has(.plan-bar) .page.layout > .sidebar { grid-column: 3; width: auto; }
+}

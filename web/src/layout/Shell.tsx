@@ -61,6 +61,10 @@ function StartOver() {
   );
 }
 
+/** 사이트 홈페이지 주소: 포털이 하위 경로(예: /mission-portal/)에 배포됐을 때만 그 위 폴더 */
+const BASE = import.meta.env.BASE_URL ?? '/';
+const HOME_URL = BASE !== '/' && BASE.startsWith('/') ? BASE.replace(/[^/]+\/$/, '') : null;
+
 /** 맨 위 검은 띠: 팀 로고(홈페이지와 같은 크기·위치) · 화면 이동 · 데이터 상태 · 내보내기 */
 export function Masthead() {
   const app = useApp();
@@ -106,7 +110,8 @@ export function Masthead() {
 
   return (
     <header className="mast">
-      <a className="logo" href="./" aria-label="DU:NE 임무 포털 처음으로" onClick={(e) => { e.preventDefault(); ui.set({ mode: 'explore' }); }}>
+      {/* 홈페이지와 함께 배포(/mission-portal/)되면 로고는 홈페이지(/)로 간다. 포털만 단독으로 열면(base /) 지도 화면으로 */}
+      <a className="logo" href={HOME_URL ?? './'} aria-label={HOME_URL ? 'DU:NE 홈페이지로' : 'DU:NE 임무 포털 처음으로'} onClick={(e) => { if (HOME_URL) return; e.preventDefault(); ui.set({ mode: 'explore' }); }}>
         <img src="brand/dune-logo.png" alt="DU:NE" width={221} height={80} />
       </a>
       <nav className="mnav" aria-label="화면">
