@@ -32,7 +32,7 @@ function ProfileTab() {
   const profs: ProfileSel[] = ['custom', 'long_base', 'recon', 'water'];
   return (
     <>
-      <Card title="미션 프로파일" tag={<span className="badge prov">임시값 PROVISIONAL</span>}>
+      <Card title="미션 프로파일">
         <div className="g4">
           {profs.map((k) => {
             const w = k === 'custom' ? app.customWeights : PROFILES[k as ProfileId].weights;
@@ -76,7 +76,7 @@ function ProfileTab() {
           </Card>
         </div>
         <div className="col">
-          <Card title="가중치" sub="순위에 반영" tag={<span className="badge prov">임시값</span>}>
+          <Card title="가중치" sub="순위에 반영">
             <Help>남은 곳들 중 무엇을 더 중요하게 볼지 정합니다. 비율만 의미가 있습니다.{sun ? null : <> 지금 발전 방식(<b>{POWER_KINDS[app.powerSource.kind].name}</b>)은 햇빛이 필요 없어 <b>발전(일조)</b> 가중치와 시나리오 점수의 전력 항목을 계산에서 뺍니다.</>}</Help>
             <div className="share">
               {CRITS.filter((k) => app.mapWeights[k] > 0 && (sun || k !== 'power')).map((k) => { const s = (app.mapWeights[k] / wsum) * 100; return <div key={k} style={{ width: `${s}%`, background: CRIT_COL[k] }} title={`${CRIT[k]} ${Math.round(s)}%`}>{s >= 9 ? `${Math.round(s)}%` : ''}</div>; })}
@@ -89,7 +89,7 @@ function ProfileTab() {
               </div>
             ))}
           </Card>
-          <Card title="임무 기간 · 통신 여유각" tag={<span className="badge prov">임시값</span>}>
+          <Card title="임무 기간 · 통신 여유각">
             <div className="wrow"><label className="small">임무 기간</label><input type="range" min={24} max={1440} step={24} value={app.duration_h} onChange={(e) => app.setDuration(Number(e.target.value))} /><output>{app.duration_h}</output></div>
             <div className="chips">
               {([[72, '3일'], [240, '10일'], [720, '30일'], [1440, '60일']] as Array<[number, string]>).map(([v, l]) => <button key={v} className="chip" aria-pressed={app.duration_h === v} onClick={() => app.setDuration(v)}>{l}</button>)}
@@ -108,6 +108,9 @@ const EXTRA: Array<[keyof LanderExtra, string, number]> = [
   ['dry_mass_kg', '건조 질량 (kg)', 10], ['prop_mass_kg', '추진제 질량 (kg)', 10], ['thrust_n', '주 엔진 추력 (N)', 10], ['isp_s', '비추력 Isp (s)', 1],
 ];
 const num = (v: number | null | undefined) => (typeof v === 'number' && Number.isFinite(v) ? v : '');
+const PRESET_HELP = '태양전지 착륙선 대표 유형 4종입니다. 고르면 발전 방식(태양전지), 패널 면적·효율, 배터리, 소비 전력, 전송 속도가 그 유형의 근사값으로 바뀝니다. 질량·추진과 기지 필요 전력은 유형별 예시 자료가 없어 프리셋과 상관없이 따로 정합니다. 숫자를 바꾸면 04 임무 분석의 타임랩스가 바로 다시 계산됩니다.';
+const PRESET_MOUNT = '패널 설치 방식';
+const MOUNT_KO: Record<string, string> = { horizontal: '수평 고정', vertical_fixed: '수직 고정', vertical_tracking: '수직 태양 추적' };
 
 function LanderTab() {
   const app = useApp();
@@ -124,16 +127,17 @@ function LanderTab() {
   const tw = m0 > 0 ? ex.thrust_n / (m0 * 1.62) : NaN;
   return (
     <>
-      <Card title="착륙선 프리셋" tag={<span className="badge approx">근사값</span>}>
+      <Card title="착륙선 프리셋">
         <div className="row">
           <select className="field" value={L?.id ?? ''} style={{ minWidth: 300 }} onChange={(e) => app.setLander(e.target.value)}>
             {landers.map((l) => <option key={l.id} value={l.id}>{l.name}</option>)}
           </select>
           {Object.keys(app.landerEdits).length ? <button className="btn sm" onClick={() => L && app.setLander(L.id)}>원래 값으로</button> : null}
         </div>
-        <Help>대표 유형의 근사값입니다. 아래 숫자를 바꾸면 04 임무 분석의 타임랩스가 바로 다시 계산됩니다.</Help>
+        <Help>{PRESET_HELP}</Help>
+        {L ? <div className="row small soft"><span>{PRESET_MOUNT}</span><b>{MOUNT_KO[L.mount] ?? L.mount}</b></div> : null}
       </Card>
-      <Card title="발전 방식" tag={<span className="badge prov">출력·연료 임시값</span>}>
+      <Card title="발전 방식">
         <Seg<PowerKind> value={ps.kind} opts={(Object.keys(POWER_KINDS) as PowerKind[]).map((k) => [k, POWER_KINDS[k].name] as [PowerKind, string])} onChange={(k) => app.setPowerSource({ kind: k })} wrap />
         <p className="help" style={{ margin: 0 }}>{kind.desc}.{kind.needsSun ? '' : ' 햇빛이 필요 없으므로 일조율·최장 그늘은 가중치·필수 조건·점수 계산에서 빠집니다.'}</p>
         {kind.needsSun ? (
@@ -155,7 +159,7 @@ function LanderTab() {
           </div>
           <Help>04 임무 분석의 <b>전력</b> 탭이 기지 필요 전력으로 {kind.needsSun ? <>패널 면적과 배터리 용량을 계산합니다. 태양을 따라 도는 수직 패널 기준, 시스템 손실 {DEFAULTS.panel_loss * 100}%, 설계 여유 {DEFAULTS.power_margin * 100}% (임시값).</> : <>필요한 발전기 대수를 봅니다.</>}</Help>
         </Card>
-        <Card title="질량 · 추진" sub="궤도 분석용" tag={<span className="badge prov">임시값 PROVISIONAL</span>}>
+        <Card title="질량 · 추진" sub="궤도 분석용">
           <div className="row">{EXTRA.map(([k, l, st]) => <label key={k} className="small muted">{l}<br /><input className="field num" type="number" min={0} step={st} value={num(ex[k])} onChange={(e) => app.setLanderExtra({ [k]: e.currentTarget.valueAsNumber } as Partial<LanderExtra>)} /></label>)}</div>
           <div className="row small">
             <span>속도 변화 여유 Δv <b className="mono">{Number.isFinite(dv) ? `${Math.round(dv).toLocaleString()} m/s` : '—'}</b></span>

@@ -35,6 +35,7 @@ export function tx(s: string): string {
     .replace(/(\d)\s*곳(?![가-힣])/g, '$1 sites')
     .replace(/(\d)\s*칸(?![가-힣])/g, '$1 cells')
     .replace(/(\d)\s*개(?![가-힣])/g, '$1')
+    .replace(/(\d)\s*점(?![가-힣])/g, '$1 pts')
     .replace(/\/일(?![가-힣])/g, '/day');
   return s3.replace(RE, (k) => EN[k]);
 }

@@ -67,7 +67,7 @@ select.field{padding-right:24px}
 .side{border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0}
 .side .scroll{flex:1;overflow:auto;padding:10px 0}
 .sgrp{padding:10px 14px 4px;font:600 10.5px var(--f-mono);letter-spacing:.12em;color:var(--muted)}
-.step{display:grid;grid-template-columns:30px 1fr 10px;gap:0 8px;align-items:start;width:100%;text-align:left;border:0;background:transparent;padding:8px 12px 8px 12px;border-left:3px solid transparent}
+.step{display:grid;grid-template-columns:30px 1fr 16px;gap:0 8px;align-items:start;width:100%;text-align:left;border:0;background:transparent;padding:8px 12px 8px 12px;border-left:3px solid transparent}
 .step:hover{background:var(--panel2)}
 .step[aria-current=true]{background:var(--accent-bg);border-left-color:var(--accent)}
 .step .n{font:500 12px var(--f-mono);color:var(--muted);border:1px solid var(--line2);height:22px;display:grid;place-items:center;border-radius:var(--r);margin-top:1px}
@@ -665,3 +665,17 @@ body.fs .rsz{display:none}
   .app.mode-explore .rail{height:calc(100vh - 96px)}
   .app.mode-plan .rail{grid-template-rows:440px auto}
 }
+
+/* 오른쪽 3D 달: 평소에는 달만 보이고, 마우스를 올리면 버튼·범례·표지가 천천히 나타난다 (터치 화면·전체화면·지도 모드 첫 카드는 그대로) */
+@media (hover:hover){
+  body:not(.fs) .rail .view > :not(canvas):not(.pick):not(.loading),
+  body:not(.fs) .rail .view2d > .vtools{transition:opacity .28s ease}
+  body:not(.fs) .rail .view:not(:hover):not(:focus-within) > :not(canvas):not(.pick):not(.loading),
+  body:not(.fs) .rail .view2d:not(:hover):not(:focus-within) > .vtools{opacity:0;pointer-events:none}
+}
+.viewdiff{font-size:11px;color:var(--amber,#d9a24e);border:1px dashed currentColor;padding:1px 6px;margin-left:6px;white-space:nowrap}
+.fvh .viewreset{order:3;margin-left:auto}
+
+/* 단계 목록 경고: 빨간 점 대신 경고 삼각형(느낌표) */
+.step .dot.warn{width:15px;height:13px;margin-top:3px;border-radius:0;background:none;color:var(--warn);display:inline-flex;line-height:0}
+.side.collapsed .step .dot.warn{top:4px;right:6px}

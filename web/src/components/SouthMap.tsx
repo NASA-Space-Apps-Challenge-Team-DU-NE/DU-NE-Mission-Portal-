@@ -8,7 +8,7 @@ import { useBases } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite } from '../state/hooks';
 import { useNormLayer } from '../state/layerNorm';
-import { useApp } from '../state/store';
+import { useApp, viewRefOf } from '../state/store';
 import { rampRGB } from './kit';
 import { useArtemisVintage } from '../state/artemis';
 import type { GridRegion } from '../core/gridScore';
@@ -181,7 +181,7 @@ export function RegionSeg() {
   );
 }
 
-export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: number): void }) {
+export function SouthMap(p: { where: 'site' | 'base'; view?: boolean; onPick(lat: number, lon: number): void }) {
   const app = useApp();
   const region = useData((d) => d.mapRegion);
   const grid = useData((d) => d.grid);
@@ -189,7 +189,8 @@ export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: n
   const regions = useData((d) => d.artemisRegions);
   const vint = useArtemisVintage();
   const res = useGridRun((g) => g.result);
-  const rs = useResolvedSite();
+  const viewRef = useApp(viewRefOf);
+  const rs = useResolvedSite(p.view ? viewRef : undefined);
   const bases = useBases();
   const nl = useNormLayer();
   const wac = useWac();
@@ -328,8 +329,10 @@ export function SouthMap(p: { where: 'site' | 'base'; onPick(lat: number, lon: n
 }
 
 /** 지도·3D 클릭: 가까운 카탈로그 착륙지 → 상위 후보 칸 → 좌표 그대로 */
-export function pickNear(lat: number, lon: number, kmLimit = 8) {
-  const app = useApp.getState();
+/** 지도에서 누른 곳 근처의 착륙지·격자 칸을 고른다. view = true 면 오른쪽(3D 달·현장 뷰)에서만 바꾸고 계획은 그대로 둔다 */
+export function pickNear(lat: number, lon: number, kmLimit = 8, view = false) {
+  const st = useApp.getState();
+  const app = { setSite: view ? st.setViewSite : st.setSite };
   const sites = useData.getState().sites.items;
   const res = useGridRun.getState().result;
   const near = sites.find((s) => greatCircleKm(lat, lon, s.lat_deg, s.lon_deg) < kmLimit);

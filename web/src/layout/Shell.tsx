@@ -7,7 +7,7 @@ import { useData } from '../state/data';
 import { useSiteWarnings, useEval, usePower, useSim } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
 import { useResolvedSite } from '../state/hooks';
-import { useApp, type PageId } from '../state/store';
+import { useApp, viewLandingOf, type PageId } from '../state/store';
 import { playClock } from '../state/playClock';
 import { PROFILE_UI, STEPS, useUi } from '../state/ui';
 import { HOMEPAGE_URL, POWER_KINDS } from '../config';
@@ -123,10 +123,13 @@ export function Masthead() {
 }
 
 /** 시간 막대: 착륙 시각 · 재생 · 보는 시각. 달 지도 아래에 붙는다 (어느 모드에서나 보임) */
+/** 오른쪽(3D 달·현장 뷰) 시간 막대. 여기서 바꾼 착륙 시각은 오른쪽에서만 쓰고 계획(왼쪽)은 바꾸지 않는다.
+ *  현장 뷰 제목 줄의 '계획으로 되돌리기'를 누르면 오른쪽이 계획의 착륙지·착륙 시각·여유각으로 돌아간다. */
 export function TimeBar() {
   const app = useApp();
+  const landing = useApp(viewLandingOf);
   const span = Math.max(720, app.duration_h);
-  const rel = (app.t - app.landing) / HOUR_MS;
+  const rel = (app.t - landing) / HOUR_MS;
 
   // 재생: 3D 화면은 매 프레임 부드럽게(playClock), 계산용 시각(store t)은 220 ms 마다 그 값으로 맞춘다.
   // 빠르기는 예전과 같다 (220 ms 에 speed 시간). 끝나면 착륙 시각으로 돌아간다.
@@ -137,7 +140,8 @@ export function TimeBar() {
     const tick = (now: number) => {
       const st = useApp.getState();
       playClock.t += ((now - last) / 220) * st.speed_h * HOUR_MS; last = now;
-      if (playClock.t > st.landing + Math.max(720, st.duration_h) * HOUR_MS) playClock.t = st.landing;
+      const L = viewLandingOf(st);
+      if (playClock.t > L + Math.max(720, st.duration_h) * HOUR_MS) playClock.t = L;
       if (now - sync >= 220) { sync = now; useApp.setState({ t: Math.round(playClock.t / 60000) * 60000 }); }
       raf = requestAnimationFrame(tick);
     };
@@ -150,18 +154,18 @@ export function TimeBar() {
       <button className="ibtn pri" aria-label="재생" title="재생 (스페이스)" onClick={app.togglePlay}>{app.playing ? '❚❚' : '▶'}</button>
       <div className="tgrp">
         <label htmlFor="landing">착륙</label>
-        <input type="datetime-local" className="field mono" id="landing" step={3600} value={toInput(app.landing)} onChange={(e) => { const v = fromInput(e.target.value); if (Number.isFinite(v)) { app.setLanding(v); app.setT(v); toast('착륙 시각을 바꿨습니다'); } }} />
+        <input type="datetime-local" className="field mono" id="landing" step={3600} value={toInput(landing)} onChange={(e) => { const v = fromInput(e.target.value); if (Number.isFinite(v)) { app.setViewLanding(v); toast('이 화면에서만 착륙 시각을 바꿨습니다 (계획은 그대로)'); } }} />
         <span className="tiny muted mono">UTC</span>
       </div>
       <div className="tslide">
         <div className="tl"><span>보는 시각 <output>{utc(app.t)} UTC</output></span><span className="mono">착륙 {rel >= 0 ? '+' : '−'}{Math.floor(Math.abs(rel) / 24)}일 {Math.round(Math.abs(rel) % 24)}시간</span></div>
-        <input type="range" min={-24} max={span} step={1} value={Math.max(-24, Math.min(span, rel))} aria-label="보는 시각 (착륙 기준 시간)" onChange={(e) => app.setT(app.landing + Number(e.target.value) * HOUR_MS)} />
+        <input type="range" min={-24} max={span} step={1} value={Math.max(-24, Math.min(span, rel))} aria-label="보는 시각 (착륙 기준 시간)" onChange={(e) => app.setT(landing + Number(e.target.value) * HOUR_MS)} />
       </div>
       <div className="seg" aria-label="재생 속도">
         {[[1, '1h'], [6, '6h'], [24, '1일']].map(([v, l]) => <button key={v} aria-pressed={app.speed_h === v} onClick={() => app.setSpeed(v as number)}>{l}</button>)}
       </div>
       <button className="btn sm" title="실제 현재 시각" onClick={() => app.setT(Math.floor(Date.now() / HOUR_MS) * HOUR_MS)}>지금</button>
-      <button className="btn sm" onClick={() => app.setT(app.landing)}>착륙 시각으로</button>
+      <button className="btn sm" onClick={() => app.setT(landing)}>착륙 시각으로</button>
     </div>
   );
 }
@@ -197,6 +201,17 @@ export function Sidebar() {
     if (id === 'site' && ev && !ev.score.meets_requirements) return 'warn';
     return '';
   };
+  // 경고는 점 대신 빨간 경고 삼각형(느낌표). 마우스를 올리면 이유를 보여 준다
+  const WARN_WHY: Partial<Record<PageId, string>> = { site: '지금 계획이 필수 요구 조건을 넘지 못합니다', base: '관측된 단층애 근접 경고가 있습니다', sim: '표면 운용 요구 조건을 다 충족하지 못합니다' };
+  const mark = (id: PageId) => {
+    const d = dot(id);
+    if (d !== 'warn') return <span className={`dot ${d}`} />;
+    return (
+      <span className="dot warn" title={WARN_WHY[id]} role="img" aria-label={WARN_WHY[id]}>
+        <svg viewBox="0 0 16 14" width="15" height="13" aria-hidden="true"><path d="M8 1 L15 13 H1 Z" fill="currentColor" /><rect x="7.2" y="4.6" width="1.6" height="4.6" rx="0.6" fill="#fff" /><circle cx="8" cy="11.1" r="0.95" fill="#fff" /></svg>
+      </span>
+    );
+  };
   let g = '';
   return (
     <nav className={`side${ui.sideCollapsed ? ' collapsed' : ''}`} aria-label="단계">
@@ -211,7 +226,7 @@ export function Sidebar() {
           return [
             head,
             <button key={st.id} className={`step ${app.visited.includes(st.id) && st.id !== app.page ? 'done' : ''}`} aria-current={st.id === app.page} title={ui.sideCollapsed ? `${st.n} ${st.t}` : undefined} onClick={() => app.setPage(st.id)}>
-              <span className="n">{st.n}</span><span className="t">{st.t}</span><span className={`dot ${dot(st.id)}`} /><span className="s" title={s}>{s}</span>
+              <span className="n">{st.n}</span><span className="t">{st.t}</span>{mark(st.id)}<span className="s" title={s}>{s}</span>
             </button>,
           ];
         })}

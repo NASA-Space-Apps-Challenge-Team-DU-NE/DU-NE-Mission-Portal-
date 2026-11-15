@@ -10,9 +10,9 @@ import { sampleTimeline, type SiteContext } from '../core/timeline';
 import type { Lander, TimelineSample } from '../core/types';
 import { t } from '../strings';
 import { useData } from './data';
-import { useResolvedSite, useSiteCtx, useSiteLayers, type ResolvedSite } from './hooks';
+import { useResolvedSite, useSiteCtx, useSiteLayers, useViewSite, type ResolvedSite } from './hooks';
 import { useUi } from './ui';
-import { scoreWeights, useApp } from './store';
+import { scoreWeights, useApp, viewLandingOf } from './store';
 
 const cache = new Map<string, unknown>();
 export function cached<T>(key: string, fn: () => T): T {
@@ -48,6 +48,19 @@ export function useEval(): ScenarioEval | null {
     const k = `ev|${siteKey(rs, app.margin_deg)}|${app.landing}|${app.duration_h}|${JSON.stringify(app.req)}|${JSON.stringify(w)}|${app.delay_days}`;
     return cached(k, () => scoreScenario(ctx, app.landing, app.duration_h, app.req, w, app.delay_days, 1));
   }, [ctx, rs, app.margin_deg, app.landing, app.duration_h, app.req, app.scenarioWeights, app.delay_days, app.powerSource]);
+}
+
+/** 오른쪽(3D 달·현장 뷰)이 보는 지점·착륙 시각의 시나리오 점수 */
+export function useViewEval(): ScenarioEval | null {
+  const { rs, ctx, margin } = useViewSite();
+  const landing = useApp(viewLandingOf);
+  const app = useApp();
+  return useMemo(() => {
+    if (!ctx) return null;
+    const w = scoreWeights(app);
+    const k = `ev|${siteKey(rs, margin)}|${landing}|${app.duration_h}|${JSON.stringify(app.req)}|${JSON.stringify(w)}|${app.delay_days}`;
+    return cached(k, () => scoreScenario(ctx, landing, app.duration_h, app.req, w, app.delay_days, 1));
+  }, [ctx, rs, margin, landing, app.duration_h, app.req, app.scenarioWeights, app.delay_days, app.powerSource]); // eslint-disable-line react-hooks/exhaustive-deps
 }
 
 export function evalFor(ctx: SiteContext, key: string, landing: number, duration_h: number, step_h = 3): ScenarioEval {

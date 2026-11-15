@@ -11,7 +11,7 @@ import { greatCircleKm } from '../core/vec';
 import { useData } from '../state/data';
 import { useBases } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
-import { useResolvedSite, useSiteCtx } from '../state/hooks';
+import { useViewSite } from '../state/hooks';
 import { useGlobeLayers } from '../state/globeRuns';
 import type { GridGeometry, GridRegion } from '../core/gridScore';
 import { REGION_LABEL } from './SouthMap';
@@ -50,7 +50,7 @@ interface G {
   sunDraw: THREE.Vector3;
   /** 지금 그린 지구·태양 거리 (달 반지름 단위) — 겹침 표지 위치에 쓴다 */
   dE: number; dS: number;
-  /** 카메라가 바라보는 점 (기본 달 중심). '지구까지' 보기에서는 달–지구 중간 */
+  /** 카메라가 바라보는 점 (기본 달 중심). 지구로 날아갈 때는 지구 쪽으로 옮긴다 */
   look: THREE.Vector3; lookT: THREE.Vector3;
   /** 카메라 이동 빠르기 (한 화면마다 남은 거리의 비율). 지구로 날아갈 때는 느리게 */
   k: number;
@@ -73,25 +73,20 @@ const latOf = (p: THREE.Vector3) => Math.asin(clamp(p.y, -1, 1)) / D2R;
 const view = { g: null as G | null };
 /** 실제 크기·거리라 지구(약 221 달 반지름)까지 볼 수 있게 */
 const maxDist = () => 900;
-export function globeView(v: 'pole' | 'npole' | 'sun' | 'globe' | 'in' | 'out' | 'earth' | 'north') {
+export function globeView(v: 'pole' | 'npole' | 'sun' | 'globe' | 'in' | 'out' | 'north') {
   const g = view.g;
   if (!g) return;
   const eph = useData.getState().eph, t = useApp.getState().t;
   if (v === 'pole') g.target = { lat: -89.5, lon: lonOf(g.pos), dist: 2.0 };
   else if (v === 'npole') g.target = { lat: 89.5, lon: lonOf(g.pos), dist: 2.0 };
-  else if (v === 'north') g.target = { lat: latOf(g.pos), lon: lonOf(g.pos), dist: g.dist };
+  // 북 ↑: 적도 위(위도 0°)에서 바라봐 자전축이 화면 세로 일직선이 되게 한다 (위 = 북, 아래 = 남). 경도와 거리는 그대로.
+  // 위도가 0° 가 아니면 위나 아래에서 비스듬히 내려다보게 되어 축이 짧게 겹쳐 보인다
+  else if (v === 'north') g.target = { lat: 0, lon: lonOf(g.pos), dist: g.dist };
   else if (v === 'sun') { const s = subLatLon(eph.bodyVectors(t).sun); g.target = { lat: s.lat, lon: s.lon, dist: 3.2 }; }
   else if (v === 'globe') g.target = { lat: -25, lon: 0, dist: 3.6 };
   else if (v === 'in') { g.dist = clamp(g.dist * 0.8, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
   else if (v === 'out') { g.dist = clamp(g.dist * 1.25, 1.08, maxDist()); g.lookT.set(0, 0, 0); }
-  else if (v === 'earth') {
-    // 달과 지구가 한 화면에 들어오게: 지구 방향에 수직인 쪽에서 바라본다
-    const e = meToThree(eph.bodyVectors(t).earth), up = Math.abs(e.y) > 0.9 ? new THREE.Vector3(1, 0, 0) : new THREE.Vector3(0, 1, 0);
-    const p = new THREE.Vector3().crossVectors(e, up).normalize();
-    g.lookT.copy(e).multiplyScalar(g.dE * 0.5);
-    g.target = { lat: Math.asin(p.y) * R2D, lon: Math.atan2(-p.z, p.x) * R2D, dist: g.dE * 1.7 };
-  }
-  if (v !== 'earth' && v !== 'in' && v !== 'out' && v !== 'north') g.lookT.set(0, 0, 0);
+  if (v !== 'in' && v !== 'out') g.lookT.set(0, 0, 0);
   g.dirty = true;
 }
 
@@ -153,8 +148,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
   const vint = useArtemisVintage();
   const eph = useData((d) => d.eph);
   const res = useGridRun((g) => g.result);
-  const rs = useResolvedSite();
-  const ctx = useSiteCtx(rs);
+  // 오른쪽 화면은 계획과 따로 지점을 볼 수 있다 (여기서 고른 지점은 계획을 바꾸지 않는다)
+  const { rs, ctx } = useViewSite();
   const bases = useBases();
   const live = useRef({ sites, regions, vint, res, rs, ctx, eph, t: app.t, bases });
   live.current = { sites, regions, vint, res, rs, ctx, eph, t: app.t, bases };
@@ -256,14 +251,16 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
 
     let drag: { x: number; y: number } | null = null, moved = 0;
     const down = (e: PointerEvent) => { drag = { x: e.clientX, y: e.clientY }; moved = 0; c.setPointerCapture(e.pointerId); g.target = null; };
-    // 끌기: 가로 = 경도, 세로 = 위도 방향으로 돈다 (화면 위쪽은 늘 북쪽). 극에서 멈춘다
+    // 끌기: 화면 기준으로 자유롭게 돈다 (남북 축 고정 없음, 극도 넘어감). 가로 끌기 = 화면 위쪽 축, 세로 끌기 = 화면 오른쪽 축 둘레.
+    // 북쪽을 다시 위로 맞추려면 '북 ↑' 버튼
     const move = (e: PointerEvent) => {
       if (!drag) return;
       const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
       moved += Math.abs(dx) + Math.abs(dy); drag = { x: e.clientX, y: e.clientY };
-      const k = Math.min(0.3, 0.25 * (g.dist - 1));
-      const lat = clamp(latOf(g.pos) + dy * k, -89.9, 89.9), lon = lonOf(g.pos) - dx * k;
-      g.pos.copy(v3(lat, lon)); g.up.copy(northAt(g.pos) ?? g.up); orthoUp(g);
+      const k = Math.min(0.3, 0.25 * (g.dist - 1)) * D2R;
+      const right = new THREE.Vector3().crossVectors(g.pos, g.up).negate().normalize();
+      const q = new THREE.Quaternion().setFromAxisAngle(g.up, -dx * k).multiply(new THREE.Quaternion().setFromAxisAngle(right, -dy * k));
+      g.pos.applyQuaternion(q).normalize(); g.up.applyQuaternion(q); orthoUp(g);
       g.dirty = true;
     };
     const up = () => { drag = null; };
@@ -280,9 +277,9 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
       if (lat < -75 && gr) {
         let best = -1, bd = 1e9;
         for (let i = 0; i < gr.cells.length; i += 1) { const d = greatCircleKm(lat, lon, gr.lat[i], gr.lon[i]); if (d < bd) { bd = d; best = i; } }
-        if (bd < 25) return st.setSite({ kind: 'cell', cell: best });
+        if (bd < 25) return st.setViewSite({ kind: 'cell', cell: best });
       }
-      st.setSite({ kind: 'custom', lat: +lat.toFixed(3), lon: +lon.toFixed(3) });
+      st.setViewSite({ kind: 'custom', lat: +lat.toFixed(3), lon: +lon.toFixed(3) });
     };
     // 확대·축소는 늘 달 중심을 기준으로 한다: 아무리 멀리 나가도 다시 확대하면 달로 돌아온다
     const wheel = (e: WheelEvent) => { e.preventDefault(); g.dist = clamp(g.dist * (e.deltaY > 0 ? 1.12 : 0.89), 1.08, maxDist()); g.lookT.set(0, 0, 0); g.target = null; g.dirty = true; };
@@ -555,8 +552,8 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
           if (!t) return;
           const [k, v] = (t.dataset.act ?? '').split(':');
           if (k === 'earth') flyToEarth();
-          else if (k === 'cell') app.setSite({ kind: 'cell', cell: Number(v) });
-          else if (k === 'site') app.setSite({ kind: 'catalog', id: v });
+          else if (k === 'cell') app.setViewSite({ kind: 'cell', cell: Number(v) });
+          else if (k === 'site') app.setViewSite({ kind: 'catalog', id: v });
         }}
       />
       <div className="vtools">
@@ -565,8 +562,7 @@ export function MoonGlobe({ children, onSub, tools }: { children?: ReactNode; on
         <button onClick={() => globeView('npole')}>북극</button>
         <button onClick={() => globeView('sun')}>태양 쪽</button>
         <button onClick={() => globeView('globe')}>전체</button>
-        <button title="화면 위쪽을 북쪽으로 되돌립니다" onClick={() => globeView('north')}>북 ↑</button>
-        <button onClick={() => globeView('earth')}>지구까지</button>
+        <button title="자전축을 세로로 세워 위쪽을 북, 아래쪽을 남으로 맞춥니다" onClick={() => globeView('north')}>북 ↑</button>
         <button aria-label="확대" onClick={() => globeView('in')}>+</button>
         <button aria-label="축소" onClick={() => globeView('out')}>−</button>
       </div>

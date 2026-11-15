@@ -80,7 +80,7 @@ export default function Power() {
     const out = app.powerSource.output_w;
     const n = out > 0 ? Math.ceil((ui.demand_kw * 1000 * (1 + DEFAULTS.power_margin)) / out) : NaN;
     return (
-      <Card title="전력 계산" tag={<span className="badge prov">출력 임시값</span>}>
+      <Card title="전력 계산">
         <div className="nodata">지금 발전 방식(<b>{kind.name}</b>)은 햇빛이 필요 없어 패널 면적·일조 기반 계산(패널 설치 추천·마스트 높이·빛 릴레이)을 하지 않습니다.</div>
         <div className="kpis">
           <Kpi l="정격 출력 (1대)" v={`${out} W`} />
@@ -97,7 +97,7 @@ export default function Power() {
   const terrain = rs.terrain === 'flat' ? '지형 미반영' : rs.terrain === 'grid' ? '격자 지평선' : '지점 지평선';
   return (
     <>
-      <Card title="전력 계산" tag={<span className={`badge ${source.approx ? 'approx' : ''}`}>출처: {source.label} · {terrain}</span>}>
+      <Card title="전력 계산" tag={<span className="badge">출처: {source.label} · {terrain}</span>}>
         <div className="row">
           <span className="small">필요 전력 <b className="mono">{ui.demand_kw} kW</b> · 패널 효율 <b className="mono">{ui.eff}</b></span>
           <button className="btn sm ghost" onClick={() => { useUi.getState().set({ condTab: 'lander' }); app.setPage('cond'); }}>01 임무 설정 › 착륙선 정보에서 바꾸기</button>
@@ -114,7 +114,7 @@ export default function Power() {
         <LineChart h={160} pick times={samples.map((s) => s.t)} series={[{ values: plan.per_m2_w, color: '--sun', fill: true }]} yMin={0} />
         <div className="row small">
           <b>비교 단위</b>
-          {refs.items.length ? <><span className={`badge ${refs.env?.quality === 'VALIDATED' ? 'ok' : 'approx'}`}>{({ VALIDATED: '검증됨', LIMITED_USE: '제한 사용', REVIEW_REQUIRED: '검토 필요', REFERENCE_ONLY: '참고용' } as Record<string, string>)[refs.env?.quality ?? ''] ?? '품질 미상'}</span>{refs.items.map((r, i) => <span key={r.id}>{i ? <span className="muted">· </span> : null}<span className="mono soft">{r.name}: {r.value} {r.unit}</span></span>)}</> : <span className="muted">자료 없음</span>}
+          {refs.items.length ? <>{refs.items.map((r, i) => <span key={r.id}>{i ? <span className="muted">· </span> : null}<span className="mono soft">{r.name}: {r.value} {r.unit}</span></span>)}</> : <span className="muted">자료 없음</span>}
         </div>
       </Card>
       <Card title="패널 설치 추천">

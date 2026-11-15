@@ -1,6 +1,9 @@
-// 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침) · 착륙지 부분: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
+// 02 착륙지·날짜 고르기 (옛 02 착륙지 + 04 착륙 날짜를 합침).
+// 순서: ① 착륙 날짜(시각·기간, 착륙지 × 시작일 점수표, 검토 중인 조합) → ② 착륙지(지도·순위·목록·좌표)
+//       → ③ 지금 계획 카드 [착륙지 요약 | 점수 근거 | 착륙 윈도] 탭 → 상위 6곳 비교·역방향 탐색
+// 착륙지 부분: 남극 지도·레이어(P1-02~07), 추천 순위(P1-19), 착륙지 목록·좌표(P1-08·09), 지표(P1-22 미리보기), 점수 근거(P1-20)
 import { useEffect, useMemo, useState } from 'react';
-import { ArtemisBadge, Card, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, gridLabel, hrs, pct, toast, Empty } from '../components/kit';
+import { ArtemisBadge, Help, Kpi, NoData, ScoreChip, Seg, TerrBadge, gridLabel, hrs, pct, toast, utc, Empty } from '../components/kit';
 import { useArtemisVintage } from '../state/artemis';
 import { MapCard } from '../components/MapCard';
 import { REGION_LABEL } from '../components/SouthMap';
@@ -158,8 +161,12 @@ export default function Site() {
   const R = app.req;
   const vint = useArtemisVintage();
   const sv = rs ? vint.get(rs.site.id) : undefined;
+  const [planTab, setPlanTab] = useState<'site' | 'why' | 'win'>('site');
   return (
     <>
+      <h2 className="sechead first"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>
+      <LandingDate part="top" />
+      <h2 className="sechead"><span>착륙지</span><small>지도·추천 순위·목록·좌표 중 편한 방법으로 고릅니다</small></h2>
       <div className="g21">
         <MapCard where="site" />
         <section className="card">
@@ -169,22 +176,33 @@ export default function Site() {
           {ui.siteTab === 'rank' ? <RankTab /> : ui.siteTab === 'list' ? <ListTab /> : <CoordTab />}
         </section>
       </div>
-      {rs && ev ? (
-        <Card title={rs.site.name} sub={`${rs.site.lat_deg.toFixed(3)}°, ${rs.site.lon_deg.toFixed(3)}° · ${CAT[rs.site.category] ?? ''}`} tag={<><TerrBadge k={rs.terrain} />{rs.terrain === 'grid' && rs.gridRegion ? <span className="tiny muted">{gridLabel(rs.gridRegion, rs.gridKm)}</span> : null}<ArtemisBadge v={sv} /><button className="btn sm" onClick={() => { app.addScenario(makeScenario(rs.site, app.landing, app.duration_h, 'user')); toast('비교에 추가했습니다 (07 후보 비교)'); }}>비교에 추가</button></>}>
-          <div className="kpis">
-            <Kpi l="시나리오 점수" v={Math.round(ev.score.total)} s="상대 비교용 · 확률 아님" />
-            <Kpi l="요구 조건" v={ev.score.meets_requirements ? '충족' : '요건 미달'} s={ev.score.meets_requirements ? '' : '필수 요구 조건 미달'} tone={ev.score.meets_requirements ? 'good' : 'bad'} />
-            <Kpi l="임무 기간 일조율" v={pct(ev.summary.illum_frac)} s={`기준 ≥ ${pct(R.min_illum_frac)}`} />
-            <Kpi l="임무 기간 교신율" v={pct(ev.summary.comm_frac)} />
-            <Kpi l="하루 최소 교신" v={hrs(ev.summary.daily_comm_h_min)} s={`기준 ≥ ${R.min_daily_comm_h} h`} tone={ev.summary.daily_comm_h_min >= R.min_daily_comm_h ? '' : 'bad'} />
-            <Kpi l="최장 연속 암흑" v={hrs(ev.summary.longest_dark_h)} s={`기준 ≤ ${R.max_dark_h} h`} tone={ev.summary.longest_dark_h <= R.max_dark_h ? '' : 'bad'} />
+      {rs ? (
+        <section className="card">
+          <div className="hd">
+            <h2>지금 계획</h2>
+            <div className="acts"><><TerrBadge k={rs.terrain} />{rs.terrain === 'grid' && rs.gridRegion ? <span className="tiny muted">{gridLabel(rs.gridRegion, rs.gridKm)}</span> : null}<ArtemisBadge v={sv} /><button className="btn sm" onClick={() => { app.addScenario(makeScenario(rs.site, app.landing, app.duration_h, 'user')); toast('비교에 추가했습니다 (07 후보 비교)'); }}>비교에 추가</button></></div>
           </div>
-          <div className="row small"><b>날짜가 밀리면?</b>{prev.map((p) => <span key={p.d} className="mono">+{p.d}일 → <ScoreChip v={p.e.score.total} /></span>)}<button className="btn sm ghost" onClick={() => app.setPage('delay')}>06 일정 변경에서 자세히 →</button></div>
-        </Card>
-      ) : !rs ? <NoData what="착륙지" why="지도·순위표·목록에서 고르세요" /> : null}
-      {ex ? (
-        <Card title="점수 근거" sub={comp != null && Number.isFinite(comp) ? `종합 점수 ${Math.round(comp * 100)}` : ''}>
-          <Help>지도 종합 점수가 기준별로 어떻게 나왔는지입니다. 막대가 짧은 기준이 점수를 깎은 원인입니다.{app.siteRef?.kind !== 'cell' ? ' (선택 지점에서 가장 가까운 5 km 격자 칸 기준)' : ''}</Help>
+          <div className="tabs" role="tablist">
+            {([['site', rs.site.name], ['why', '점수 근거'], ['win', '착륙 윈도']] as const).map(([k, l]) => <button key={k} role="tab" aria-selected={planTab === k} onClick={() => setPlanTab(k)}>{l}</button>)}
+          </div>
+          {planTab === 'site' ? (ev ? (
+            <div className="bd">
+              <div className="small soft">{`${rs.site.lat_deg.toFixed(3)}°, ${rs.site.lon_deg.toFixed(3)}° · ${CAT[rs.site.category] ?? ''} · ${utc(app.landing)} UTC 착륙 · ${app.duration_h} h`}</div>
+              <div className="kpis">
+                <Kpi l="시나리오 점수" v={Math.round(ev.score.total)} s="상대 비교용 · 확률 아님" />
+                <Kpi l="요구 조건" v={ev.score.meets_requirements ? '충족' : '요건 미달'} s={ev.score.meets_requirements ? '' : '필수 요구 조건 미달'} tone={ev.score.meets_requirements ? 'good' : 'bad'} />
+                <Kpi l="임무 기간 일조율" v={pct(ev.summary.illum_frac)} s={`기준 ≥ ${pct(R.min_illum_frac)}`} />
+                <Kpi l="임무 기간 교신율" v={pct(ev.summary.comm_frac)} />
+                <Kpi l="하루 최소 교신" v={hrs(ev.summary.daily_comm_h_min)} s={`기준 ≥ ${R.min_daily_comm_h} h`} tone={ev.summary.daily_comm_h_min >= R.min_daily_comm_h ? '' : 'bad'} />
+                <Kpi l="최장 연속 암흑" v={hrs(ev.summary.longest_dark_h)} s={`기준 ≤ ${R.max_dark_h} h`} tone={ev.summary.longest_dark_h <= R.max_dark_h ? '' : 'bad'} />
+              </div>
+              <div className="row small"><b>날짜가 밀리면?</b>{prev.map((p) => <span key={p.d} className="mono">+{p.d}일 → <ScoreChip v={p.e.score.total} /></span>)}<button className="btn sm ghost" onClick={() => app.setPage('delay')}>06 일정 변경에서 자세히 →</button></div>
+            </div>
+          ) : <div className="bd"><Empty>점수 계산 중…</Empty></div>) : planTab === 'why' ? (
+            <div className="bd">
+              {ex ? (
+                <>
+                  <Help>지도 종합 점수가 기준별로 어떻게 나왔는지입니다. 막대가 짧은 기준이 점수를 깎은 원인입니다.{app.siteRef?.kind !== 'cell' ? ' (선택 지점에서 가장 가까운 5 km 격자 칸 기준)' : ''}</Help>
           {ex.contributions.map((c) => (
             <div key={c.criterion} className="wrow" style={{ gridTemplateColumns: '150px minmax(0,1fr) 90px' }}>
               <span className="small">{CRIT[c.criterion as Criterion]}</span>
@@ -196,15 +214,19 @@ export default function Site() {
             {ex.weakest ? <>가장 크게 깎인 기준: <b style={{ color: 'var(--warn)' }}>{CRIT[ex.weakest]}</b></> : null}
             {ex.contributions.some((c) => c.missing) ? <> · <span className="muted">빠진 기준(가중치 0 또는 자료 없음): {ex.contributions.filter((c) => c.missing).map((c) => CRIT[c.criterion as Criterion]).join(', ')}</span></> : null}
           </div>
-        </Card>
-      ) : otherRegion ? (
-        <Card title="점수 근거">
-          <Help><span>점수 근거는 지금 고른 지도 지역의 종합 점수에서 나옵니다.</span> <span>{`이 지점은 ${REGION_LABEL[otherRegion]} 격자에 있습니다.`}</span> <span>단층애 경고와 패널 추천은 지도와 무관하게 지점이 있는 지역 격자로 계산합니다.</span></Help>
-          <div className="row"><button className="btn sm" onClick={() => void setMapRegion(otherRegion)}>{`${REGION_LABEL[otherRegion]} 지도로 바꾸기`}</button></div>
-        </Card>
-      ) : null}
-      <h2 className="sechead"><span>착륙 날짜</span><small>착륙 시각을 정하거나, 기간을 주고 후보 착륙지 × 시작일 점수표에서 조합을 골라 계획에 적용합니다</small></h2>
-      <LandingDate />
+                </>
+              ) : otherRegion ? (
+                <>
+                  <Help><span>점수 근거는 지금 고른 지도 지역의 종합 점수에서 나옵니다.</span> <span>{`이 지점은 ${REGION_LABEL[otherRegion]} 격자에 있습니다.`}</span> <span>단층애 경고와 패널 추천은 지도와 무관하게 지점이 있는 지역 격자로 계산합니다.</span></Help>
+                  <div className="row"><button className="btn sm" onClick={() => void setMapRegion(otherRegion)}>{`${REGION_LABEL[otherRegion]} 지도로 바꾸기`}</button></div>
+                </>
+              ) : <Empty>이 지점의 격자 점수 근거가 없습니다 (지도 격자 밖이거나 계산 중).</Empty>}
+              {comp != null && Number.isFinite(comp) ? <div className="small muted">종합 점수 {Math.round(comp * 100)}</div> : null}
+            </div>
+          ) : <LandingDate part="windows" />}
+        </section>
+      ) : <NoData what="착륙지" why="지도·순위표·목록에서 고르세요" />}
+      <LandingDate part="rest" />
     </>
   );
 }

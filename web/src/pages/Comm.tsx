@@ -66,7 +66,7 @@ export default function Comm() {
         <BandChart h={60} pick times={times} rows={[{ label: '지구 보임', values: vis, color: '--earth' }, { label: '교신 가능', values: Array.from(link, Number), color: '--accent' }]} />
         <p className="note">예상 전송량 = 착륙선 프리셋 전송 속도 × 교신 가능 시간 (근사)</p>
       </Card>
-      <Card title="지상국 통신 창" sub="지구가 보이는 시간 ∩ 지상국에서 달이 보이는 시간" tag={<><span className="badge approx">근사값</span>{app.customStations.length ? <span className="badge">가정 {app.customStations.length}곳</span> : null}</>}>
+      <Card title="지상국 통신 창" sub="지구가 보이는 시간 ∩ 지상국에서 달이 보이는 시간" tag={<>{app.customStations.length ? <span className="badge">가정 {app.customStations.length}곳</span> : null}</>}>
         <div className="gEG">
           <div className="col">
             <EarthGlobe stations={all} />

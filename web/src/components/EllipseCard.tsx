@@ -102,7 +102,7 @@ export function EllipseCard() {
   const obsTxt = obsKnown && st ? `관측 ${pct(st.observed_frac)}${low ? ' · 측정 밀도 낮음' : ''}` : obsKnown ? '' : '관측 수 지도 없음';
   const sub = [radius !== null ? `반경 ${radius} km` : '', info ? `${info.res_m} m` : '', obsTxt].filter(Boolean).join(' · ');
   return (
-    <Card title="착륙 오차 범위 안 경사 조건 만족 비율" sub={sub} tag={<><span className="badge">3순위 · 선택</span><span className="badge prov">반경·경사 한계 임시값</span></>}>
+    <Card title="착륙 오차 범위 안 경사 조건 만족 비율" sub={sub} tag={<span className="badge">3순위 · 선택</span>}>
       {state === 'loading' ? <div className="muted small">불러오는 중…</div> : !patch || !info ? (
         <NoData what="착륙 오차 범위" why={rs ? '카탈로그 남극 착륙지만 계산합니다. 지도·좌표로 고른 지점은 국지 지형 패치가 없습니다' : '02에서 착륙지를 먼저 고르세요'} />
       ) : (

@@ -60,6 +60,11 @@ export interface AppState {
   fullscreen: boolean;
   presentation: boolean;
   overlayScenarioId: string | null;
+  /** 오른쪽(3D 달·현장 뷰)에서만 바꾼 값. null 이면 계획(왼쪽 대시보드) 값을 따른다.
+   *  오른쪽에서 바꿔도 계획은 그대로이고, 계획을 바꾸면 해당 값의 오른쪽 덮어쓰기는 지워진다. */
+  viewRef: SiteRef | null;
+  viewLanding: TimeMs | null;
+  viewMargin: number | null;
 
   setPage(p: PageId): void;
   setSite(r: SiteRef | null): void;
@@ -69,6 +74,10 @@ export interface AppState {
   togglePlay(): void;
   setSpeed(h: number): void;
   setMargin(d: number): void;
+  setViewSite(r: SiteRef): void;
+  setViewLanding(t: TimeMs): void;
+  setViewMargin(d: number): void;
+  resetView(): void;
   setReq(p: Partial<Requirements>): void;
   setScenarioWeights(p: Partial<ScenarioWeights>): void;
   setDelayDays(d: number): void;
@@ -136,17 +145,25 @@ export const useApp = create<AppState>((set, get) => ({
   fullscreen: false,
   presentation: false,
   overlayScenarioId: null,
+  viewRef: null,
+  viewLanding: null,
+  viewMargin: null,
 
   setPage: (page) => set({ page, visited: get().visited.includes(page) ? get().visited : [...get().visited, page] }),
-  setSite: (siteRef) => set({ siteRef: siteRef?.kind === 'cell' && cellResolver ? cellResolver(siteRef.cell) : siteRef }),
+  setSite: (siteRef) => set({ siteRef: siteRef?.kind === 'cell' && cellResolver ? cellResolver(siteRef.cell) : siteRef, viewRef: null }),
   setT: (t) => set({ t }),
   // 착륙 시각이 바뀌면 보는 시각도 착륙 시각으로 옮긴다 (위쪽 시간 막대를 없앴으므로 현장 뷰가 새 착륙 조건을 바로 보이게)
-  setLanding: (landing) => set({ landing, t: landing }),
+  setLanding: (landing) => set({ landing, t: landing, viewLanding: null }),
   // 지도·순위와 같은 상한(60일)을 URL·프리셋에도 강제한다
   setDuration: (duration_h) => { if (Number.isFinite(duration_h)) set({ duration_h: Math.max(1, Math.min(MAX_DURATION_H, duration_h)) }); },
   togglePlay: () => set({ playing: !get().playing }),
   setSpeed: (speed_h) => set({ speed_h }),
-  setMargin: (margin_deg) => set({ margin_deg }),
+  setMargin: (margin_deg) => set({ margin_deg, viewMargin: null }),
+  setViewSite: (viewRef) => set({ viewRef: viewRef?.kind === 'cell' && cellResolver ? cellResolver(viewRef.cell) : viewRef }),
+  setViewLanding: (viewLanding) => set({ viewLanding, t: viewLanding }),
+  setViewMargin: (viewMargin) => set({ viewMargin }),
+  // 오른쪽을 계획 값으로 되돌린다 (보는 시각도 계획 착륙 시각으로)
+  resetView: () => set({ viewRef: null, viewLanding: null, viewMargin: null, t: get().landing }),
   setReq: (p) => set({ req: { ...get().req, ...p } }),
   setScenarioWeights: (p) => set({ scenarioWeights: { ...get().scenarioWeights, ...p } }),
   setDelayDays: (delay_days) => set({ delay_days }),
@@ -170,14 +187,15 @@ export const useApp = create<AppState>((set, get) => ({
   saveAB: (which) => set({ abSets: { ...get().abSets, [which]: { weights: { ...get().mapWeights }, filters: { ...get().filters } } } }),
   addBase: (b) => set({ bases: [...get().bases, b] }),
   removeBase: (id) => set({ bases: get().bases.filter((b) => b.id !== id) }),
-  setLander: (landerId) => set({ landerId, landerEdits: {} }),
+  // 프리셋 4종은 모두 태양전지 착륙선 유형이라, 고르면 발전 방식도 태양전지로 맞춘다 (출력·연료 값은 그대로)
+  setLander: (landerId) => set({ landerId, landerEdits: {}, powerSource: { ...get().powerSource, kind: 'solar' } }),
   editLander: (p) => set({ landerEdits: { ...get().landerEdits, ...p } }),
   setPowerSource: (p) => set({ powerSource: { ...get().powerSource, ...p } }),
   setLanderExtra: (p) => set({ landerExtra: { ...get().landerExtra, ...p } }),
   resetInputs: () => {
     const landing = Date.parse(DEFAULT_LANDING_UTC);
     set({
-      landing, t: landing, playing: false, duration_h: DEFAULTS.duration_h, margin_deg: DEFAULTS.comm_margin_deg, req: DEFAULT_REQUIREMENTS,
+      landing, t: landing, viewRef: null, viewLanding: null, viewMargin: null, playing: false, duration_h: DEFAULTS.duration_h, margin_deg: DEFAULTS.comm_margin_deg, req: DEFAULT_REQUIREMENTS,
       scenarioWeights: DEFAULT_SCENARIO_WEIGHTS, delay_days: DEFAULTS.delay_days, profile: 'custom', mapWeights: DEFAULT_MAP_WEIGHTS, customWeights: DEFAULT_MAP_WEIGHTS,
       filters: DEFAULT_FILTERS, shift_days: 14, landerId: 'small_solar', landerEdits: {}, powerSource: DEFAULT_POWER_SOURCE, landerExtra: DEFAULT_LANDER_EXTRA,
     });
@@ -266,3 +284,10 @@ export function effFilters(s: Pick<AppState, 'powerSource' | 'filters'>): HardFi
   delete f.min_illum_frac; delete f.max_dark_h;
   return f;
 }
+
+/** 오른쪽(3D 달·현장 뷰)이 실제로 보는 값: 오른쪽에서 바꾼 값이 있으면 그것, 없으면 계획 값 */
+export const viewRefOf = (s: AppState) => s.viewRef ?? s.siteRef;
+export const viewLandingOf = (s: AppState) => s.viewLanding ?? s.landing;
+export const viewMarginOf = (s: AppState) => s.viewMargin ?? s.margin_deg;
+/** 오른쪽이 계획과 다른 값을 보고 있는가 */
+export const viewDiffers = (s: AppState) => s.viewRef !== null || s.viewLanding !== null || s.viewMargin !== null;

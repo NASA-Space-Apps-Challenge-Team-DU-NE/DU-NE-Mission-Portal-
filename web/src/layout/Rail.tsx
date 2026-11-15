@@ -2,16 +2,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { HOUR_MS, DAY_MS } from '../core/constants';
 import { skyState } from '../core/sky';
-import { ArtemisBadge, LayerPickButton, NoData, Kpi, TerrBadge, deg, dur, hrs, pct, utc, Empty } from '../components/kit';
+import { ArtemisBadge, LayerPickButton, NoData, Kpi, TerrBadge, deg, dur, hrs, pct, toast, utc, Empty } from '../components/kit';
 import { MoonGlobe } from '../components/MoonGlobe';
 import { pickNear, REGION_LABEL, RegionSeg, regionSub, SouthMap } from '../components/SouthMap';
 import { Dome, Pano } from '../components/viz';
 import { useData } from '../state/data';
-import { siteKey, timelineFor, useEval, useSim } from '../state/derived';
+import { siteKey, timelineFor, useSim, useViewEval } from '../state/derived';
 import { useGridRun } from '../state/gridRun';
-import { useNextEvents, useResolvedSite, useSiteCtx } from '../state/hooks';
+import { useNextEvents, useViewSite } from '../state/hooks';
 import { HUD_LAYERS, LAYER_UI } from '../state/layerUi';
-import { useApp, type FailMode } from '../state/store';
+import { useApp, viewDiffers, viewLandingOf, type FailMode } from '../state/store';
 import { PROFILE_UI, useUi } from '../state/ui';
 import { TimeBar } from './Shell';
 import { useArtemisVintage } from '../state/artemis';
@@ -23,11 +23,11 @@ const FILTER_NAMES: Record<string, [string, (v: number) => string]> = {
 
 function Hud() {
   const app = useApp();
-  const rs = useResolvedSite();
-  const ctx = useSiteCtx(rs);
-  const ev = useEval();
+  const { rs, ctx, margin } = useViewSite();
+  const ev = useViewEval();
   const res = useGridRun((g) => g.result);
-  const span = Math.max(720, app.duration_h), rel = (app.t - app.landing) / HOUR_MS;
+  const landing = useApp(viewLandingOf);
+  const span = Math.max(720, app.duration_h), rel = (app.t - landing) / HOUR_MS;
   const n = ctx ? skyState(ctx.frame, ctx.mask, ctx.eph, app.t, ctx.margin_deg) : null;
   return (
     <div className="hud">
@@ -35,7 +35,7 @@ function Hud() {
         <button className="btn" onClick={() => app.setFullscreen(false)}>← 나가기 <span className="kbd">Esc</span></button>
         <div className="tl">
           <button className="ibtn pri" onClick={app.togglePlay}>{app.playing ? '❚❚' : '▶'}</button>
-          <input type="range" min={-24} max={span} step={1} value={Math.max(-24, Math.min(span, rel))} aria-label="보는 시각" onChange={(e) => app.setT(app.landing + Number(e.target.value) * HOUR_MS)} />
+          <input type="range" min={-24} max={span} step={1} value={Math.max(-24, Math.min(span, rel))} aria-label="보는 시각" onChange={(e) => app.setT(landing + Number(e.target.value) * HOUR_MS)} />
           <output className="mono small">{utc(app.t)}</output>
         </div>
         <div className="lbtns">{HUD_LAYERS.map((id) => <button key={id} aria-pressed={app.mapLayer === id} onClick={() => app.setMap({ mapLayer: id })}>{LAYER_UI[id].name.replace(/ \(.*\)/, '')}</button>)}</div>
@@ -43,7 +43,7 @@ function Hud() {
       </div>
       <div className="hud-card" id="hudCond">
         <b>조건</b>
-        <span className="muted">{PROFILE_UI[app.profile].name} · {app.duration_h} h · 여유각 {app.margin_deg}°</span>
+        <span className="muted">{PROFILE_UI[app.profile].name} · {app.duration_h} h · 여유각 {margin}°</span>
         <span>통과 <b className="mono">{res?.passCount ?? '—'}</b>칸</span>
         {Object.entries(app.filters).map(([k, v]) => <span key={k} className="tiny muted">{k === 'artemis_only' ? '아르테미스 III 후보 지역 안만' : `${FILTER_NAMES[k]?.[0] ?? k} ${FILTER_NAMES[k]?.[1](v as number) ?? ''}`}</span>)}
       </div>
@@ -70,9 +70,10 @@ function Hud() {
 function Intro() {
   const app = useApp();
   const set = useUi((u) => u.set);
-  const rs = useResolvedSite();
-  const ev = useEval();
-  const start = (page: 'cond' | 'site') => { app.setPage(page); set({ mode: 'plan' }); };
+  const { rs } = useViewSite();
+  const ev = useViewEval();
+  // 지도 모드에서 달을 눌러 고른 곳(오른쪽에서만 바꾼 지점)을 계획으로 가져가 시작한다
+  const start = (page: 'cond' | 'site') => { const v = useApp.getState().viewRef; if (v) app.setSite(v); app.setPage(page); set({ mode: 'plan' }); };
   return (
     <>
       <div className="pick">
@@ -117,7 +118,7 @@ function MoonSection() {
       {dim === '3d' ? (
         <MoonGlobe onSub={setSub} tools={dimSeg}><Hud />{explore ? <Intro /> : null}</MoonGlobe>
       ) : (
-        <div className="view2d"><SouthMap where="site" onPick={(la, lo) => pickNear(la, lo)} /><div className="vtools">{dimSeg}</div>{explore ? <Intro /> : null}</div>
+        <div className="view2d"><SouthMap where="site" view onPick={(la, lo) => pickNear(la, lo, 8, true)} /><div className="vtools">{dimSeg}</div>{explore ? <Intro /> : null}</div>
       )}
       <div className="mctl">
         <label>색 진하기 <input type="range" min={0.1} max={1} step={0.05} value={app.opacity} aria-label="색 진하기" onChange={(e) => app.setMap({ opacity: Number(e.target.value) })} /><output className="mono soft">{pct(app.opacity)}</output></label>
@@ -133,11 +134,12 @@ function MoonSection() {
 interface Ev { t: number; k: string; icon: string }
 /** 앞으로 30일 주요 변화 (1 h 표본) */
 export function useEventList(): Ev[] {
-  const rs = useResolvedSite();
-  const ctx = useSiteCtx(rs);
+  const { rs, ctx, margin } = useViewSite();
   const t = useApp((s) => s.t);
-  const margin = useApp((s) => s.margin_deg);
-  const sim = useSim();
+  const differs = useApp(viewDiffers);
+  const planSim = useSim();
+  // 배터리 경고는 계획(착륙선·착륙지·시각) 기준이라, 오른쪽에서 다른 지점·시각을 보고 있으면 넣지 않는다
+  const sim = differs ? null : planSim;
   const hour = Math.floor(t / HOUR_MS) * HOUR_MS;
   return useMemo(() => {
     if (!ctx) return [];
@@ -161,14 +163,13 @@ export function useEventList(): Ev[] {
 
 function SkyTab() {
   const app = useApp();
-  const rs = useResolvedSite();
-  const ctx = useSiteCtx(rs);
-  const ev = useEval();
+  const { rs, ctx, margin } = useViewSite();
+  const ev = useViewEval();
   const nx = useNextEvents(ctx, app.t);
   const hour = Math.floor(app.t / (3 * HOUR_MS)) * 3 * HOUR_MS;
   const now = useMemo(() => (ctx ? skyState(ctx.frame, ctx.mask, ctx.eph, app.t, ctx.margin_deg) : null), [ctx, app.t]);
-  const trackPano = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), hour - 15 * DAY_MS, 30 * 24, 3) : null), [ctx, rs, app.margin_deg, hour]);
-  const trackDome = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, app.margin_deg), hour, 30 * 24, 3) : null), [ctx, rs, app.margin_deg, hour]);
+  const trackPano = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, margin), hour - 15 * DAY_MS, 30 * 24, 3) : null), [ctx, rs, margin, hour]);
+  const trackDome = useMemo(() => (ctx ? timelineFor(ctx, siteKey(rs, margin), hour, 30 * 24, 3) : null), [ctx, rs, margin, hour]);
   if (!rs || !ctx || !now) return <NoData what="착륙지" why="02에서 착륙지를 고르세요" />;
   const sm = ev?.summary;
   return (
@@ -188,8 +189,8 @@ function SkyTab() {
         <div><div className="chartlbl"><span>하늘 돔 · 30일</span></div><Dome h={170} mask={ctx.mask} track={trackDome} now={now} /></div>
         <div className="col" style={{ gap: 6 }}>
           <div className="wrow" style={{ gridTemplateColumns: '1fr 46px', padding: 0 }}>
-            <label className="small">통신 여유각</label><output className="mono">{app.margin_deg}°</output>
-            <input type="range" min={0} max={10} step={0.5} value={app.margin_deg} onChange={(e) => app.setMargin(Number(e.target.value))} style={{ gridColumn: '1/-1' }} />
+            <label className="small">통신 여유각</label><output className="mono">{margin}°</output>
+            <input type="range" min={0} max={10} step={0.5} value={margin} onChange={(e) => app.setViewMargin(Number(e.target.value))} style={{ gridColumn: '1/-1' }} />
           </div>
           <p className="help">돔 가운데가 머리 위, 바깥 원이 지평선입니다. 남극에서는 태양이 지평선 근처를 한 바퀴 돕니다.</p>
         </div>
@@ -242,13 +243,15 @@ function SourcesTab() {
 }
 
 function FieldView() {
-  const rs = useResolvedSite();
+  const { rs } = useViewSite();
+  const differs = useApp(viewDiffers);
   const [tab, setTab] = useState<'sky' | 'alerts' | 'src'>('sky');
   const evs = useEventList();
   const vint = useArtemisVintage();
   return (
     <section className="fv" aria-label="현장 뷰">
-      <div className="fvh"><b>{rs ? rs.site.name : '현장 뷰'}</b>{rs ? <span>{rs.site.lat_deg.toFixed(3)}°, {rs.site.lon_deg.toFixed(3)}° · <TerrBadge k={rs.terrain} /> <ArtemisBadge v={vint.get(rs.site.id)} /></span> : null}</div>
+      <div className="fvh"><b>{rs ? rs.site.name : '현장 뷰'}</b>{differs ? <span className="viewdiff" title="오른쪽에서만 바꾼 값을 보고 있습니다. 왼쪽 계획은 그대로입니다">계획과 다르게 보는 중</span> : null}
+        <button className={`btn sm viewreset ${differs ? 'pri' : ''}`} disabled={!differs} title="오른쪽 화면에서만 바꾼 착륙지·착륙 시각·통신 여유각을 버리고 왼쪽 계획 값으로 돌아갑니다" onClick={() => { useApp.getState().resetView(); toast('계획으로 되돌렸습니다'); }}>계획으로 되돌리기</button>{rs ? <span>{rs.site.lat_deg.toFixed(3)}°, {rs.site.lon_deg.toFixed(3)}° · <TerrBadge k={rs.terrain} /> <ArtemisBadge v={vint.get(rs.site.id)} /></span> : null}</div>
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === 'sky'} onClick={() => setTab('sky')}>하늘</button>
         <button role="tab" aria-selected={tab === 'alerts'} onClick={() => setTab('alerts')}>알림 <span className="mono" style={{ color: 'var(--accent)' }}>{evs.length || ''}</span></button>

@@ -10,7 +10,7 @@ import { nearestCell } from '../core/gridScore';
 import { terrainMaskAt, type TerrainRegion } from '../core/terrainGrids';
 import { HOUR_MS } from '../core/constants';
 import { t as tr } from '../strings';
-import { useApp, type SiteRef } from './store';
+import { useApp, viewMarginOf, viewRefOf, type SiteRef } from './store';
 import { siteRegionAt, useData, type RegionData } from './data';
 import type { GridRegion } from '../core/gridScore';
 
@@ -88,9 +88,10 @@ export function useResolvedSite(ref?: SiteRef | null): ResolvedSite | null {
   }, [base, masks, grid, layers, r, approx, terrainGrids]);
 }
 
-export function useSiteCtx(rs: ResolvedSite | null): SiteContext | null {
+export function useSiteCtx(rs: ResolvedSite | null, marginOverride?: number): SiteContext | null {
   const eph = useData((s) => s.eph);
-  const margin = useApp((s) => s.margin_deg);
+  const planMargin = useApp((s) => s.margin_deg);
+  const margin = marginOverride ?? planMargin;
   return useMemo(() => {
     if (!rs) return null;
     return siteContext({ ...rs.site, elevation_m: rs.groundElev }, rs.mask, eph, margin, rs.maskEnv?.observer_height_m ?? DEFAULTS.observer_height_m);
@@ -135,4 +136,13 @@ export function useSiteLayers(rs: ResolvedSite | null): { region: GridRegion | n
   useEffect(() => { if (canLoad && region) void ensureRegion(region); }, [canLoad, region, ensureRegion]);
   const cell = useMemo(() => (rd && lat != null && lon != null ? nearestCell(rd.geo, lat, lon, rd.geo.manifest.cell_km) : -1), [rd, lat, lon]);
   return { region, rd, cell, loading: canLoad };
+}
+
+/** 오른쪽(3D 달·현장 뷰)이 보는 지점과 그 하늘 계산 (오른쪽에서만 바꾼 지점·여유각 반영) */
+export function useViewSite(): { rs: ResolvedSite | null; ctx: SiteContext | null; margin: number } {
+  const ref = useApp(viewRefOf);
+  const margin = useApp(viewMarginOf);
+  const rs = useResolvedSite(ref);
+  const ctx = useSiteCtx(rs, margin);
+  return { rs, ctx, margin };
 }
